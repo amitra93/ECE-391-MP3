@@ -101,7 +101,7 @@ idt_desc_ptr:
 	.align  16
 idt:
 _idt:
-	.rept NUM_VEC
+	.rept NUM_VEC # NUM_VEC = 256
 	.quad 0
 	.endr
 
