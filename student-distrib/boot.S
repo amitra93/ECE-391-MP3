@@ -25,12 +25,10 @@ _start:
 
 continue:
 	# Load the GDT
-	# From IA reference manual 2.4.1
-	# On power up or reset of the processor, the base address is set to the default value of 0 and 
-	# the limit is set to FFFFH. A new base address must be loaded into the GDTR as part of the 
-	# processor initialization process for protected-mode operation
+	lgdt gdt_desc
 	
-	
+	# Load the IDT
+	lidt idt_desc_ptr
 	
 	# Load CS with the new descriptor value
 	ljmp    $KERNEL_CS, $keep_going

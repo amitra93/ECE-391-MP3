@@ -7,6 +7,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "debug.h"
+#include "intel_intr.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -102,6 +103,7 @@ entry (unsigned long magic, unsigned long addr)
 					(unsigned) mmap->length_low);
 	}
 
+	
 	/* Construct an LDT entry in the GDT */
 	{
 		seg_desc_t the_ldt_desc;
@@ -142,7 +144,43 @@ entry (unsigned long magic, unsigned long addr)
 		tss.esp0 = 0x800000;
 		ltr(KERNEL_TSS);
 	}
-
+	
+	printf("Constructing IDT\n");
+	/* Construct entries in the IDT */
+	{
+		int i;
+		
+		/* Initialize all Intel Defined Interrupts */
+		SET_IDT_ENTRY(idt[0], idt_intel_de); idt[0].seg_selector = KERNEL_CS; 
+		SET_IDT_ENTRY(idt[1], idt_intel_db); idt[1].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[3], idt_intel_bp); idt[3].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[4], idt_intel_of); idt[4].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[5], idt_intel_br); idt[5].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[6], idt_intel_ud); idt[6].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[7], idt_intel_nm); idt[7].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[8], idt_intel_df); idt[8].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[10], idt_intel_ts); idt[10].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[11], idt_intel_np); idt[11].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[12], idt_intel_ss); idt[12].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[13], idt_intel_gp); idt[13].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[14], idt_intel_pf); idt[14].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[16], idt_intel_mf); idt[16].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[17], idt_intel_ac); idt[17].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[18], idt_intel_mc); idt[18].seg_selector = KERNEL_CS;
+		SET_IDT_ENTRY(idt[19], idt_intel_xf); idt[19].seg_selector = KERNEL_CS;
+		
+		/* Set up gate type as an interrupt */
+		for (i = 0; i < 20; i ++)
+		{
+			/* Skip reserved entries */
+			if (i == 2 || i == 9 || i == 15)
+				continue;
+			idt[i].reserved2 = 1;
+			idt[i].reserved1 = 1;
+			idt[i].size = 1;
+		}
+	}
+	
 	/* Init the PIC */
 	i8259_init();
 
@@ -157,7 +195,7 @@ entry (unsigned long magic, unsigned long addr)
 	sti();*/
 
 	/* Execute the first program (`shell') ... */
-
+	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
 }
