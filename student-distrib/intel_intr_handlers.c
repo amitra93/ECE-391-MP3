@@ -1,3 +1,8 @@
+/*
+* Interrupt handlers for Intel defines: http://courses.engr.illinois.edu/ece391/references/IA32-ref-manual-vol-3.pdf
+* See section 5-23
+*/
+
 void _idt_intel_de(void){ } /* Interrupt 0 */
 void _idt_intel_db(void){ } /* Interrupt 1 */
 void _idt_intel_bp(void){ } /* Interrupt 3 */
