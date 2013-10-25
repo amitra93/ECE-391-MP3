@@ -174,6 +174,51 @@ do { \
 		str.offset_15_00 = ((uint32_t)(handler) & 0xFFFF); \
 } while(0)
 
+/* Sets runtime parameters for an IDT entry as Interrupt */
+#define SET_INTR_GATE(str, handler) \
+do { \
+	str.offset_31_16 = ((uint32_t)(handler) & 0xFFFF0000) >> 16; \
+	str.offset_15_00 = ((uint32_t)(handler) & 0xFFFF); \
+	str.size = 1; \
+	str.reserved0 = 0;  \
+	str.reserved1 = 1; \
+	str.reserved2 = 1; \
+	str.reserved3 = 0; \
+	str.present = 1; \
+	str.dpl = 0; \
+	str.seg_selector = 0x0010; \
+} while(0)
+
+/* Sets runtime parameters for an IDT entry as Trap */
+#define SET_TRAP_GATE(str, handler) \
+do { \
+	str.offset_31_16 = ((uint32_t)(handler) & 0xFFFF0000) >> 16; \
+	str.offset_15_00 = ((uint32_t)(handler) & 0xFFFF); \
+	str.size = 1; \
+	str.reserved0 = 0;  \
+	str.reserved1 = 1; \
+	str.reserved2 = 1; \
+	str.reserved3 = 1; \
+	str.present = 1; \
+	str.dpl = 0; \
+	str.seg_selector = 0x0010; \
+} while(0)
+
+/* Sets runtime parameters for an IDT entry as System */
+#define SET_SYSTEM_GATE(str, handler) \
+do { \
+	str.offset_31_16 = ((uint32_t)(handler) & 0xFFFF0000) >> 16; \
+	str.offset_15_00 = ((uint32_t)(handler) & 0xFFFF); \
+	str.size = 0; \
+	str.reserved0 = 0; \
+	str.reserved1 = 1; \
+	str.reserved2 = 0; \
+	str.reserved3 = 1; \
+	str.present = 1; \
+	str.dpl = 3; \
+	str.seg_selector = 0x0010; \
+} while(0)
+
 /* Load task register.  This macro takes a 16-bit index into the GDT,
  * which points to the TSS entry.  x86 then reads the GDT's TSS
  * descriptor and loads the base address specified in that descriptor

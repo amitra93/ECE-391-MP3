@@ -179,6 +179,15 @@ putc(uint8_t c)
     }
 }
 
+void
+set_cursor_pos(int32_t x, int32_t y)
+{
+	if (x > 0 && x < NUM_COLS)
+		screen_x = x;
+	if (y > 0 && y < NUM_ROWS)
+		screen_y = y;
+}
+
 /* Convert a number to its ASCII representation, with base "radix" */
 int8_t*
 itoa(uint32_t value, int8_t* buf, int32_t radix)

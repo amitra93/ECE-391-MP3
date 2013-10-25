@@ -8,6 +8,8 @@
 #include "i8259.h"
 #include "debug.h"
 #include "intel_intr.h"
+#include "sys_calls.h"
+
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -149,36 +151,34 @@ entry (unsigned long magic, unsigned long addr)
 	/* Construct entries in the IDT */
 	{
 		int i;
+		for (i = 0; i < 256; i ++)
+		{
+			SET_TRAP_GATE(idt[i], &idt_unknown_intr);
+		}
 		
 		/* Initialize all Intel Defined Interrupts */
-		SET_IDT_ENTRY(idt[0], idt_intel_de); idt[0].seg_selector = KERNEL_CS; 
-		SET_IDT_ENTRY(idt[1], idt_intel_db); idt[1].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[3], idt_intel_bp); idt[3].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[4], idt_intel_of); idt[4].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[5], idt_intel_br); idt[5].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[6], idt_intel_ud); idt[6].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[7], idt_intel_nm); idt[7].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[8], idt_intel_df); idt[8].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[10], idt_intel_ts); idt[10].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[11], idt_intel_np); idt[11].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[12], idt_intel_ss); idt[12].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[13], idt_intel_gp); idt[13].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[14], idt_intel_pf); idt[14].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[16], idt_intel_mf); idt[16].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[17], idt_intel_ac); idt[17].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[18], idt_intel_mc); idt[18].seg_selector = KERNEL_CS;
-		SET_IDT_ENTRY(idt[19], idt_intel_xf); idt[19].seg_selector = KERNEL_CS;
+		SET_TRAP_GATE(idt[0], &idt_intel_de); 
+		SET_TRAP_GATE(idt[1], &idt_intel_db); 
+		SET_TRAP_GATE(idt[2], &idt_intel_nmi);
+		SET_SYSTEM_GATE(idt[3], &idt_intel_bp); 
+		SET_SYSTEM_GATE(idt[4], &idt_intel_of); 
+		SET_SYSTEM_GATE(idt[5], &idt_intel_br); 
+		SET_TRAP_GATE(idt[6], &idt_intel_ud); 
+		SET_TRAP_GATE(idt[7], &idt_intel_nm); 
+		SET_TRAP_GATE(idt[8], &idt_intel_df); 
+		SET_TRAP_GATE(idt[9], &idt_intel_cso); 
+		SET_TRAP_GATE(idt[10], &idt_intel_ts); 
+		SET_TRAP_GATE(idt[11], &idt_intel_np); 
+		SET_TRAP_GATE(idt[12], &idt_intel_ss); 
+		SET_TRAP_GATE(idt[13], &idt_intel_gp); 
+		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
+		SET_TRAP_GATE(idt[16], &idt_intel_mf); 
+		SET_TRAP_GATE(idt[17], &idt_intel_ac); 
+		SET_TRAP_GATE(idt[18], &idt_intel_mc); 
+		SET_TRAP_GATE(idt[19], &idt_intel_xf); 
 		
-		/* Set up gate type as an interrupt */
-		for (i = 0; i < 20; i ++)
-		{
-			/* Skip reserved entries */
-			if (i == 2 || i == 9 || i == 15)
-				continue;
-			idt[i].reserved2 = 1;
-			idt[i].reserved1 = 1;
-			idt[i].size = 1;
-		}
+		/* Set up the system_call entry x80 */
+		SET_SYSTEM_GATE(idt[0x80], system_call);
 	}
 	
 	/* Init the PIC */
@@ -191,9 +191,15 @@ entry (unsigned long magic, unsigned long addr)
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
-	/*printf("Enabling Interrupts\n");
-	sti();*/
+	printf("Enabling Interrupts\n");
+	sti();
 
+	{
+		int a = 1;
+		int b = 0;
+		a /= b;
+	}
+	
 	/* Execute the first program (`shell') ... */
 	
 	/* Spin (nicely, so we don't chew up cycles) */
