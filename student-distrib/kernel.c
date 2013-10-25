@@ -153,10 +153,11 @@ entry (unsigned long magic, unsigned long addr)
 		int i;
 		for (i = 0; i < 256; i ++)
 		{
-			SET_TRAP_GATE(idt[i], &idt_unknown_intr);
+			SET_INTR_GATE(idt[i], &idt_unknown_intr);
 		}
 		
 		/* Initialize all Intel Defined Interrupts */
+		#if 0
 		SET_TRAP_GATE(idt[0], &idt_intel_de); 
 		SET_TRAP_GATE(idt[1], &idt_intel_db); 
 		SET_TRAP_GATE(idt[2], &idt_intel_nmi);
@@ -179,6 +180,7 @@ entry (unsigned long magic, unsigned long addr)
 		
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
+		#endif
 	}
 	
 	/* Init the PIC */
@@ -194,14 +196,12 @@ entry (unsigned long magic, unsigned long addr)
 	printf("Enabling Interrupts\n");
 	sti();
 
-	{
-		int a = 1;
-		int b = 0;
-		a /= b;
-	}
-	
 	/* Execute the first program (`shell') ... */
-	
+	{
+		int * a = NULL;
+		*a = 0;
+	}
+		
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
 }

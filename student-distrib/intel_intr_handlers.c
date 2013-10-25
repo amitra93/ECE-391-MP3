@@ -64,7 +64,9 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 	printf("Process ID  : 0x%#x", pid);
 }
 
-void do_idt_unknown_intr(void){ printf("Unknown Interrupt"); } 
+void do_idt_unknown_intr(void){
+	print_error("Unknown Intr", 0, 0, 0);
+} 
 
 /* Interrupt 0 : Divide Error (fault) */
 void do_idt_intel_de(void){ 
