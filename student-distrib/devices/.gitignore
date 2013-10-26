@@ -1,0 +1,10 @@
+# compiled sources #
+####################
+*.o
+*.dep
+
+
+# Misc #
+########
+bootimg
+dev_env
