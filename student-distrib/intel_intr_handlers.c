@@ -65,7 +65,7 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 }
 
 void do_idt_unknown_intr(void){
-	print_error("Unknown Intr", 0, 0, 0);
+	print_error("Unknown Interrupt", 0, 0, 0);
 } 
 
 /* Interrupt 0 : Divide Error (fault) */
