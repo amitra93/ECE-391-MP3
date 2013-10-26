@@ -15,14 +15,14 @@ void
 i8259_init(void)
 {
 	// http://www.brokenthorn.com/Resources/OSDevPic.html
-	/*
+	
 	unsigned long flags;
 	
-	//cli_and_save(flags);
+	cli_and_save(flags);
 	
 	// Mask all interrupts on the PIC
-	outb(0xff, MASTER_8259_PORT);
-	outb(0xff, SLAVE_8259_PORT);
+	outb(0xff, MASTER_8259_PORT+1);
+	outb(0xff, SLAVE_8259_PORT+1);
 	
 	// Send ICW1
 	outb(ICW1, MASTER_8259_PORT);
@@ -44,9 +44,9 @@ i8259_init(void)
 	outb(master_mask, MASTER_8259_PORT);
 	outb(slave_mask, SLAVE_8259_PORT);
 	
-	//sti();
-	//restore_flags(flags);
-	*/
+	sti();
+	restore_flags(flags);
+	
 	
 }
 
@@ -54,19 +54,56 @@ i8259_init(void)
 void
 enable_irq(uint32_t irq_num)
 {
+	unsigned long flags;
+	
+	uint8_t mask = ~ (1 << (irq_num & 7));
+	cli_and_save(flags);
+	
+	if (irq_num & 8){
+		// send to slave
+		slave_mask &= mask;
+		outb(slave_mask, SLAVE_8259_PORT);
+	}
+	else {
+		// send to master
+		master_mask &= mask;
+		outb(master_mask, MASTER_8259_PORT);
+	}
+	
+	sti();
+	restore_flags(flags);
 }
 
 /* Disable (mask) the specified IRQ */
 void
 disable_irq(uint32_t irq_num)
 {
+	unsigned long flags;
+	
+	uint8_t mask = 1 << (irq_num & 7);
+	cli_and_save(flags);
+	
+	if (irq_num & 8){
+		// send to slave
+		slave_mask |= mask;
+		outb(slave_mask, SLAVE_8259_PORT);
+	}
+	else {
+		// send to master
+		master_mask |= mask;
+		outb(master_mask, MASTER_8259_PORT);
+	}
+	
+	sti();
+	restore_flags(flags);
+	
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void
 send_eoi(uint32_t irq_num)
 {
-	/*
+	
 	unsigned long flags;
 	
 	cli_and_save(flags);
@@ -83,6 +120,6 @@ send_eoi(uint32_t irq_num)
 	
 	sti();
 	restore_flags(flags);
-	*/
+	
 }
 
