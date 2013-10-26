@@ -27,6 +27,8 @@
  * to declare the interrupt finished */
 #define EOI             0x60
 
+#define CASCADE_IR		0x02
+
 /* Externally-visible functions */
 
 /* Initialize both PICs */
