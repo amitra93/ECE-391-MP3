@@ -6,6 +6,8 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "i8259.h"
+#include "rtc.h"
+#include "keyboard.h"
 #include "debug.h"
 #include "intel_intr.h"
 #include "sys_calls.h"
@@ -184,11 +186,16 @@ entry (unsigned long magic, unsigned long addr)
 	}
 	
 	/* Init the PIC */
+	printf("Enabling PIC\n");
 	i8259_init();
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-
+	printf("Enabling RTC\n");
+	rtc_init();
+	printf("Enabling keyboard\n");
+	keyboard_init();
+	
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
