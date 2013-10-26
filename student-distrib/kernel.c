@@ -11,7 +11,7 @@
 #include "debug.h"
 #include "intel_intr.h"
 #include "sys_calls.h"
-
+#include "paging.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -191,8 +191,12 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
+	printf("Enabling Paging\n");
+	paging_init();
+	 
 	printf("Enabling RTC\n");
 	rtc_init();
+	
 	printf("Enabling keyboard\n");
 	keyboard_init();
 	
