@@ -22,8 +22,10 @@ void paging_init(){
 	for ( i = 0; i < 1024; i ++)
 	{
 		//Set up page table base address
-		pt[i] = addr | 0x3; //set page as 4KB, set supervisor priv., set r/w, and present
-		addr += 0x1000;//4096;
+		//Set the first entry to not preset for seg faults
+		if (i != 0)
+			pt[i] = addr | 0x3; //set page as 4KB, set supervisor priv., set r/w, and present
+		addr += 0x1000;//4KBytes;
 	}
 	
 	//sets up 4MB page for kernel and puts proper dir. address in
@@ -33,18 +35,6 @@ void paging_init(){
 
 	//Load the address of the page directory
 	asm volatile("movl %0, %%cr3" :: "r"(pd) );
-	
-	/*asm volatile("movl $0x8, %%eax;\
-			  mov %%cr4, %%ebx;\
-			  or %%eax, %%ebx;\
-			  mov %%ebx, %%cr4;":::"eax","ebx");
-	
-	//enables paging
-	asm volatile("movl $1, %%eax;\
-				  shll $31, %%eax;\
-				  mov %%cr0, %%ebx;\
-				  or %%eax, %%ebx;\
-				  mov %%ebx, %%cr0;":::"eax","ebx");*/
 				  
 	//enables 4MB paging 
 	asm volatile("movl %%cr4, %0": "=b"(temp));

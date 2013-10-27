@@ -201,7 +201,7 @@ entry (unsigned long magic, unsigned long addr)
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 	printf("Enabling Paging\n");
-	//paging_init();
+	paging_init();
 	 
 	printf("Enabling RTC\n");
 	rtc_init();
@@ -220,8 +220,8 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Execute the first program (`shell') ... */
 	{
-		int * a = NULL;
-		*a = 0;
+		//int * a = NULL;
+		//*a = 0;
 	}
 		
 	/* Spin (nicely, so we don't chew up cycles) */

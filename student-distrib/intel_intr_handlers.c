@@ -39,6 +39,7 @@ Aborts
 #define NUM_ROWS 25
 #define ATTRIB 0x7
 
+
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
 	while(1);
