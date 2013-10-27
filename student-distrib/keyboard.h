@@ -22,11 +22,15 @@
 
 /* Externally-visible functions */
 
-/* Initialize keyboard */
+/* Helper function that determines whether to print uppercase or lowercase characters */
+void determine_case(unsigned char char_pressed);
+
+
+/* This function initializes relevant global variables that we use when keyboard interrupts are generated*/
 void keyboard_init(void);
 
+/* Function that gets called whenever a keyboard interrupt is generated */
 void process_keypress(void);
 
-void determine_case(unsigned char char_pressed);
 
 #endif /* _KEYBOARD_H */
