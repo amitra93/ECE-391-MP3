@@ -114,19 +114,19 @@ _idt:
 
 idt_bottom:
 
-.align 4096
+.align PAGE_ALIGN
 page_directory:
   _page_directory:
-	.rept 1024
-	.long 0x2  # Attribute: Supervisor, Read/Write, Not Present
+	.rept PAGE_DIRECTORY_SIZE
+	.long PAGE_RW  # Attribute: Supervisor, Read/Write, Not Present
 	.endr
 page_directory_bottom:
 
-.align 4096
+.align PAGE_ALIGN
 page_table:
   _page_table:
-	.rept 1024
-	.long 0x2  # Attribute: Supervisor, Read/Write, Not Present
+	.rept PAGE_TABLE_SIZE
+	.long PAGE_RW  # Attribute: Supervisor, Read/Write, Not Present
 	.endr
 page_table_bottom:
 

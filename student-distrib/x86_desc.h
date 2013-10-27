@@ -16,6 +16,12 @@
 #define KERNEL_TSS 0x0030
 #define KERNEL_LDT 0x0038
 
+/* Paging Options*/
+#define PAGE_DIRECTORY_SIZE 1024
+#define PAGE_TABLE_SIZE 	1024
+#define PAGE_ALIGN			4096
+#define PAGE_RW				0x2
+
 /* Size of the task state segment (TSS) */
 #define TSS_SIZE 104
 
