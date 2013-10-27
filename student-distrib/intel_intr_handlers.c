@@ -27,7 +27,13 @@ Aborts
 
 #include "lib.h"
 
-/* Get arguments from registers as defined in intel_intr.s:error_code */
+/*
+*  GET_ARGS(error, instr_ptr, pid)
+*  Description: Gets the arguments from registers
+*  Inputs: Unsigned Int * to variables to hold error code, instruction pointer, and process id
+*  Outputs: error gets error code, instr_ptr gets instruction pointer, pid gets process id
+*  Side Effects: Overwrites inputs
+*/
 #define GET_ARGS(error, instr_ptr, pid) 					\
 	do { 									 				\
 		asm volatile("										\
@@ -36,7 +42,12 @@ Aborts
 	}while(0)						
 
 /*
-*  In each of the handler functions: get the register arguments, print error to screen, return
+*  Interrupt Handlers
+*  Description: Prints an error code on screen
+*  Inputs: EAX = Error Code, EBX = Instruction Pointer, ECX = Process ID
+*  Outputs: None
+*  Side Effects: Clears screen and prints error code. Individual interrupts have 
+*				 their own side effects to handle the exception.
 */
 	
 /* Generate an unknown interrupt exception */

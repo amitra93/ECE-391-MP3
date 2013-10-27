@@ -82,6 +82,10 @@ _idt_intel_xf:
 	.long	do_idt_intel_xf
 
 	
+
+
+.text
+
 /* 
 * The follwoing code sets up a small calling convention for error codes
 * First push the error code onto the stack (processor does this) or
@@ -89,8 +93,14 @@ _idt_intel_xf:
 * Next, push the interrupt handler address onto the stack then jump to the error code
 */
 
-.text
-	
+/*
+*  interrupt interface
+*  Description: Pushes error code = NULL if the processor does not generate one, and pushes the 
+*               exception handler address
+*  Inputs: None
+*  Outputs: None
+*  Side Effects: See exception handler specific side effects
+*/
 .align 4
 idt_unknown_intr:
 	iret
@@ -184,7 +194,11 @@ idt_intel_xf:
 
 
 /*
-* Lastly, we want to set up the function arguments for the C interrupt handler and return to the IP
+*  error_code(handler address, error code)
+*  Description: Handles stack frame set up for calling the exception handler
+*  Inputs: Handler address, and error code
+*  Outputs: None
+*  Side Effects: Exception handler has its own side effects
 *
 * EAX : Error Code
 * EBX : Instruction Pointer

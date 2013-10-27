@@ -38,13 +38,42 @@
 
 /* Externally-visible functions */
 
-/* Initialize both PICs */
+/*
+ * void i8259_init(void)
+ * DESCRIPTION: This function initializes the PIC
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: PIC is now capable of generating intrrupts
+ */
 void i8259_init(void);
-/* Enable (unmask) the specified IRQ */
+/*
+ * void enable_irq(uint32_t irq_num)
+ * DESCRIPTION: This function enables(unmasks) the specified IRQ
+ *
+ * INPUTS: irq_num
+ * OUTPUTS: none
+ * SIDE EFFECTS: Specified IRQ is now capable of generating interrupts
+ */
 void enable_irq(uint32_t irq_num);
-/* Disable (mask) the specified IRQ */
+/*
+ * void disable_irq(uint32_t irq_num)
+ * DESCRIPTION: This function disables(masks) the specified IRQ
+ *
+ * INPUTS: irq_num
+ * OUTPUTS: none
+ * SIDE EFFECTS: Specified IRQ is now incapable of generating interrupts
+ */
 void disable_irq(uint32_t irq_num);
-/* Send end-of-interrupt signal for the specified IRQ */
+
+/*
+ * void send_eoi(uint32_t irq_num)
+ * DESCRIPTION: This function sends end-of-interrupt signal for the specified IRQ
+ *
+ * INPUTS: irq_num
+ * OUTPUTS: none
+ * SIDE EFFECTS: Specified IRQ can now send interrupts again
+ */
 void send_eoi(uint32_t irq_num);
 
 #endif /* _I8259_H */

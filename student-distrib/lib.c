@@ -13,8 +13,12 @@ static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
 /*
-*   This function clears the screen and draws the error description, error code, 
-*   instruction pointer, and process id.
+*  print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
+*  Description: Prints error code onto screen
+*  Inputs: Description=Error description, error_code=processor error_code, instr_ptr = error_instruction
+		   pid = process id
+*  Outputs: None
+*  Side Effects: Clears screen, writes error onto screen
 */
 void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
 {
