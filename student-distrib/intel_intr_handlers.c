@@ -26,6 +26,7 @@ Aborts
 */
 
 #include "lib.h"
+#include "i8259.h"
 
 #define GET_ARGS(error, instr_ptr, pid) 					\
 	do { 									 				\
@@ -199,3 +200,14 @@ void do_idt_intel_xf(void){
 	print_error("Floating-Point Exception", error, instr_ptr, pid);
 } 
 
+
+/*___________HARDWARE INTERRUPTS___________*/
+
+void do_idt_keyboard(void){
+	printf("Entering KB handler\n");
+	send_eoi(1);
+}
+
+void do_idt_rtc(void){
+
+}

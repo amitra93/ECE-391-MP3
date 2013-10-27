@@ -186,7 +186,9 @@ entry (unsigned long magic, unsigned long addr)
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 		#endif
-
+		
+		SET_TRAP_GATE(idt[33], &idt_keyboard);
+		SET_TRAP_GATE(idt[40], &idt_rtc);
 		
 	}
 	
@@ -201,9 +203,11 @@ entry (unsigned long magic, unsigned long addr)
 	 
 	printf("Enabling RTC\n");
 	rtc_init();
+	enable_irq(8);
 	
 	printf("Enabling keyboard\n");
 	keyboard_init();
+	enable_irq(1);
 	
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
