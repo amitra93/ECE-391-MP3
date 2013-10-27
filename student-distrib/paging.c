@@ -16,7 +16,7 @@ extern unsigned int page_table;
 
 static unsigned int * pd = &page_directory;
 static unsigned int * pt = &page_table;
-static unsigned int * kernel_page = KERNEL_LOCATION;
+static unsigned int * kernel_page = (unsigned int *) KERNEL_LOCATION;
 
 /* void paging_init()
  *   DESCRIPTION: Initializes paging for the CPU. The first 4MB are used with 4KB paging,
