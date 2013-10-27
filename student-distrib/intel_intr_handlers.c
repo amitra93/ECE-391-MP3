@@ -26,7 +26,6 @@ Aborts
 */
 
 #include "lib.h"
-#include "i8259.h"
 
 #define GET_ARGS(error, instr_ptr, pid) 					\
 	do { 									 				\
@@ -39,31 +38,6 @@ Aborts
 #define NUM_COLS 80
 #define NUM_ROWS 25
 #define ATTRIB 0x7
-
-void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
-{
-	int32_t str_len, x, y;
-	
-	str_len = strlen(description);
-	clear();
-	x = (NUM_COLS / 2) - 16;
-	y = (NUM_ROWS / 2) - 2;
-	
-	set_cursor_pos(x, y);
-	printf("Error       : %s", description);
-	
-	x = (NUM_COLS / 2);
-	y ++;
-	
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
-	printf("Error Code  : 0x%#x", error_code);
-	
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
-	printf("Instruction : 0x%#x", instr_ptr);
-	
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
-	printf("Process ID  : 0x%#x", pid);
-}
 
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
@@ -199,15 +173,3 @@ void do_idt_intel_xf(void){
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Floating-Point Exception", error, instr_ptr, pid);
 } 
-
-
-/*___________HARDWARE INTERRUPTS___________*/
-
-void do_idt_keyboard(void){
-	printf("Entering KB handler\n");
-	send_eoi(1);
-}
-
-void do_idt_rtc(void){
-
-}

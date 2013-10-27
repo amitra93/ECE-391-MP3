@@ -12,6 +12,40 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+
+
+void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
+{
+	int32_t str_len, x, y;
+	
+	str_len = strlen(description);
+	clear();
+	x = (NUM_COLS / 2) - 16;
+	y = (NUM_ROWS / 2) - 2;
+	
+	set_cursor_pos(x, y);
+	printf("Error       : %s", description);
+	
+	x = (NUM_COLS / 2);
+	y ++;
+	
+	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	printf("Error Code  : 0x%#x", error_code);
+	
+	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	printf("Instruction : 0x%#x", instr_ptr);
+	
+	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	printf("Process ID  : 0x%#x", pid);
+}
+
+
+
+
+
+
+
+
 void
 clear(void)
 {

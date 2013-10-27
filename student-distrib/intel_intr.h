@@ -21,7 +21,5 @@ extern void idt_intel_mf(void); /* Interrupt 16 */
 extern void idt_intel_ac(void); /* Interrupt 17 */
 extern void idt_intel_mc(void); /* Interrupt 18 */
 extern void idt_intel_xf(void); /* Interrupt 19 */
-extern void idt_keyboard(void); /* Interrupt 33 */
-extern void idt_rtc(void);		/* Interrupt 40 */
 
 #endif /* _INTEL_INTR_H_ */
