@@ -7,6 +7,13 @@
 
 #include "types.h"
 
+/* Constants */
+#define DATA_PORT		0x60
+#define STATUS_REG		0x64
+#define CMD_REG			0x64
+
+
+
 /* Externally-visible functions */
 
 /* Initialize keyboard */
