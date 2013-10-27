@@ -7,12 +7,12 @@
 .data
 	.globl idt_unknown_intr, idt_intel_de, idt_intel_db, idt_intel_nmi, idt_intel_bp, idt_intel_of, idt_intel_br
 	.globl idt_intel_ud, idt_intel_nm, idt_intel_df, idt_intel_cso, idt_intel_ts, idt_intel_np, idt_intel_ss
-	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf
+	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf, idt_keyboard, idt_rtc
 
 	.extern do_idt_unknown_intr, do_idt_intel_de, do_idt_intel_db, do_idt_intel_nmi, do_idt_intel_bp, do_idt_intel_of
 	.extern	do_idt_intel_br, do_idt_intel_ud, do_idt_intel_nm, do_idt_intel_df, do_idt_intel_cso, do_idt_intel_ts
 	.extern	do_idt_intel_np, do_idt_intel_ss, do_idt_intel_gp, do_idt_intel_pf, do_idt_intel_mf, do_idt_intel_ac
-	.extern do_idt_intel_mc, do_idt_intel_xf
+	.extern do_idt_intel_mc, do_idt_intel_xf, do_idt_keyboard, do_idt_rtc
 
 
 _idt_unknown_intr:
@@ -74,6 +74,12 @@ _idt_intel_mc:
 
 _idt_intel_xf:
 	.long	do_idt_intel_xf
+
+_idt_keyboard:
+	.long	do_idt_keyboard
+
+_idt_rtc:
+	.long	do_idt_rtc
 	
 	/* 
 	* The follwoing code sets up a small calling convention for error codes
@@ -173,6 +179,16 @@ idt_intel_mc:
 idt_intel_xf:
 	pushl $0
 	pushl (_idt_intel_xf)
+	jmp error_code
+
+idt_keyboard:
+	pushl $0
+	pushl (_idt_keyboard)
+	jmp error_code
+
+idt_rtc:
+	pushl $0
+	pushl (_idt_rtc)
 	jmp error_code
 
 /*

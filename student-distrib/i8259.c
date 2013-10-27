@@ -20,34 +20,31 @@ i8259_init(void)
 	
 	cli_and_save(flags);
 	
+	master_mask = 0xff;
+	slave_mask = 0xff;
+	
 	// Mask all interrupts on the PIC
-	outb(0xff, MASTER_8259_PORT+1);
-	outb(0xff, SLAVE_8259_PORT+1);
+	//outb(0xff, MASTER_DATA);
+	//outb(0xff, SLAVE_DATA);
 	
-	// Send ICW1
-	outb(ICW1, MASTER_8259_PORT);
-	outb(ICW1, SLAVE_8259_PORT);
+	//master
+	outb(ICW1, MASTER_COMMAND);
+	outb(ICW2_MASTER, MASTER_DATA);
+	outb(ICW3_MASTER, MASTER_DATA);
+	outb(ICW4, MASTER_DATA);
 	
-	// Send ICW2
-	outb(ICW2_MASTER, MASTER_8259_PORT);
-	outb(ICW2_SLAVE, SLAVE_8259_PORT);
-	
-	// Send ICW3
-	outb(ICW3_MASTER, MASTER_8259_PORT);
-	outb(ICW3_SLAVE, SLAVE_8259_PORT);
-	
-	// Send ICW4
-	outb(ICW4, MASTER_8259_PORT);
-	outb(ICW4, SLAVE_8259_PORT);
+	//slave
+	outb(ICW1, SLAVE_COMMAND);
+	outb(ICW2_SLAVE, SLAVE_DATA);
+	outb(ICW3_SLAVE, SLAVE_DATA);
+	outb(ICW4, SLAVE_DATA);
 	
 	// restore interrupt masks
-	outb(master_mask, MASTER_8259_PORT);
-	outb(slave_mask, SLAVE_8259_PORT);
+	outb(master_mask, MASTER_DATA);
+	outb(slave_mask, SLAVE_DATA);
 	
-	sti();
 	restore_flags(flags);
-	
-	
+	sti();
 }
 
 /* Enable (unmask) the specified IRQ */
@@ -56,22 +53,25 @@ enable_irq(uint32_t irq_num)
 {
 	unsigned long flags;
 	
-	uint8_t mask = ~ (1 << (irq_num & 7));
 	cli_and_save(flags);
+	uint8_t mask = ~ (1 << (irq_num & 7));
 	
 	if (irq_num & 8){
 		// send to slave
 		slave_mask &= mask;
-		outb(slave_mask, SLAVE_8259_PORT);
+		outb(slave_mask, SLAVE_DATA);
+		master_mask &= 0xfb;
+		outb(master_mask, MASTER_DATA);
 	}
 	else {
 		// send to master
 		master_mask &= mask;
-		outb(master_mask, MASTER_8259_PORT);
+		outb(master_mask, MASTER_DATA);
 	}
 	
-	sti();
 	restore_flags(flags);
+	sti();
+	
 }
 
 /* Disable (mask) the specified IRQ */
@@ -86,16 +86,17 @@ disable_irq(uint32_t irq_num)
 	if (irq_num & 8){
 		// send to slave
 		slave_mask |= mask;
-		outb(slave_mask, SLAVE_8259_PORT);
+		outb(slave_mask, SLAVE_DATA);
 	}
 	else {
 		// send to master
 		master_mask |= mask;
-		outb(master_mask, MASTER_8259_PORT);
+		outb(master_mask, MASTER_DATA);
 	}
 	
-	sti();
 	restore_flags(flags);
+	sti();
+	
 	
 }
 
@@ -110,16 +111,17 @@ send_eoi(uint32_t irq_num)
 	
 	if (irq_num & 8){
 		// send 2 to master and irq_num-8 to slave
-		outb(EOI | (irq_num & 7), SLAVE_8259_PORT);
-		outb(EOI | CASCADE_IR, MASTER_8259_PORT);
+		outb(EOI | (irq_num & 7), SLAVE_COMMAND);
+		outb(EOI | CASCADE_IR, MASTER_COMMAND);
 	}
 	else {
 		// send to master only
-		outb(EOI | irq_num, MASTER_8259_PORT);
+		outb(EOI | irq_num, MASTER_COMMAND);
 	}
 	
-	sti();
 	restore_flags(flags);
+	sti();
+	
 	
 }
 
