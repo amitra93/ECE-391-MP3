@@ -4,7 +4,6 @@ ECE-391-MP3
 Done:
 
 GDT
-
 IDT
 
 PIC
