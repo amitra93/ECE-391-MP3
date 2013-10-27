@@ -14,29 +14,31 @@ uint8_t slave_mask; /* IRQs 8-15 */
 void
 i8259_init(void)
 {
-	// http://www.brokenthorn.com/Resources/OSDevPic.html
-	
 	unsigned long flags;
 	
 	cli_and_save(flags);
 	
-	master_mask = 0xff;
-	slave_mask = 0xff;
+	// Initialize masks to disable all interrupts
+	master_mask = INTERRUPTS_MASKED;
+	slave_mask = INTERRUPTS_MASKED;
 	
-	// Mask all interrupts on the PIC
-	//outb(0xff, MASTER_DATA);
-	//outb(0xff, SLAVE_DATA);
 	
-	//master
+	// start the initialization sequence for master
 	outb(ICW1, MASTER_COMMAND);
+	// vector offset for master
 	outb(ICW2_MASTER, MASTER_DATA);
+	// tell Master PIC there is a slave PIC at IRQ 2
 	outb(ICW3_MASTER, MASTER_DATA);
+	// enable 8086 mode
 	outb(ICW4, MASTER_DATA);
 	
-	//slave
+	// start the initialization sequence for slave
 	outb(ICW1, SLAVE_COMMAND);
+	// vector offset for slave
 	outb(ICW2_SLAVE, SLAVE_DATA);
+	// tell slave PIC its cascade identity (2)
 	outb(ICW3_SLAVE, SLAVE_DATA);
+	//enable 8086 mode
 	outb(ICW4, SLAVE_DATA);
 	
 	// restore interrupt masks
@@ -54,17 +56,20 @@ enable_irq(uint32_t irq_num)
 	unsigned long flags;
 	
 	cli_and_save(flags);
+	
+	// create mask to later AND with
 	uint8_t mask = ~ (1 << (irq_num & 7));
 	
 	if (irq_num & 8){
-		// send to slave
+		// send mask to slave and 2 to master
 		slave_mask &= mask;
 		outb(slave_mask, SLAVE_DATA);
-		master_mask &= 0xfb;
+		//send 2 to master
+		master_mask &= UNMASK_2;
 		outb(master_mask, MASTER_DATA);
 	}
 	else {
-		// send to master
+		// send to master only
 		master_mask &= mask;
 		outb(master_mask, MASTER_DATA);
 	}
@@ -80,6 +85,7 @@ disable_irq(uint32_t irq_num)
 {
 	unsigned long flags;
 	
+	// create mask to later OR with
 	uint8_t mask = 1 << (irq_num & 7);
 	cli_and_save(flags);
 	

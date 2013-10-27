@@ -11,10 +11,14 @@ rtc_init(void)
 {
 	cli();
 	
+	// select Register B and disable NMI
 	outb(STATUS_REG_B, REGISTER);
+	// read current value of Register B
 	char prev = inb(IO_PORT);
+	// set index again because read resets register
 	outb(STATUS_REG_B, REGISTER);
-	outb(prev | 0x40, IO_PORT);
+	// turn on bit 6 of Register B
+	outb(prev | BIT6_MASK, IO_PORT);
 	
 	sti();	
 }
@@ -22,7 +26,9 @@ rtc_init(void)
 void
 process_rtc(void)
 {
-	outb(STATUS_REG_C - 0x80, REGISTER);
+	// Register C must be read on each interrupt, else more interrupts will not be generated
+	outb(STATUS_REG_C, REGISTER);
+	// we don't care about the value for now
 	inb(IO_PORT);
 
 }

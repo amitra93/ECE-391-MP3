@@ -187,6 +187,7 @@ entry (unsigned long magic, unsigned long addr)
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 
+		/* Initialize hardware interrupts */
 		SET_TRAP_GATE(idt[33], &idt_keyboard);
 		SET_TRAP_GATE(idt[40], &idt_rtc);
 		
