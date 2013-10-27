@@ -24,8 +24,7 @@ void do_idt_keyboard(void){
 }
 
 void do_idt_rtc(void){
-	printf("Entering RTC handler\n");
-	test_interrupts();
+	//test_interrupts();
 	process_rtc();
 	send_eoi(8);
 }

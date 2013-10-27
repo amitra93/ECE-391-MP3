@@ -11,10 +11,10 @@ rtc_init(void)
 {
 	cli();
 	
-	outb(REGISTER, STATUS_REG_B);
+	outb(STATUS_REG_B, REGISTER);
 	char prev = inb(IO_PORT);
-	outb(REGISTER, STATUS_REG_B);
-	outb(IO_PORT, prev | 0x40);
+	outb(STATUS_REG_B, REGISTER);
+	outb(prev | 0x40, IO_PORT);
 	
 	sti();	
 }
@@ -22,7 +22,7 @@ rtc_init(void)
 void
 process_rtc(void)
 {
-	outb(REGISTER, STATUS_REG_C - 0x80);
+	outb(STATUS_REG_C - 0x80, REGISTER);
 	inb(IO_PORT);
 
 }
