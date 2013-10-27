@@ -11,7 +11,6 @@
 .globl  tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl  gdt_ptr
 .globl  idt_desc_ptr, idt
-.extern pageDirectory
 
 .align 4
 

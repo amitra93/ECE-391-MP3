@@ -16,7 +16,7 @@ void paging_init(){
 	//set page as 4MB, set supervisor priv., set r/w, and present
 	//pageDirectory[1] |= 0x83;//might also want to make global, will check later  
 
-	//asm volatile("mov %0, %%cr3" :: "b"(pageDirectory) );
+	asm volatile("movl %0, %%cr3" :: "b"(pageDirectory) );
 
 	//enables paging
 	//asm volatile("mov %%cr0, %0": "=b"(temp));
