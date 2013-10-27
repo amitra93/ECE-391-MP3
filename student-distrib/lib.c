@@ -12,8 +12,6 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
-
-
 void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
 {
 	int32_t str_len, x, y;
@@ -38,13 +36,6 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 	set_cursor_pos((NUM_COLS / 2) - 16, y++);
 	printf("Process ID  : 0x%#x", pid);
 }
-
-
-
-
-
-
-
 
 void
 clear(void)

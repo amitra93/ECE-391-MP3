@@ -190,9 +190,6 @@ error_code:
 	movl  36(%esp), %eax  	# Get the error code
 	movl  $-1, 36(%esp)		# Set the error code to -1, differentiates interrupts and sys calls
 	movl  32(%esp), %edi 	# Get the handler address
-	# movw  $KERNEL_DS, %cx	# Move the Kernel Data Segment 
-	# movw  %cx, %ds 			# Move the data segment selector into ds and es
-	# movw  %cx, %es	
 	call *%edi				# Go to ISR
 	popa					# Pop off all saved registers
 	addl $8, %esp 			# Pop off error code and function address

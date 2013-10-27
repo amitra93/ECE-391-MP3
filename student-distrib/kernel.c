@@ -162,7 +162,6 @@ entry (unsigned long magic, unsigned long addr)
 		}
 		
 		/* Initialize all Intel Defined Interrupts */
-		#if 0
 		SET_TRAP_GATE(idt[0], &idt_intel_de); 
 		SET_TRAP_GATE(idt[1], &idt_intel_db); 
 		SET_TRAP_GATE(idt[2], &idt_intel_nmi);
@@ -177,7 +176,7 @@ entry (unsigned long magic, unsigned long addr)
 		SET_TRAP_GATE(idt[11], &idt_intel_np); 
 		SET_TRAP_GATE(idt[12], &idt_intel_ss); 
 		SET_TRAP_GATE(idt[13], &idt_intel_gp); 
-		
+		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
 		SET_TRAP_GATE(idt[16], &idt_intel_mf); 
 		SET_TRAP_GATE(idt[17], &idt_intel_ac); 
 		SET_TRAP_GATE(idt[18], &idt_intel_mc); 
@@ -185,10 +184,7 @@ entry (unsigned long magic, unsigned long addr)
 		
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
-		#endif
-		
-		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
-		
+
 		SET_TRAP_GATE(idt[33], &idt_keyboard);
 		SET_TRAP_GATE(idt[40], &idt_rtc);
 		
@@ -219,10 +215,6 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	{
-		//int * a = NULL;
-		//*a = 0;
-	}
 		
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

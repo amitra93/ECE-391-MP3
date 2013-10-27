@@ -34,12 +34,6 @@ Aborts
 		:"=d"(error), "=S"(instr_ptr), "=D"(pid));			\
 	}while(0)						
 
-#define VIDEO 0xB8000
-#define NUM_COLS 80
-#define NUM_ROWS 25
-#define ATTRIB 0x7
-
-
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
 	while(1);
