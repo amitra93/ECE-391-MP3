@@ -7,8 +7,12 @@
 
 #include "types.h"
 
-
+/*
+*   This function clears the screen and draws the error description, error code, 
+*   instruction pointer, and process id.
+*/
 void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid);
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);

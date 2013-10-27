@@ -1,6 +1,12 @@
 #ifndef _INTEL_INTR_H_
 #define _INTEL_INTR_H_
 
+#ifndef ASM
+
+
+/**
+* These declare the interface to the assembly code in intel_intr.S
+*/
 extern void idt_unknown_intr(void); /* Unknown Interrupt */
 extern void idt_intel_de(void); /* Interrupt 0 */
 extern void idt_intel_db(void); /* Interrupt 1 */
@@ -21,5 +27,7 @@ extern void idt_intel_mf(void); /* Interrupt 16 */
 extern void idt_intel_ac(void); /* Interrupt 17 */
 extern void idt_intel_mc(void); /* Interrupt 18 */
 extern void idt_intel_xf(void); /* Interrupt 19 */
+
+#endif /* ASM */
 
 #endif /* _INTEL_INTR_H_ */

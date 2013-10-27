@@ -27,6 +27,7 @@ Aborts
 
 #include "lib.h"
 
+/* Get arguments from registers as defined in intel_intr.s:error_code */
 #define GET_ARGS(error, instr_ptr, pid) 					\
 	do { 									 				\
 		asm volatile("										\
@@ -34,9 +35,13 @@ Aborts
 		:"=d"(error), "=S"(instr_ptr), "=D"(pid));			\
 	}while(0)						
 
+/*
+*  In each of the handler functions: get the register arguments, print error to screen, return
+*/
+	
+/* Generate an unknown interrupt exception */
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
-	while(1);
 } 
 
 /* Interrupt 0 : Divide Error (fault) */
@@ -44,7 +49,6 @@ void do_idt_intel_de(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Divide by Zero", error, instr_ptr, pid);
-	while(1);
 } 
 
 /* Interrupt 1 : Debug (trap or fault)
@@ -55,7 +59,7 @@ void do_idt_intel_db(void){
 	print_error("Debug", error, instr_ptr, pid);
 } 
 
-/* Interrupt 2 : Not Used */
+/* Interrupt 2 : Not Used, for now */
 void do_idt_intel_nmi(void){ } 
 
 /* Interrupt 3 : Breakpoint (trap) */

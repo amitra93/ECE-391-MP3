@@ -5,16 +5,22 @@
 
 .align 4
 .data
+
+	/* Set up the assembly interface as global */
 	.globl idt_unknown_intr, idt_intel_de, idt_intel_db, idt_intel_nmi, idt_intel_bp, idt_intel_of, idt_intel_br
 	.globl idt_intel_ud, idt_intel_nm, idt_intel_df, idt_intel_cso, idt_intel_ts, idt_intel_np, idt_intel_ss
 	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf
 
+	/* Get the externally defined C handlers */
 	.extern do_idt_unknown_intr, do_idt_intel_de, do_idt_intel_db, do_idt_intel_nmi, do_idt_intel_bp, do_idt_intel_of
 	.extern	do_idt_intel_br, do_idt_intel_ud, do_idt_intel_nm, do_idt_intel_df, do_idt_intel_cso, do_idt_intel_ts
 	.extern	do_idt_intel_np, do_idt_intel_ss, do_idt_intel_gp, do_idt_intel_pf, do_idt_intel_mf, do_idt_intel_ac
 	.extern do_idt_intel_mc, do_idt_intel_xf
 
-
+/* 
+*  Put the addresses in memory, for some reason this was the only way the assembler
+*  could recognize the functions.
+*/
 _idt_unknown_intr:
 	.long	do_idt_unknown_intr
 
@@ -76,12 +82,12 @@ _idt_intel_xf:
 	.long	do_idt_intel_xf
 
 	
-	/* 
-	* The follwoing code sets up a small calling convention for error codes
-	* First push the error code onto the stack (processor does this) or
-	* push a null value for the error code if the processor does not (see IA manual)
-	* Next, push the interrupt handler address onto the stack then jump to the error code
-	*/
+/* 
+* The follwoing code sets up a small calling convention for error codes
+* First push the error code onto the stack (processor does this) or
+* push a null value for the error code if the processor does not (see IA manual)
+* Next, push the interrupt handler address onto the stack then jump to the error code
+*/
 
 .text
 	
@@ -178,6 +184,8 @@ idt_intel_xf:
 
 
 /*
+* Lastly, we want to set up the function arguments for the C interrupt handler and return to the IP
+*
 * EAX : Error Code
 * EBX : Instruction Pointer
 * ECX : Reserved for future use of process ID
@@ -193,6 +201,6 @@ error_code:
 	call *%edi				# Go to ISR
 	popa					# Pop off all saved registers
 	addl $8, %esp 			# Pop off error code and function address
-	iret
+	iret					# Return to code
 	
 	
