@@ -9,7 +9,9 @@
 void
 keyboard_init(void)
 {
-
-	
-	
+	//enable keyboard
+	//outb(0xAE, CMD_REG);
+	//outb(0x60, CMD_REG);
+	//outb(0x05, CMD_REG);
+	//outb(0xFF, DATA_PORT);
 }

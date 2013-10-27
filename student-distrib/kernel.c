@@ -10,6 +10,7 @@
 #include "keyboard.h"
 #include "debug.h"
 #include "intel_intr.h"
+#include "hardware_intr.h"
 #include "sys_calls.h"
 #include "paging.h"
 
