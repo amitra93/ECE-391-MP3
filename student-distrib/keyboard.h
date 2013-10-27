@@ -23,13 +23,38 @@
 /* Externally-visible functions */
 
 /* Helper function that determines whether to print uppercase or lowercase characters */
+
+/*
+ * void determine_case(unsigned char char_pressed)
+ * DESCRIPTION: This is a helper function that determines whether to print uppercase or lowercase characters.
+ *
+ * INPUTS: char_pressed
+ * OUTPUTS: none
+ * SIDE EFFECTS: sets variable that determines whether to select from uppercase or lowercase array
+ */
 void determine_case(unsigned char char_pressed);
 
 
-/* This function initializes relevant global variables that we use when keyboard interrupts are generated*/
+/*
+ * void keyboard_init(void)
+ * DESCRIPTION: This function initializes relevant global variables that we use when keyboard interrupts are generated
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: initializes global variables
+ */
 void keyboard_init(void);
 
 /* Function that gets called whenever a keyboard interrupt is generated */
+
+/*
+ * void process_keypress(void)
+ * DESCRIPTION: This is an internal helper function that gets called whenever we get a keyborad interrupt
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: sends relevant keypresses to the console
+ */
 void process_keypress(void);
 
 
