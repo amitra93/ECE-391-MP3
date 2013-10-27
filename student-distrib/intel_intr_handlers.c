@@ -168,6 +168,7 @@ void do_idt_intel_pf(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Page Fault", error, instr_ptr, pid);
+	while(1);
 } 
 
 /* Interrupt 16 : Floating Point Error (fault) */

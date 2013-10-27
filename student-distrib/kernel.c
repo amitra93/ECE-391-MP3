@@ -17,6 +17,9 @@
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
+extern unsigned int * pageDirectory;
+extern unsigned int * kernelPage;
+
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void
@@ -183,6 +186,8 @@ entry (unsigned long magic, unsigned long addr)
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 		#endif
+
+		
 	}
 	
 	/* Init the PIC */

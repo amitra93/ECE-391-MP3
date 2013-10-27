@@ -3,7 +3,7 @@
 
 #ifndef ASM
 
-extern void init_paging();
+extern void paging_init();
 
 #endif /* ASM */
 
