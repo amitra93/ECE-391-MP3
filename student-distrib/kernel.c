@@ -177,36 +177,39 @@ entry (unsigned long magic, unsigned long addr)
 		SET_TRAP_GATE(idt[11], &idt_intel_np); 
 		SET_TRAP_GATE(idt[12], &idt_intel_ss); 
 		SET_TRAP_GATE(idt[13], &idt_intel_gp); 
-		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
+		
 		SET_TRAP_GATE(idt[16], &idt_intel_mf); 
 		SET_TRAP_GATE(idt[17], &idt_intel_ac); 
 		SET_TRAP_GATE(idt[18], &idt_intel_mc); 
 		SET_TRAP_GATE(idt[19], &idt_intel_xf); 
-		#endif
+		
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
-
-		//SET_TRAP_GATE(idt[33], &idt_keyboard);
-		//SET_TRAP_GATE(idt[40], &idt_rtc);
+		#endif
+		
+		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
+		
+		SET_TRAP_GATE(idt[33], &idt_keyboard);
+		SET_TRAP_GATE(idt[40], &idt_rtc);
 		
 	}
 	
 	/* Init the PIC */
-	//printf("Enabling PIC\n");
-	//i8259_init();
+	printf("Enabling PIC\n");
+	i8259_init();
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-	//printf("Enabling Paging\n");
-	paging_init();
+	printf("Enabling Paging\n");
+	//paging_init();
 	 
-	//printf("Enabling RTC\n");
-	//rtc_init();
-	//enable_irq(8);
+	printf("Enabling RTC\n");
+	rtc_init();
+	enable_irq(8);
 	
-	//printf("Enabling keyboard\n");
-	//keyboard_init();
-	//enable_irq(1);
+	printf("Enabling keyboard\n");
+	keyboard_init();
+	enable_irq(1);
 	
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -217,11 +220,8 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Execute the first program (`shell') ... */
 	{
-		int a = 1;
-		int b = 0;
-		//int * a = NULL;
-		//*a = 0;
-		//a /= b;
+		int * a = NULL;
+		*a = 0;
 	}
 		
 	/* Spin (nicely, so we don't chew up cycles) */
