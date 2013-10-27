@@ -34,17 +34,25 @@ void paging_init(){
 	pd[1] |= 0x83;//might also want to make global, will check later  
 
 	//Load the address of the page directory
-	asm volatile("movl %0, %%cr3" :: "r"(pd) );
+	asm volatile("movl %0, %%cr3" 
+						:
+						: "r"(pd) );
 				  
 	//enables 4MB paging 
-	asm volatile("movl %%cr4, %0": "=b"(temp));
+	asm volatile("movl %%cr4, %0"
+						: "=b"(temp));
 	temp |= 0x10;
-	asm volatile("movl %0, %%cr4":: "b"(temp));
+	asm volatile("movl %0, %%cr4"
+						:
+						: "b"(temp));
 	
 	//Enable paging
-	asm volatile("movl %%cr0, %0": "=b"(temp));
+	asm volatile("movl %%cr0, %0"
+						: "=b"(temp));
 	temp |= 0x80000000;
-	asm volatile("movl %0, %%cr0":: "b"(temp));
+	asm volatile("movl %0, %%cr0"
+						:
+						: "b"(temp));
 
 
 
