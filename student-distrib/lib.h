@@ -7,7 +7,7 @@
 
 #include "types.h"
 
-
+void test_interrupts(void);
 void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid);
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
