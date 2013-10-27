@@ -41,6 +41,7 @@ Aborts
 
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
+	while(1);
 } 
 
 /* Interrupt 0 : Divide Error (fault) */
@@ -48,6 +49,7 @@ void do_idt_intel_de(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Divide by Zero", error, instr_ptr, pid);
+	while(1);
 } 
 
 /* Interrupt 1 : Debug (trap or fault)

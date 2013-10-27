@@ -116,6 +116,7 @@ idt_bottom:
 
 .align 4096
 page_directory:
+  _page_directory:
 	.rept 1024
 	.long 0x2  # Attribute: Supervisor, Read/Write, Not Present
 	.endr
@@ -123,8 +124,9 @@ page_directory_bottom:
 
 .align 4096
 page_table:
+  _page_table:
 	.rept 1024
-	.long 0x3  # Attribute: Supervisor, Read/Write, Present
+	.long 0x2  # Attribute: Supervisor, Read/Write, Not Present
 	.endr
 page_table_bottom:
 
