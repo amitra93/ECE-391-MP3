@@ -18,6 +18,14 @@ static unsigned int * pd = &page_directory;
 static unsigned int * pt = &page_table;
 static unsigned int * kernel_page = KERNEL_LOCATION;
 
+/* void paging_init()
+ *   DESCRIPTION: Initializes paging for the CPU. The first 4MB are used with 4KB paging,
+ *	 while from 4MB onwards, the pages are of size 4MB. Uses the global page_directory and page_table
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   SIDE EFFECTS: page faults can now be generated, control registers cr0, cr3, cr4 modified
+ */
+
 void paging_init(){
 	int i;
 	unsigned int temp, addr;
