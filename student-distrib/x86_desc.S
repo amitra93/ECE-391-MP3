@@ -11,6 +11,7 @@
 .globl  tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl  gdt_ptr
 .globl  idt_desc_ptr, idt
+.globl  page_directory, page_table
 
 .align 4
 
@@ -112,3 +113,19 @@ _idt:
 	.endr
 
 idt_bottom:
+
+.align 4096
+page_directory:
+	.rept 1024
+	.long 0x2  # Attribute: Supervisor, Read/Write, Not Present
+	.endr
+page_directory_bottom:
+
+.align 4096
+page_table:
+	.rept 1024
+	.long 0x3  # Attribute: Supervisor, Read/Write, Present
+	.endr
+page_table_bottom:
+
+

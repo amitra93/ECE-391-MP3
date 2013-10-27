@@ -17,8 +17,7 @@
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
-extern unsigned int * pageDirectory;
-extern unsigned int * kernelPage;
+extern unsigned int * page_directory;
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -177,7 +176,7 @@ entry (unsigned long magic, unsigned long addr)
 		SET_TRAP_GATE(idt[11], &idt_intel_np); 
 		SET_TRAP_GATE(idt[12], &idt_intel_ss); 
 		SET_TRAP_GATE(idt[13], &idt_intel_gp); 
-		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
+		
 		SET_TRAP_GATE(idt[16], &idt_intel_mf); 
 		SET_TRAP_GATE(idt[17], &idt_intel_ac); 
 		SET_TRAP_GATE(idt[18], &idt_intel_mc); 
@@ -186,6 +185,8 @@ entry (unsigned long magic, unsigned long addr)
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 		#endif
+		
+		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
 		
 		SET_TRAP_GATE(idt[33], &idt_keyboard);
 		SET_TRAP_GATE(idt[40], &idt_rtc);
