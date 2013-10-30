@@ -53,7 +53,7 @@ Aborts
 /* Generate an unknown interrupt exception */
 void do_idt_unknown_intr(void){
 	print_error("Unknown Interrupt", 0, 0, 0);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 0 : Divide Error (fault) */
@@ -61,7 +61,7 @@ void do_idt_intel_de(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Divide by Zero", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 1 : Debug (trap or fault)
@@ -70,7 +70,7 @@ void do_idt_intel_db(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Debug", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 2 : Not Used, for now */
@@ -81,7 +81,7 @@ void do_idt_intel_bp(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Breakpoint", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 4 : Overflow (trap) */
@@ -89,7 +89,7 @@ void do_idt_intel_of(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Overflow", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 5 : Bounds Check (fault) */
@@ -97,7 +97,7 @@ void do_idt_intel_br(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Bounds Check Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 6 : Invalid Opcode (fault) */
@@ -105,7 +105,7 @@ void do_idt_intel_ud(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Invalid Opcode", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 7 : Device not Available (fault) */
@@ -113,7 +113,7 @@ void do_idt_intel_nm(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Device Not Available", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 8 : Double Fault (abort) */
@@ -121,7 +121,7 @@ void do_idt_intel_df(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Double Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 }  
 
 /* Interrupt 9 : Coprocessor Segment Overrun (abort) */
@@ -129,7 +129,7 @@ void do_idt_intel_cso(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Coprocessor Segment Overrun", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 }  
 
 /* Interrupt 10 : Invalid TSS (fault) */
@@ -137,7 +137,7 @@ void do_idt_intel_ts(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Invalid TSS", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 11 : Segment not Present (fault) */
@@ -145,7 +145,7 @@ void do_idt_intel_np(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Segment Not Present", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 12 : Stack Segment (fault) */
@@ -153,7 +153,7 @@ void do_idt_intel_ss(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Stack Segment Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 13 : General Protection (fault) */
@@ -161,7 +161,7 @@ void do_idt_intel_gp(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("General Protection Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 14 : Page Fault (fault) */
@@ -169,7 +169,7 @@ void do_idt_intel_pf(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Page Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 16 : Floating Point Error (fault) */
@@ -177,7 +177,7 @@ void do_idt_intel_mf(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Floating Point Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 17 : Alignment Check (fault) */
@@ -185,7 +185,7 @@ void do_idt_intel_ac(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Alignment Check Fault", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 18 : Machine-Check Exception (abort) */
@@ -193,7 +193,7 @@ void do_idt_intel_mc(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Machine-Check Exception", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
 
 /* Interrupt 19 : Floating-Point Exception (fault) */
@@ -201,5 +201,5 @@ void do_idt_intel_xf(void){
 	uint32_t error, instr_ptr, pid;
 	GET_ARGS(error, instr_ptr, pid);
 	print_error("Floating-Point Exception", error, instr_ptr, pid);
-	asm volatile(".1: hlt; jmp .1;");
+	while(1);
 } 
