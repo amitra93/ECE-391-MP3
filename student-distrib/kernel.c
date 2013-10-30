@@ -164,32 +164,32 @@ entry (unsigned long magic, unsigned long addr)
 		}
 		
 		/* Initialize all Intel Defined Interrupts */
-		SET_TRAP_GATE(idt[0], &idt_intel_de); 
-		SET_TRAP_GATE(idt[1], &idt_intel_db); 
-		SET_TRAP_GATE(idt[2], &idt_intel_nmi);
-		SET_SYSTEM_GATE(idt[3], &idt_intel_bp); 
-		SET_SYSTEM_GATE(idt[4], &idt_intel_of); 
-		SET_SYSTEM_GATE(idt[5], &idt_intel_br); 
-		SET_TRAP_GATE(idt[6], &idt_intel_ud); 
-		SET_TRAP_GATE(idt[7], &idt_intel_nm); 
-		SET_TRAP_GATE(idt[8], &idt_intel_df); 
-		SET_TRAP_GATE(idt[9], &idt_intel_cso); 
-		SET_TRAP_GATE(idt[10], &idt_intel_ts); 
-		SET_TRAP_GATE(idt[11], &idt_intel_np); 
-		SET_TRAP_GATE(idt[12], &idt_intel_ss); 
-		SET_TRAP_GATE(idt[13], &idt_intel_gp); 
-		SET_TRAP_GATE(idt[14], &idt_intel_pf); 
-		SET_TRAP_GATE(idt[16], &idt_intel_mf); 
-		SET_TRAP_GATE(idt[17], &idt_intel_ac); 
-		SET_TRAP_GATE(idt[18], &idt_intel_mc); 
-		SET_TRAP_GATE(idt[19], &idt_intel_xf); 
+		SET_INTR_GATE(idt[0], &idt_intel_de); 
+		SET_INTR_GATE(idt[1], &idt_intel_db); 
+		SET_INTR_GATE(idt[2], &idt_intel_nmi);
+		SET_INTR_GATE(idt[3], &idt_intel_bp); 
+		SET_INTR_GATE(idt[4], &idt_intel_of); 
+		SET_INTR_GATE(idt[5], &idt_intel_br); 
+		SET_INTR_GATE(idt[6], &idt_intel_ud); 
+		SET_INTR_GATE(idt[7], &idt_intel_nm); 
+		SET_INTR_GATE(idt[8], &idt_intel_df); 
+		SET_INTR_GATE(idt[9], &idt_intel_cso); 
+		SET_INTR_GATE(idt[10], &idt_intel_ts); 
+		SET_INTR_GATE(idt[11], &idt_intel_np); 
+		SET_INTR_GATE(idt[12], &idt_intel_ss); 
+		SET_INTR_GATE(idt[13], &idt_intel_gp); 
+		SET_INTR_GATE(idt[14], &idt_intel_pf); 
+		SET_INTR_GATE(idt[16], &idt_intel_mf); 
+		SET_INTR_GATE(idt[17], &idt_intel_ac); 
+		SET_INTR_GATE(idt[18], &idt_intel_mc); 
+		SET_INTR_GATE(idt[19], &idt_intel_xf); 
 		
 		/* Set up the system_call entry x80 */
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 
 		/* Initialize hardware interrupts */
-		SET_TRAP_GATE(idt[33], &idt_keyboard);
-		SET_TRAP_GATE(idt[40], &idt_rtc);
+		SET_INTR_GATE(idt[33], &idt_keyboard);
+		SET_INTR_GATE(idt[40], &idt_rtc);
 		
 	}
 	

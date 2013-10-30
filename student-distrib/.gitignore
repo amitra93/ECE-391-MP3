@@ -3,11 +3,12 @@
 *.o
 *.dep
 
+# Images #
+##########
+*.img
 
 # Misc #
 ########
 bootimg
 dev_env
 debug.sh
-mp3.img
-mp3.bk.img
