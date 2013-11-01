@@ -1,0 +1,8 @@
+string = "A 1C,B 32,C 21,D 23,E 24,F 2B,G 34"
+key_pairs = string.split(',')
+
+array = []
+for i in key_pairs:
+    keys = i.split(' ')
+    array[int(keys[1])] = (keys[0], 1, )
+print(array)

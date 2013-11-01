@@ -203,12 +203,11 @@ entry (unsigned long magic, unsigned long addr)
 	paging_init();
 	 
 	printf("Enabling RTC\n");
-	rtc_init();
-	enable_irq(8);
-	
+	rtc_open(NULL);
+
 	printf("Enabling keyboard\n");
 	keyboard_init();
-	enable_irq(1);
+	
 	
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your

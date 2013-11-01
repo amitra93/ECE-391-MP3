@@ -6,7 +6,6 @@
 #define _KEYBOARD_H
 
 #include "types.h"
-
 /* Constants */
 #define DATA_PORT		0x60
 #define STATUS_REG		0x64
@@ -33,6 +32,8 @@
  * SIDE EFFECTS: sets variable that determines whether to select from uppercase or lowercase array
  */
 void determine_case(unsigned char char_pressed);
+
+void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
 
 
 /*
