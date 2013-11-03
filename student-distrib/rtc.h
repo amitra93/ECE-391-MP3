@@ -14,18 +14,33 @@
 #define STATUS_REG_B	0x8B
 #define STATUS_REG_C	0x8C
 #define BIT6_MASK		0x40
+#define INT_MAX			0x7FFFFFFF
+
+int interrupt_received;
+
 
 /* Externally-visible functions */
 
+int rtc_open(const uint8_t* filename);
+
+int rtc_read(int32_t fd, void* buf, int32_t nbytes);
+
+int rtc_write(int32_t fd, const void* buf, int32_t nbytes);
+
+int rtc_close(int32_t fd);
+
+
+
+
 /*
- * void process_rtc(void)
+ * void rtc_process_interrupt(void)
  * DESCRIPTION: This function reads from RTC Register C and processes the data.
  *
  * INPUTS: none
  * OUTPUTS: none
  * SIDE EFFECTS: none
  */
-void process_rtc(void);
+void rtc_process_interrupt(void);
 
 
 /*
@@ -38,6 +53,8 @@ void process_rtc(void);
  */
 void rtc_init(void);
 
+int32_t rtc_set_frequency(int32_t frequency);
 
+int32_t rtc_get_power_of_2(int32_t number);
 
 #endif /* _RTC_H */
