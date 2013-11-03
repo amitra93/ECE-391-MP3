@@ -204,7 +204,7 @@ entry (unsigned long magic, unsigned long addr)
 	paging_init();
 	
 	printf("Initializeing File System\n");
-	init_file_system();
+	init_file_system((uint32_t *)((module_t*)mbi->mods_addr)->mod_start);
 	
 	printf("Enabling RTC\n");
 	rtc_open(NULL);
@@ -221,7 +221,7 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-		
+	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
 }
