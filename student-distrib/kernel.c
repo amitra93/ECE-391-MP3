@@ -13,6 +13,7 @@
 #include "hardware_intr.h"
 #include "sys_calls.h"
 #include "paging.h"
+#include "filesys.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -61,6 +62,7 @@ entry (unsigned long magic, unsigned long addr)
 		int i;
 		module_t* mod = (module_t*)mbi->mods_addr;
 		while(mod_count < mbi->mods_count) {
+			printf("Module name is %s\n", mod->string);
 			printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
 			printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
 			printf("First few bytes of module:\n");
@@ -194,19 +196,23 @@ entry (unsigned long magic, unsigned long addr)
 	}
 	
 	/* Init the PIC */
-	printf("Enabling PIC\n");
+	//printf("Enabling PIC\n");
 	i8259_init();
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-	printf("Enabling Paging\n");
+	 
+	//printf("Enabling Paging\n");
 	paging_init();
 	 
-	printf("Enabling RTC\n");
+	//printf("Parsing Filesystems\n");
+	init_file_system((uint32_t*)((module_t*)mbi->mods_addr)->mod_start );
+	 	 
+	//printf("Enabling RTC\n");
 	rtc_init();
 	enable_irq(8);
 	
-	printf("Enabling keyboard\n");
+	///printf("Enabling keyboard\n");
 	keyboard_init();
 	enable_irq(1);
 	
@@ -214,11 +220,12 @@ entry (unsigned long magic, unsigned long addr)
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
-	printf("Enabling Interrupts\n");
+	//printf("Enabling Interrupts\n");
 	sti();
 
 	/* Execute the first program (`shell') ... */
-		
+	test_file_system();
+	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
 }

@@ -1,9 +1,10 @@
 #include "paging.h"
 #include "lib.h"
+#include "filesys.h"
 
 #define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
 #define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
-#define KERNEL_LOCATION 0x400000 /*starting location in memory where kernel resides*/
+#define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
 #define NUM_PAGES 1024 /*number of pages in a page directory*/
 #define SIZE_4KB_PAGE 0x1000 /*this size of a 4kb page (4KB!)*/
 #define CR4_4MB_PAGE_BIT 0x10 /*bit of CR4 control register that enables 4mb paging*/
@@ -49,7 +50,7 @@ void paging_init(){
 	pd[1] = (((unsigned int) kernel_page) & FIRST_10_BITS);
 	//set page as 4MB, set supervisor priv., set r/w, and present
 	pd[1] |=  ( PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT);  
-
+	
 	//Load the address of the page directory from pd[0] into cr3
 	asm volatile("movl %0, %%cr3" 
 						:
