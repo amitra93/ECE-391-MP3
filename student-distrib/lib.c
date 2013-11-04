@@ -222,14 +222,15 @@ putc(uint8_t c)
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    //set_cursor_pos(screen_x,screen_y);
 }
 
 void
 set_cursor_pos(int32_t x, int32_t y)
 {
-	if (x > 0 && x < NUM_COLS)
+	if (x >= 0 && x < NUM_COLS)
 		screen_x = x;
-	if (y > 0 && y < NUM_ROWS)
+	if (y >= 0 && y < NUM_ROWS)
 		screen_y = y;
 }
 
