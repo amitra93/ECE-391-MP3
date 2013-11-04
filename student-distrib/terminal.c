@@ -73,3 +73,10 @@ void terminal_backspace(){
 	terminal_write(0, input, buffer_pointer);
 	//if (old_screen_x > 0) old_screen_x--;
 }
+
+void terminal_clear(){
+	clear();
+	buffer_pointer = 0;
+	set_cursor_pos(0, 0);
+}
+

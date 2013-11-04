@@ -29,4 +29,6 @@ int terminal_close(int32_t fd);
 
 void terminal_backspace();
 
+void terminal_clear();
+
 #endif /* _TERMINAL_H */

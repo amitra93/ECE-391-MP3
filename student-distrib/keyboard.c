@@ -72,7 +72,7 @@ process_keypress(void)
 		is_control_pressed = 0;
 	}
 	if (is_control_pressed && char_pressed == 0x26){
-		clear();
+		terminal_clear();
 		set_cursor_pos(0, 0);
 		return;
 	}
