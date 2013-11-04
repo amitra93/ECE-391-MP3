@@ -26,7 +26,6 @@ static unsigned int * kernel_page = (unsigned int *) KERNEL_LOCATION;
  *   OUTPUTS: none
  *   SIDE EFFECTS: page faults can now be generated, control registers cr0, cr3, cr4 modified
  */
-
 void paging_init(){
 	int i;
 	unsigned int temp, addr;
