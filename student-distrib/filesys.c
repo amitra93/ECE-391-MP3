@@ -1,14 +1,14 @@
 #include "lib.h"
 #include "filesys.h"
 
-inode_t * get_inode(uint32_t inode)
+static inode_t * get_inode(uint32_t inode)
 {
 	if (inode >= file_sys->num_inodes)
 		return NULL;
 	return  (inode_t*)(((uint8_t*)file_sys + FILESYS_SIZE) + (inode * sizeof(inode_t)));
 }
 
-dblock_t * get_datablocks()
+static dblock_t * get_datablocks()
 {
 	return  (dblock_t*)((uint8_t*)get_inode(0) + (file_sys->num_inodes * sizeof(inode_t)));
 }
@@ -16,6 +16,22 @@ dblock_t * get_datablocks()
 int32_t init_file_system(uint32_t * start_addr)
 {
 	file_sys = (file_sys_t * ) start_addr;
+	return 0;
+}
+
+//Always returns -1, because this is a read-only FS
+int32_t write_file(uint32_t offset, uint8_t* buf, uint32_t length)
+{
+	return -1;
+}
+
+int32_t close_file()
+{
+	return 0;
+}
+
+int32_t open_file()
+{
 	return 0;
 }
 
@@ -71,19 +87,21 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 	dblock_t * dblocks;
 	dblock_t * dblock;
 	uint32_t dblock_page;
-	uint32_t i;
+	uint32_t i, block_length;
 		
 	//Return failure if index is out of bounds
 	if (inode >= file_sys->num_inodes)
 		return -1;
-	
 	node = get_inode(inode);
+	
+	//Determine the lnumber of datablocks for this node
+	block_length = (node->len / DATABLOCK_SIZE) + 1;
 	
 	//The starting data block page
 	dblock_page = offset / DATABLOCK_SIZE;
 	
 	//Check bounds
-	if (dblock_page >= node->len)
+	if (dblock_page >= block_length)
 		return -1;
 	
 	//The starting offset into the dblock
@@ -108,14 +126,15 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 		//If the next byte is in the next page, get the beginning of next page
 		if ( (i + 1 + offset) % DATABLOCK_SIZE == 0)
 		{
+			//Get the next page
 			dblock_page++;
 			
 			//Double check for end of file
-			if (dblock_page == node->len)
+			if (dblock_page == block_length)
 				return 0;
 			
 			//Double check bounds
-			else if (dblock_page > node->len)
+			else if (dblock_page > block_length)
 				return -1;
 			if (node->dblocks[dblock_page] >= file_sys->num_blocks)
 				return -1;
@@ -149,7 +168,6 @@ void test_file_system()
 		{"counter"},
 	};
 	
-	
 	for (i = 0; i < 16; i ++)
 	{
 		int j = 0;
@@ -168,19 +186,22 @@ void test_file_system()
 		printf("File type is: %d\n", dentry.file_type);
 		printf("Inode num is: %d\n", dentry.inode_num);
 		printf("\n");
-		printf("Reading first 160 Bytes...\n");
-		read_data(dentry.inode_num, 0, buf, 40);
-		printf("%s\n", buf);
 		
-		read_data(dentry.inode_num, 40, buf, 40);
-		printf("%s\n", buf);
-		
-		read_data(dentry.inode_num, 80, buf, 40);
-		printf("%s\n", buf);
-		
-		read_data(dentry.inode_num, 120, buf, 40);
-		printf("%s\n", buf);
-		
+		if (dentry.file_type == 2)
+		{
+			printf("Reading first 160 Bytes...\n");
+			read_data(dentry.inode_num, 0, buf, 40);
+			printf("%s\n", buf);
+			
+			read_data(dentry.inode_num, 40, buf, 40);
+			printf("%s\n", buf);
+			
+			read_data(dentry.inode_num, 80, buf, 40);
+			printf("%s\n", buf);
+			
+			read_data(dentry.inode_num, 120, buf, 40);
+			printf("%s\n", buf);
+		}
 		for(j = 0; j < 1000000000; j ++);
 	}
 }
