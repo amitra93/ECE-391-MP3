@@ -1,5 +1,6 @@
 #include "lib.h"
 #include "filesys.h"
+#include "terminal.h"
 
 /* get_inode(uint32_t inode)
  *   DESCRIPTION: Gets a specific inode at location 
@@ -45,7 +46,7 @@ int32_t init_file_system(uint32_t * start_addr)
  *   OUTPUTS: -1, using a read-file system
  *   SIDE EFFECTS: none
  */
-int32_t write_file(uint32_t offset, uint8_t* buf, uint32_t length)
+int32_t write_file(uint32_t offset, const uint8_t* buf, uint32_t length)
 {
 	return -1;
 }
