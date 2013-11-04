@@ -9,11 +9,13 @@
 
 
 /* Constants and variables */
-#define BUFFER_SIZE		128
+#define BUFFER_SIZE		20
 
 
 char input[BUFFER_SIZE];
 int buffer_pointer;
+int old_screen_x;
+int old_screen_y;
 
 /* Externally-visible functions */
 
@@ -25,5 +27,6 @@ int terminal_write(int32_t fd, const void* buf, int32_t nbytes);
 
 int terminal_close(int32_t fd);
 
+void terminal_backspace();
 
 #endif /* _TERMINAL_H */

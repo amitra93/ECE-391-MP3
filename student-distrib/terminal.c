@@ -26,7 +26,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	int i = 0;
 	char* string = (char*) input;
 	char* output = (char*) buf;
-	while (i < buffer_pointer){
+	while (i < buffer_pointer || string[i] != '\n' || i < nbytes){
 		output[i] = string[i];
 		i++;
 	}
@@ -43,14 +43,20 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	int i;
 	char* string = (char*) buf;
 	for (i = 0; i < nbytes; i++){
-		printf("%c", string[i]);
 		if (fd){
+			if (string[i] == '\n' || string[i] == '\r'){
+				buffer_pointer = 0;
+			}
+			if (buffer_pointer >= BUFFER_SIZE) {
+				return -1;
+			}
 			input[buffer_pointer] = string[i];
-			buffer_pointer++;
-			//if (character == '\n'){
-			//	buffer_pointer = 0;
-			//}
+			if (!(string[i] == '\n' || string[i] == '\r')){
+				buffer_pointer++;
+			}
 		}
+		get_cursor_pos(&old_screen_x, &old_screen_y);
+		printf("%c", string[i]);
 	}
 	return 0;
 }
@@ -58,4 +64,12 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 int
 terminal_close(int32_t fd){
 	return 0;
+}
+
+void terminal_backspace(){
+	if (buffer_pointer > 0) buffer_pointer--;
+	clear_line(old_screen_y);
+	set_cursor_pos(0, old_screen_y);
+	terminal_write(0, input, buffer_pointer);
+	//if (old_screen_x > 0) old_screen_x--;
 }

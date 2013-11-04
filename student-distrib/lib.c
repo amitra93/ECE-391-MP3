@@ -67,6 +67,25 @@ clear(void)
     }
 }
 
+void
+clear_line(int32_t rownum){
+	if (rownum < 0 || rownum >= NUM_ROWS){
+		return;
+	}
+	int i;
+	char* temp = video_mem + NUM_COLS * rownum * 2;
+	for(i = 0; i < NUM_COLS; i++) {
+        *(uint8_t *)(temp + (i << 1)) = ' ';
+        *(uint8_t *)(temp + (i << 1) + 1) = ATTRIB;
+    }
+}
+
+void scroll_up(){
+	memmove(video_mem, video_mem + NUM_COLS*2, NUM_COLS * (NUM_ROWS-1) * 2);
+	clear_line(NUM_ROWS-1);
+}
+
+
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character
@@ -215,6 +234,11 @@ putc(uint8_t c)
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x=0;
+
+        if (screen_y >= NUM_ROWS){ //we are on last line
+      		scroll_up();
+      		screen_y--;
+    	}
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -222,7 +246,14 @@ putc(uint8_t c)
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
-    //set_cursor_pos(screen_x,screen_y);
+}
+
+void get_cursor_pos(int32_t* x, int32_t* y){
+	if (x == NULL || y == NULL){
+		return;
+	}
+	*x = screen_x;
+	*y = screen_y;
 }
 
 void

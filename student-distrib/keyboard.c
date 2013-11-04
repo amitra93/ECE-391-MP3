@@ -64,9 +64,6 @@ process_keypress(void)
 	// change keyboard map (maintain history of what's pressed and released)
 	change_keys_pressed(char_pressed, char_to_print);
 
-	// if character is a letter or number (not a special char), print it
-	if (char_to_print != '\0') terminal_write(1, &char_to_print, 1);
-	//printf("-->%x<--\n", char_pressed);
 
 	if (char_pressed == 0x1D){
 		is_control_pressed = 1;
@@ -77,6 +74,15 @@ process_keypress(void)
 	if (is_control_pressed && char_pressed == 0x26){
 		clear();
 		set_cursor_pos(0, 0);
+		return;
 	}
+	if (char_pressed == 0x0E){
+		terminal_backspace();
+		return;
+	}
+
+	// if character is a letter or number (not a special char), print it
+	if (char_to_print != '\0') terminal_write(1, &char_to_print, 1);
+	//printf("-->%x<--\n", char_pressed);
 
 }
