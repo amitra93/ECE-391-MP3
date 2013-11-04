@@ -208,7 +208,7 @@ entry (unsigned long magic, unsigned long addr)
 	printf("Enabling Paging\n");
 	paging_init();
 	
-	printf("Initializeing File System\n");
+	printf("Initializing File System\n");
 	init_file_system((uint32_t *)((module_t*)mbi->mods_addr)->mod_start);
 	
 	printf("Enabling RTC\n");

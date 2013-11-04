@@ -9,7 +9,7 @@
 
 
 /* Constants and variables */
-#define BUFFER_SIZE		20
+#define BUFFER_SIZE		128
 
 
 char input[BUFFER_SIZE];
