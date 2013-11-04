@@ -14,6 +14,7 @@
 #include "sys_calls.h"
 #include "paging.h"
 #include "filesys.h"
+#include "terminal.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -194,6 +195,10 @@ entry (unsigned long magic, unsigned long addr)
 		
 	}
 	
+	terminal_open(NULL);
+	printf("Enabling terminal\n");
+	
+
 	/* Init the PIC */
 	printf("Enabling PIC\n");
 	i8259_init();
@@ -213,6 +218,7 @@ entry (unsigned long magic, unsigned long addr)
 	keyboard_init();
 	
 	
+
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close

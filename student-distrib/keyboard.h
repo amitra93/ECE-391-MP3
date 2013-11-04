@@ -19,6 +19,15 @@
 #define LSHIFT_RELEASE	0xAA
 #define RSHIFT_RELEASE	0xB6
 
+
+// global variable to select between uppercase and lowercase letters
+char* array_to_use;
+
+// determine status of whether SHIFT/CAPS is pressed or not
+int is_uppercase;
+
+int is_control_pressed;
+
 /* Externally-visible functions */
 
 /* Helper function that determines whether to print uppercase or lowercase characters */

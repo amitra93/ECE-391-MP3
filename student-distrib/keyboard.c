@@ -5,14 +5,11 @@
 #include "keyboard.h"
 #include "lib.h"
 #include "i8259.h"
-//#include "keyboard_characters.c"
+#include "terminal.h"
+#include "keyboard_characters.h"
 
 
-// global variable to select between uppercase and lowercase letters
-char* array_to_use;
 
-// determine status of whether SHIFT/CAPS is pressed or not
-int is_uppercase;
 
 /* Scancodes for lowercase characters, 'EOI' char whenever appropriate */
 char lowercase[256] = { '\0','\0','1','2','3','4','5','6','7','8','9','0','-','=','\b','\t', 'q','w','e','r','t','y','u','i','o','p','[',']','\n','\0','a','s', 'd','f','g','h','j','k','l',';','\'','`','\0','\\','z','x','c','v', 'b','n','m',',','.','/','\0','*','\0',' ','\0','\0','\0',' ','\0','\0', '\0','\0','\0','\0','\0','\0','\0','7','8','9','-','4','5','6','+','1', '2','3','0','.','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0', '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
@@ -49,7 +46,7 @@ keyboard_init(void)
 	// set constants to use
 	array_to_use = &lowercase[0];
 	is_uppercase = 0;
-
+	is_control_pressed = 0;
 	enable_irq(1);
 }
 
@@ -67,7 +64,25 @@ process_keypress(void)
 	// change keyboard map (maintain history of what's pressed and released)
 	change_keys_pressed(char_pressed, char_to_print);
 
+
+	if (char_pressed == 0x1D){
+		is_control_pressed = 1;
+	}
+	if (char_pressed == 0x9D){
+		is_control_pressed = 0;
+	}
+	if (is_control_pressed && char_pressed == 0x26){
+		terminal_clear();
+		set_cursor_pos(0, 0);
+		return;
+	}
+	if (char_pressed == 0x0E){
+		terminal_backspace();
+		return;
+	}
+
 	// if character is a letter or number (not a special char), print it
-	if (char_to_print != '\0') printf("%c", char_to_print);
-	//printf("-->%x<--", char_pressed);
+	if (char_to_print != '\0') terminal_write(1, &char_to_print, 1);
+	//printf("-->%x<--\n", char_pressed);
+
 }
