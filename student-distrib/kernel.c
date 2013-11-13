@@ -227,7 +227,11 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
+<<<<<<< HEAD
+	//test_file_system();
+=======
 	test_file_system();
+>>>>>>> efba6d43a1ee740c88aa57ef02803afe2d95f0de
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
