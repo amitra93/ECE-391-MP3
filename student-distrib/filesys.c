@@ -201,7 +201,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 			
 			//Double check for end of file
 			if (dblock_page == block_length)
-				return 0;
+				return i;
 			
 			//Double check bounds
 			else if (dblock_page > block_length)

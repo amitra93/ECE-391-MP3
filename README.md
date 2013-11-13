@@ -19,3 +19,30 @@ Todo:
 * Loader
 * Multiple terminals and active tasks
 * Scheduling
+
+
+Checkpoint 3:
+	Tasks
+		-Simple scheduler
+			-Managing Task linked list
+		-Task Switching
+			-Change from CR0 to CR3
+			-Save and change TSS
+		
+	System Calls
+		-Execute Call
+		-Everything Else
+		
+	Loader
+		-Load from Memory
+		
+Can be Concurrrent	
+	File Loader & Tasks
+	File Loader & System Calls (NOT Execute)
+	Tasks & System Calls (NOT Execute)
+
+Cannot be Concurrent
+	Order:
+		1) File Loader (Have to have the program in program image)
+		2) Tasks (Task switching)
+		3) Execute System Call
