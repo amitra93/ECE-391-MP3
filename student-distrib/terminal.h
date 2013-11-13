@@ -10,7 +10,11 @@
 
 /* Constants and variables */
 #define BUFFER_SIZE		128
+<<<<<<< HEAD
 #define NUM_COLS		80
+=======
+
+>>>>>>> efba6d43a1ee740c88aa57ef02803afe2d95f0de
 
 char input[BUFFER_SIZE];
 int buffer_pointer;
