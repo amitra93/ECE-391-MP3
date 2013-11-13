@@ -245,7 +245,7 @@ void test_file_system()
 	for (i = 0; i < 16; i ++)
 	{
 		int j = 0;
-		uint8_t buf[40];
+		uint8_t buf[4000];
 		clear();
 		set_cursor_pos(0,1);
 		printf("Searching for %s\n", file_names[i]);
@@ -264,17 +264,18 @@ void test_file_system()
 		if (dentry.file_type == 2)
 		{
 			printf("Reading first 160 Bytes...\n");
-			read_data(dentry.inode_num, 0, buf, 40);
-			printf("%s\n", buf);
+			read_data(dentry.inode_num, 0, buf, 4000);
+			terminal_write(0, buf, 4000);
+			//printf("%s\n", buf);
 			
 			read_data(dentry.inode_num, 40, buf, 40);
-			printf("%s\n", buf);
+			//printf("%s\n", buf);
 			
 			read_data(dentry.inode_num, 80, buf, 40);
-			printf("%s\n", buf);
+		//	printf("%s\n", buf);
 			
 			read_data(dentry.inode_num, 120, buf, 40);
-			printf("%s\n", buf);
+			//printf("%s\n", buf);
 		}
 		for(j = 0; j < 1000000000; j ++);
 	}
