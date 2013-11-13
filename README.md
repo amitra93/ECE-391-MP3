@@ -30,6 +30,7 @@ Checkpoint 3:
 		-Task Switching
 			-Change from CR0 to CR3
 			-Save and change TSS
+		-Task Signals
 		
 	System Calls
 		-Execute Call
