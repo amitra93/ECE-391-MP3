@@ -18,7 +18,10 @@
 #define	CAPS_PRESS		0x3A
 #define LSHIFT_RELEASE	0xAA
 #define RSHIFT_RELEASE	0xB6
-
+#define LCNTL_PRESS		0x1D
+#define LCNTL_RELEASE	0x9D
+#define L_PRESS			0x26
+#define BKSP_PRESS		0x0E
 
 // global variable to select between uppercase and lowercase letters
 char* array_to_use;
@@ -42,6 +45,14 @@ int is_control_pressed;
  */
 void determine_case(unsigned char char_pressed);
 
+/*
+ * void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
+ * DESCRIPTION: This is a helper function that determines whether to print uppercase or lowercase characters.
+ *
+ * INPUTS: char_pressed
+ * OUTPUTS: none
+ * SIDE EFFECTS: sets variable that determines whether to select from uppercase or lowercase array
+ */
 void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
 
 

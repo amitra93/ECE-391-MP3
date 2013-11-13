@@ -21,8 +21,8 @@ rtc_open(const uint8_t* filename)
 int
 rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
-	while (!interrupt_received);
 	interrupt_received = 0;
+	while (!interrupt_received);
 	return 0;
 }
 
@@ -87,11 +87,11 @@ rtc_set_frequency(int32_t frequency){
 		return -1;
 	}
 	int32_t rate = (16 - power_of_2);
-	rate &= 0x0f;
+	rate &= SIXTEEN;
 	outb(STATUS_REG_A, REGISTER);
 	char prev = inb(IO_PORT);
 	outb(STATUS_REG_A, REGISTER);
-	outb((prev & 0xf0) | rate, IO_PORT);
+	outb((prev & TOP4BITS) | rate, IO_PORT);
 	sti();
 	return 0;
 }

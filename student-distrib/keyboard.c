@@ -65,18 +65,22 @@ process_keypress(void)
 	change_keys_pressed(char_pressed, char_to_print);
 
 
-	if (char_pressed == 0x1D){
+	if (char_pressed == LCNTL_PRESS){
 		is_control_pressed = 1;
 	}
-	if (char_pressed == 0x9D){
+	if (char_pressed == LCNTL_RELEASE){
 		is_control_pressed = 0;
 	}
-	if (is_control_pressed && char_pressed == 0x26){
+	if (is_control_pressed && char_pressed == L_PRESS){
 		terminal_clear();
 		set_cursor_pos(0, 0);
 		return;
 	}
-	if (char_pressed == 0x0E){
+	if (is_control_pressed && char_pressed == LSHIFT_PRESS){
+		test_terminal();
+		return;
+	}
+	if (char_pressed == BKSP_PRESS){
 		terminal_backspace();
 		return;
 	}
