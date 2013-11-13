@@ -23,6 +23,8 @@ Todo:
 
 Checkpoint 3:
 	Tasks
+		-Framework 
+			-Task Struct
 		-Simple scheduler
 			-Managing Task linked list
 		-Task Switching
