@@ -71,3 +71,13 @@ execute(const uint8_t * command);
 	*		3) IRET
 	*/
 }
+
+#define GET_ARGS(arg0, arg1, arg2) 											\
+	do { 									 								\
+		asm volatile("														\
+		movl %%ebx, %0 \n movl %%ecx, %1 \n movl %%edx, %2"					\
+		:"=r"(arg0), "=r"(arg1), "=r"(arg2), "=r"(arg3)::"%esi","%edi");	\
+	}while(0)
+	
+	
+	

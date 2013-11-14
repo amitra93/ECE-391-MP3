@@ -3,31 +3,25 @@
 .data
 
 	/* Set up the assembly interface as global */
-	.globl idt_unknown_intr, idt_intel_de, idt_intel_db, idt_intel_nmi, idt_intel_bp, idt_intel_of, idt_intel_br
-	.globl idt_intel_ud, idt_intel_nm, idt_intel_df, idt_intel_cso, idt_intel_ts, idt_intel_np, idt_intel_ss
-	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf
+	.globl halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn
 
 	/* Get the externally defined C handlers */
-	.extern do_
-
-.extern _halt
-.extern _execute
-.extern _read
-.extern _write
-.extern _open
-.extern _close
-.extern _getargs
-.extern _vidmap
-.extern _set_handler
-.extern _sigreturn
-
-.globl system_call
+	.extern do_halt, do_halt, do_execute, do_read, do_write, do_open, do_close,
+			do_getargs, do_vidmap, do_set_handler, do_sigreturn
 
 .text
 
 .align 4
+
+halt:
+
+
+
 system_call:
-	pushf
+	pushl $
+	pushl %ebx
+	pushl %esi
+	pushl %edi
 
 	cmpl  $0, %eax
 	jle	  done
@@ -43,4 +37,4 @@ done:
 
 # Create the jump table for the system calls
 system_call_table:
-.long _halt, _execute, _read, _write, _open, _close, _getargs, _vidmap, _set_handler, _sigreturn
+.long do_halt, do_execute, do_read, do_write, do_open, do_close, do_getargs, do_vidmap, do_set_handler, do_sigreturn
