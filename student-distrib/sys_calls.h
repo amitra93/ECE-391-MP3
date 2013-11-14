@@ -1,6 +1,7 @@
 #ifndef _SYS__CALLS_H
 #define _SYS__CALLS_H
 
+extern system_call();
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t* command);
 extern int32_t read (int32_t _fd, void* buf, int32_t _nbytes);
