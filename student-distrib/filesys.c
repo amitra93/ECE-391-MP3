@@ -2,6 +2,9 @@
 #include "filesys.h"
 #include "terminal.h"
 
+#define ELF_MAGIC_SIZE 4 //Bytes
+#define ELF_MAGIC 0x7F454C46 //Elf Magic number
+
 /* get_inode(uint32_t inode)
  *   DESCRIPTION: Gets a specific inode at location 
  *   INPUTS: inode=location in inode
@@ -201,7 +204,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 			
 			//Double check for end of file
 			if (dblock_page == block_length)
-				return i;
+				return i + 1;
 			
 			//Double check bounds
 			else if (dblock_page > block_length)
@@ -217,6 +220,48 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 	
 	//Return number of bytes read
 	return i + 1;
+}
+
+/* load_program (const uint8_t* fname, uint8_t * pgrm_addr)
+ *   DESCRIPTION: Loads a program by file name into prgm_addr
+ *   INPUTS: fname=file to read and copy, pgrm_addr=the starting address of file copy
+ *   OUTPUTS: returns number of bytes copied, or -1 for failure
+ *   SIDE EFFECTS: copies a program into physical memory
+ */
+int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr)
+{
+	uint8_t header[ELF_MAGIC_SIZE];
+	dentry_t* dentry;
+	
+	//Check for valid pointers
+	if (fname == NULL || pgrm_addr == NULL)
+		return -1;
+		
+	//Get the directory entry for the program to copy	
+	if (read_dentry_by_name(fname, dentry) == -1)
+		return -1;
+
+	//Make sure it's the correct file type as well has inodes
+	if (dentry->file_type != 2 || dentry->inode_num < 0)
+		return -1;
+	
+	//Get the header, return failure if it can't get header
+	if (read_data(dentry->inode_num, 0, header, ELF_MAGIC_SIZE) != ELF_MAGIC_SIZE)
+		return -1;
+	
+	//Make sure we have an ELF
+	if (*((uint32_t*)(header)) != ELF_MAGIC)
+		return -1;
+	
+	//Copy the data into memory (To go to the end of the file, set -1 which
+	//will translate into the maximum value for uint32_t
+	return read_data(dentry->inode_num, 0, pgrm_addr, -1);
+}
+
+void test_loader()
+{
+
+
 }
 
 void test_file_system()

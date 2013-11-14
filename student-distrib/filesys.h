@@ -41,11 +41,13 @@ typedef struct file_sys_t {
 } file_sys_t;
 
 void test_file_system();
+void test_loader();
 
 int32_t init_file_system(uint32_t * start_addr);
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
+int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr);
 
 int32_t write_file(uint32_t offset, const uint8_t* buf, uint32_t length);
 int32_t close_file();

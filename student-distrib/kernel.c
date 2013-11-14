@@ -194,7 +194,7 @@ entry (unsigned long magic, unsigned long addr)
 		SET_INTR_GATE(idt[40], &idt_rtc);
 		
 	}
-	
+		
 	terminal_open(NULL);
 	printf("Enabling terminal\n");
 	
