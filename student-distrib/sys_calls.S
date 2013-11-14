@@ -2,6 +2,14 @@
 
 .data
 
+	/* Set up the assembly interface as global */
+	.globl idt_unknown_intr, idt_intel_de, idt_intel_db, idt_intel_nmi, idt_intel_bp, idt_intel_of, idt_intel_br
+	.globl idt_intel_ud, idt_intel_nm, idt_intel_df, idt_intel_cso, idt_intel_ts, idt_intel_np, idt_intel_ss
+	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf
+
+	/* Get the externally defined C handlers */
+	.extern do_
+
 .extern _halt
 .extern _execute
 .extern _read
