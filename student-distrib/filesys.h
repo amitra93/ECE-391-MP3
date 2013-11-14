@@ -50,14 +50,18 @@ typedef struct fops_t{
 } fops_t;
 
 typedef struct file_t {
-	//Pointer to dentry
-	dentry_t * dentry;
-	
-	//State if open or closed
-	uint8_t open;
-	
 	//Pointer to file operations table
 	fops_t * fops;
+
+	//Pointer to dentry
+	inode_t * inode;
+	
+	//State if open or closed
+	uint32_t offset;
+	
+	//Flags
+	uint32_t in_use;
+	
 } file_t;
 
 
@@ -73,7 +77,6 @@ int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr);
 int32_t write_file(uint32_t offset, const uint8_t* buf, uint32_t length);
 int32_t close_file();
 int32_t open_file();
-
 
 file_sys_t * file_sys;
 

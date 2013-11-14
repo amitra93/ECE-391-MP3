@@ -7,6 +7,7 @@
 //To-Do: Fill out rest of struct
 typedef struct task_t{
 	struct task_t * parent_task; //Parent
+	struct task_t * child_task; //Children
 	struct task_t * sibling_task; //Siblings
 
 	uint8_t pid; //PID
