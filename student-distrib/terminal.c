@@ -5,6 +5,7 @@
 #include "terminal.h"
 #include "lib.h"
 #include "i8259.h"
+#include "keyboard.h"
 
 int
 terminal_open(const uint8_t* filename){
@@ -26,8 +27,9 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	}
 	int i = 0;
 	char* output = (char*) buf;
-	while (i < buffer_pointer && input[i] != '\n' && i < nbytes){
-		output[i] = input[i];
+	output[i] = '\0';
+	while (i < nbytes || output[i] != '\n'){
+		output[i] = keyboard_get_last_printable_key();
 		i++;
 	}
 	return 0;
