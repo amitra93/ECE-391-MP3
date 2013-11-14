@@ -241,8 +241,8 @@ int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr)
 	if (read_dentry_by_name(fname, dentry) == -1)
 		return -1;
 
-	//Make sure it's the correct file type as well has inodes
-	if (dentry->file_type != 2 || dentry->inode_num < 0)
+	//Make sure it's the correct file type
+	if (dentry->file_type != 2)
 		return -1;
 	
 	//Get the header, return failure if it can't get header

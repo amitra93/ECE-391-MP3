@@ -216,8 +216,6 @@ entry (unsigned long magic, unsigned long addr)
 
 	printf("Enabling keyboard\n");
 	keyboard_init();
-	
-	
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -227,7 +225,7 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	//test_file_system();
+	
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
