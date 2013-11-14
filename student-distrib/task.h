@@ -18,6 +18,9 @@ typedef struct task_t{
 	//Signals
 	
 	//Scheduling Statistics
+	
+	//Starting arguments
+	uint8_t args[64][64];
 } task_t;
 
 #endif

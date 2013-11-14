@@ -54,7 +54,7 @@ execute(const uint8_t * command);
 {
 	/*	Parse command into (use the getargs system call)
 	* 		1) Command to execute
-	* 		2) Get the argumetns
+	* 		2) Get the arguments
 	*	
 	*	Create page directory
 	*	Load program into memory

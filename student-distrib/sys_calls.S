@@ -1,6 +1,6 @@
 #define ASM 1
 
-.text
+.data
 
 .extern _halt
 .extern _execute
@@ -14,6 +14,8 @@
 .extern _sigreturn
 
 .globl system_call
+
+.text
 
 .align 4
 system_call:
