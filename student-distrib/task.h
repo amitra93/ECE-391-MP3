@@ -20,7 +20,7 @@ typedef struct task_t{
 	//Scheduling Statistics
 	
 	//Starting arguments
-	uint8_t args[64][64];
+	uint8_t args[128];
 } task_t;
 
 #endif
