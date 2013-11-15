@@ -102,17 +102,17 @@ int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size)
 int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr)
 {
 	uint32_t pd_index;
-	uint32_t pt_entry;
+	uint32_t pt_index;
 	uint32_t * pg_table;
 	
 	if (phys_addr == NULL || virt_addr == NULL)
 		return -1;
 		
 	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-	pt_entry = (virt_addr & 0x3FF000);
+	pt_index = (virt_addr & 0x3FF000) >> 12;
 	
-	pg_table = (uint32_t *)((pd[pd_index] & FIRST_10_BITS) | pt_entry);
-	*pg_table = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
+	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
+	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
 	return 0;
 }
 
