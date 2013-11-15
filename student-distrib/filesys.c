@@ -255,7 +255,10 @@ int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr)
 	
 	//Copy the data into memory (To go to the end of the file, set -1 which
 	//will translate into the maximum value for uint32_t
-	return read_data(dentry->inode_num, 0, pgrm_addr, -1);
+	read_data(dentry->inode_num, 0, pgrm_addr, -1);
+	
+	//Return the entry point
+	return *((uint32_t*)(pgrm_addr + 24));
 }
 
 void test_loader()
