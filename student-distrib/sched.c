@@ -4,6 +4,23 @@
 
 #define EXECUTION_ADDR 0x8000000
 
+#define iret()					\
+	do { 						\
+		asm volatile("iret");	\
+	}while(0)
+
+#define setup_task_stack(task) 									\
+		do {													\
+			asm volatile(" 										\
+				pushl %0 \n										\
+				pushl %1 \n pushl %2"::"r"((task)->tss.eflags), \
+				"r"((task)->tss.cs), 							\
+				"r"((task)->tss.eip));							\
+		}while(0)
+		
+
+
+	
 static int32_t clear_pid(uint32_t pid)
 {
 	schedular.task_vector &= ~(1 << pid);
@@ -67,4 +84,18 @@ int32_t set_cur_task(uint32_t pid)
 	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
 	
 	return 0;
+}
+
+int32_t switch_task(uint32_t pid)
+{
+	task_t * old_task = NULL; 
+	task_t * new_task;
+	
+	if (schedular.cur_task != -1)
+		old_task = get_task(schedular.cur_task);
+	
+	new_task = get_task(pid);
+	setup_task_switch(old_task, new_task);
+	setup_task_stack(new_task);
+	iret();
 }

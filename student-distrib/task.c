@@ -66,12 +66,12 @@ int32_t init_tasks()
 	init_task(0);
 }
 
-int32_t setup_task_switch(task_t * task)
+int32_t setup_task_switch(task_t * old_task, task_t * new_task)
 {
-	if (task == NULL)
-		return -1;
-	save_state(task);
-	load_tss(task);
+	if (old_task != NULL)
+		save_state(old_task);
+	load_state(new_task);
+	load_tss(new_task);
 }
 
 int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t * args)
