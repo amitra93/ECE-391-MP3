@@ -48,6 +48,8 @@ keyboard_init(void)
 	is_uppercase = 0;
 	is_control_pressed = 0;
 	enable_irq(1);
+	keyboard_interrupt_received = 0;
+	keyboard_last_printable_key = '\0';
 }
 
 void
@@ -86,7 +88,18 @@ process_keypress(void)
 	}
 
 	// if character is a letter or number (not a special char), print it
-	if (char_to_print != '\0') terminal_write(1, &char_to_print, 1);
+	if (char_to_print != '\0') {
+		terminal_write(1, &char_to_print, 1);
+		keyboard_last_printable_key = char_to_print;
+	}
 	//printf("-->%x<--\n", char_pressed);
 
+	keyboard_interrupt_received = 1;
+
+
+}
+
+unsigned char keyboard_get_last_printable_key(void){
+	while (!keyboard_interrupt_received);
+	return keyboard_last_printable_key;
 }

@@ -31,6 +31,9 @@ int is_uppercase;
 
 int is_control_pressed;
 
+int keyboard_interrupt_received;
+unsigned char keyboard_last_printable_key;
+
 /* Externally-visible functions */
 
 /* Helper function that determines whether to print uppercase or lowercase characters */
@@ -78,5 +81,6 @@ void keyboard_init(void);
  */
 void process_keypress(void);
 
+unsigned char keyboard_get_last_printable_key(void);
 
 #endif /* _KEYBOARD_H */
