@@ -61,11 +61,12 @@ _system_call:
 
 	int $0x80
 	
+	/* Move register return value onto stack */
+	movl %eax, 20(%ebp)
+	
 	ret
 	
 system_call:
-	pushl %esp
-	movl  %esp, %ebp
 	pushl %ebx
 	pushl %esi
 	pushl %edi

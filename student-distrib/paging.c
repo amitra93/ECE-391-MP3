@@ -10,6 +10,7 @@
 #define CR4_4MB_PAGE_BIT 0x10 /*bit of CR4 control register that enables 4mb paging*/
 #define CR0_PAGE_ENBL_BIT 0x80000000 /*bit of CR0 control register that enables paging*/
 #define SUPERVISOR_RW_PRESENT 0x3 /*bits necessary to set supervisor to priv., r/w adn pressent*/
+#define RW_PRESENT 0x3
 #define PAGE_SIZE_BIT 0x80 /*bit used to set page to 4MB */
 
 extern unsigned int page_directory;
@@ -78,7 +79,7 @@ void paging_init(){
 }
 
 //size = 0 when 4kb size = 1 when 4mb
-int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size)
+int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size, uint8_t user)
 {
 	if (phys_addr == NULL || virt_addr == NULL)
 		return -1;
@@ -87,19 +88,19 @@ int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size)
 	if (size == 0)
 	{
 		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-		pd[pd_index] = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
+		pd[pd_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
 	}
 	else if (size == 1)
 	{
 		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-		pd[pd_index] = (phys_addr & FIRST_10_BITS) | PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT;
+		pd[pd_index] = (phys_addr & FIRST_10_BITS) | PAGE_SIZE_BIT | (user << 2) |  RW_PRESENT;
 	}
 	
 	return 0;
 }
 
 //size = 0 when 4kb size = 1 when 4mb
-int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr)
+int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
 {
 	uint32_t pd_index;
 	uint32_t pt_index;
@@ -112,11 +113,11 @@ int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr)
 	pt_index = (virt_addr & 0x3FF000) >> 12;
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
-	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
+	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
 	return 0;
 }
 
-int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_t pt_index)
+int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_t pt_index, uint8_t user)
 {
 	uint32_t * pg_table;
 	
