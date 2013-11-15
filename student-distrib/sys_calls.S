@@ -6,8 +6,8 @@
 	.globl halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn, system_call
 
 	/* Get the externally defined C handlers */
-	.extern do_halt, do_halt, do_execute, do_read, do_write, do_open, do_close,
-			do_getargs, do_vidmap, do_set_handler, do_sigreturn
+	.extern do_halt, do_halt, do_execute, do_read, do_write, do_open, do_close
+	.extern do_getargs, do_vidmap, do_set_handler, do_sigreturn
 			
 .text
 .align 4
@@ -59,7 +59,7 @@ _system_call:
 	movl 12(%ebp), %ecx
 	movl 16(%ebp), %edx
 
-	int 0x80
+	int $0x80
 	
 	ret
 	

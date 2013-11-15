@@ -4,7 +4,7 @@
 	do { 									 								\
 		asm volatile("														\
 		movl %%ebx, %0 \n movl %%ecx, %1 \n movl %%edx, %2"					\
-		:"=r"(arg0), "=r"(arg1), "=r"(arg2), "=r"(arg3)::"%esi","%edi");	\
+		:"=r"(arg0), "=r"(arg1), "=r"(arg2)::"%esi","%edi");	\
 	}while(0)
 
 uint8_t argsBuffer [128];	
