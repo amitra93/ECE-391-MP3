@@ -43,10 +43,10 @@ typedef struct file_sys_t {
 //To-do: Fill out arguments
 //Return -1 for failure, 0 for success
 typedef struct fops_t{
-	uint32_t (open*)();
-	uint32_t (close*)();
-	uint32_t (read*)();
-	uint32_t (write*)();
+	uint32_t (*open)();
+	uint32_t (*close)();
+	uint32_t (*read)();
+	uint32_t (*write)();
 } fops_t;
 
 typedef struct file_t {

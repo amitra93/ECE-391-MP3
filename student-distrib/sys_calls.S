@@ -3,44 +3,88 @@
 .data
 
 	/* Set up the assembly interface as global */
-	.globl idt_unknown_intr, idt_intel_de, idt_intel_db, idt_intel_nmi, idt_intel_bp, idt_intel_of, idt_intel_br
-	.globl idt_intel_ud, idt_intel_nm, idt_intel_df, idt_intel_cso, idt_intel_ts, idt_intel_np, idt_intel_ss
-	.globl idt_intel_gp, idt_intel_pf, idt_intel_mf, idt_intel_ac, idt_intel_mc, idt_intel_xf
+	.globl halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn, system_call
 
 	/* Get the externally defined C handlers */
-	.extern do_
-
-.extern _halt
-.extern _execute
-.extern _read
-.extern _write
-.extern _open
-.extern _close
-.extern _getargs
-.extern _vidmap
-.extern _set_handler
-.extern _sigreturn
-
-.globl system_call
-
+	.extern do_halt, do_halt, do_execute, do_read, do_write, do_open, do_close
+	.extern do_getargs, do_vidmap, do_set_handler, do_sigreturn
+			
 .text
-
 .align 4
-system_call:
-	pushf
+halt:
+	movl $1, %eax
+	jmp _system_calls
+	
+execute:
+	movl $2, %eax
+	jmp _system_call
+	
+read:
+	movl $3, %eax
+	jmp _system_call
+	
+write:
+	movl $4, %eax
+	jmp _system_call
 
-	cmpl  $0, %eax
-	jle	  done
+open:
+	movl $5, %eax
+	jmp _system_call
+	
+close:
+	movl $6, %eax
+	jmp _system_call
+
+getargs:
+	movl $7, %eax
+	jmp _system_call
+
+vidmap:
+	movl $8, %eax
+	jmp _system_call
+	
+set_handler:
+	movl $9, %eax
+	jmp _system_call
+	
+sigreturn:
+	movl $10, %eax
+	jmp _system_call
+	
+_system_call:
+	pushl %esp
+	movl  %esp, %ebp
+
+	movl 8(%ebp), %ebx
+	movl 12(%ebp), %ecx
+	movl 16(%ebp), %edx
+
+	int $0x80
+	
+	ret
+	
+system_call:
+	pushl %esp
+	movl  %esp, %ebp
+	pushl %ebx
+	pushl %esi
+	pushl %edi
+
+	cmpl  $1, %eax
+	jl	  done
 	
 	cmpl  $10, %eax
-	jge   done
+	jg   done
 	
 	call *system_call_table-4(, %eax, 4)
 	
 done:
-	popf
-	iret
+	popl %edi
+	popl %esi
+	popl %ebx
+	ret
+	
 
 # Create the jump table for the system calls
 system_call_table:
-.long _halt, _execute, _read, _write, _open, _close, _getargs, _vidmap, _set_handler, _sigreturn
+.long do_halt, do_execute, do_read, do_write, do_open, do_close, do_getargs, do_vidmap, do_set_handler, do_sigreturn
