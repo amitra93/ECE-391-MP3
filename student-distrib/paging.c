@@ -121,13 +121,13 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
 	return 0;
 }
 
-int32_t set_pt_present(uint32_t virt_addr)
+int32_t set_pde(uint32_t virt_addr)
 {
 		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
 		pd[pd_index] |=  1;
 }
 
-int32_t set_pg_present(uint32_t virt_addr)
+int32_t set_pte(uint32_t virt_addr)
 {
 	uint32_t pd_index;
 	uint32_t pt_index;
@@ -138,5 +138,25 @@ int32_t set_pg_present(uint32_t virt_addr)
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
 	pg_table[pt_index] |= 1;
+	return 0;
+}
+
+int32_t clear_pde(uint32_t virt_addr)
+{
+		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+		pd[pd_index] = 0;
+}
+
+int32_t clear_pte(uint32_t virt_addr)
+{
+	uint32_t pd_index;
+	uint32_t pt_index;
+	uint32_t * pg_table;
+		
+	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	pt_index = (virt_addr & 0x3FF000) >> 12;
+	
+	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
+	pg_table[pt_index] = 0;
 	return 0;
 }

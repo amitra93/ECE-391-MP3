@@ -10,7 +10,7 @@ typedef struct task_t{
 	struct task_t * child_task; //Children
 	struct task_t * sibling_task; //Siblings
 
-	uint8_t pid; //PID
+	int32_t pid; //PID
 	file_t files[8]; //File array
 	tss_t tss;//TSS
 	//States (Task Running, Task Stopped, Interruptible, Uninterruptible, Should be halted)
@@ -25,9 +25,10 @@ typedef struct task_t{
 
 int32_t init_tasks();
 int32_t setup_task_switch(task_t * task);
-task_t * init_task(uint8_t pid);
-task_t * get_task(uint8_t pid);
+task_t * init_task(uint32_t pid);
+task_t * get_task(uint32_t pid);
 int32_t save_state(task_t * task);
 int32_t load_state(task_t * task);
+int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t * args);
 
 #endif

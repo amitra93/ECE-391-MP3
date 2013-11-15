@@ -5,7 +5,7 @@
 #define INIT_TASK_ADDR 0x800000
 
 //To-Do: Set file[0]=stdin and file[1]=stdout
-task_t * init_task(uint8_t pid)
+task_t * init_task(uint32_t pid)
 {
 	task_t * task;
 	uint32_t stack_addr;
@@ -25,7 +25,6 @@ task_t * init_task(uint8_t pid)
 	task->tss.cs = USER_CS;
 	task->tss.ds = USER_DS;
 	task->tss.cr3 = (uint32_t)pd;
-	task->tss.esp = 0x400000 - 2;
 	task->tss.eip = 0; //Set to this to induce a page fault if no program loaded
 	task->tss.ldt_segment_selector = KERNEL_LDT;
 	
@@ -56,7 +55,7 @@ void load_tss(task_t * task)
 	tss.ss0 = task->ss0;
 }
 
-task_t * get_task(uint8_t pid)
+task_t * get_task(uint32_t pid)
 {
 	return (task_t*)((0x400000 - (0x2000*pid) - 2) & 0x3FE000);
 }
@@ -64,7 +63,6 @@ task_t * get_task(uint8_t pid)
 int32_t init_tasks()
 {
 	//Initialize the page for the init task
-	map_page_directory(INIT_TASK_ADDR, INIT_TASK_ADDR, 1, 1);
 	init_task(0);
 }
 
@@ -75,3 +73,16 @@ int32_t setup_task_switch(task_t * task)
 	save_state(task);
 	load_tss(task);
 }
+
+int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t * args)
+{
+	uint32_t i;
+	int32_t exe_addr;
+	if ((exe_addr = load_program(fname, (uint8_t*)addr)) == -1 || task == NULL)
+		return -1;
+	task->tss.eip = exe_addr;
+	
+	for ( i = 0; i < 128; i ++)
+		task->args[i] = args[i];
+}
+
