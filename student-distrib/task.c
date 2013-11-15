@@ -6,7 +6,7 @@
 
 //To-Do: Set file[0]=stdin and file[1]=stdout
 //To-Do: Initialize the TSS
-static int32_t init_task(uint8_t pid)
+static task_t * init_task(uint8_t pid)
 {
 	task_t * task;
 	uint32_t stack_addr;
@@ -47,6 +47,8 @@ static int32_t init_task(uint8_t pid)
 	{
 		args[i] = 0;
 	}
+	
+	return task;
 }
 
 
@@ -66,8 +68,6 @@ void load_tss(task_t * task)
 
 int32_t init_tasks()
 {
-	task_t * task;
-	
 	//Map the running task into memory
 	map_page_directory(INIT_TASK_ADDR, 0x8000000, 1, 1);
 	init_task(0);
@@ -77,6 +77,6 @@ int32_t setup_task_switch(task_t * task)
 {
 	if (task == NULL)
 		return -1;
-	
-
+	save_state(task);
+	load_tss(task);
 }
