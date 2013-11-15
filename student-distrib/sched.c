@@ -24,6 +24,7 @@
 static int32_t clear_pid(uint32_t pid)
 {
 	schedular.task_vector &= ~(1 << pid);
+	return 0;
 }
 
 static int32_t get_new_pid()
@@ -31,7 +32,7 @@ static int32_t get_new_pid()
 	uint32_t i;
 	for (i = 0; i < schedular.max_tasks; i ++)
 	{
-		if (schedular.task_vector & (1 << i) == 0)
+		if ( (schedular.task_vector & (1 << i)) == 0)
 			return i;
 	}
 	return -1;
@@ -40,7 +41,6 @@ static int32_t get_new_pid()
 int32_t create_task(const uint8_t * fname, const uint8_t * args)
 {
 	task_t * task;
-	task_t * parent;
 	int32_t pid;
 	uint32_t addr;
 	
@@ -79,6 +79,8 @@ int32_t end_task(uint32_t pid)
 
 int32_t set_cur_task(uint32_t pid)
 {
+	uint32_t addr;
+	
 	schedular.cur_task = pid;
 	addr = 0x800000 + (pid * 0x400000);
 	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
@@ -98,4 +100,6 @@ int32_t switch_task(uint32_t pid)
 	setup_task_switch(old_task, new_task);
 	setup_task_stack(new_task);
 	iret();
+	
+	return 0;
 }
