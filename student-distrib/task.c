@@ -63,6 +63,10 @@ void load_tss(task_t * task)
 	tss.ss0 = task->ss0;
 }
 
+task_t * get_task(uint8_t pid)
+{
+	return (task_t*)((0x400000 - (0x2000*pid) - 2) & 0x3FE000);
+}
 
 int32_t init_tasks()
 {

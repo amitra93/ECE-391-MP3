@@ -26,6 +26,7 @@ typedef struct task_t{
 int32_t init_tasks();
 int32_t setup_task_switch(task_t * task);
 task_t * init_task(uint8_t pid);
+task_t * get_task(uint8_t pid);
 int32_t save_state(task_t * task);
 int32_t load_state(task_t * task);
 
