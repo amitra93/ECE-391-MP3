@@ -35,17 +35,10 @@ task_t * init_task(uint8_t pid)
 	task->pid = pid;	
 	
 	for (i = 0; i < 8; i ++)
-	{	
-		task->files[i].fops = NULL;
-		task->files[i].inode = NULL;
-		task->files[i].offset = 0;
-		task->files[i].in_use = 0;
-	}
+		task->files[i] = 0;
 	
 	for (i = 0; i < 128; i ++)
-	{
 		args[i] = 0;
-	}
 	
 	return task;
 }
@@ -70,8 +63,8 @@ task_t * get_task(uint8_t pid)
 
 int32_t init_tasks()
 {
-	//Map the running task into memory
-	map_page_directory(INIT_TASK_ADDR, 0x8000000, 1, 1);
+	//Initialize the page for the init task
+	map_page_directory(INIT_TASK_ADDR, INIT_TASK_ADDR, 1, 1);
 	init_task(0);
 }
 

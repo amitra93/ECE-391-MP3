@@ -80,10 +80,7 @@ void paging_init(){
 
 //size = 0 when 4kb size = 1 when 4mb
 int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size, uint8_t user)
-{
-	if (phys_addr == NULL || virt_addr == NULL)
-		return -1;
-		
+{	
 	//4KB Page
 	if (size == 0)
 	{
@@ -105,9 +102,6 @@ int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
 	uint32_t pd_index;
 	uint32_t pt_index;
 	uint32_t * pg_table;
-	
-	if (phys_addr == NULL || virt_addr == NULL)
-		return -1;
 		
 	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
 	pt_index = (virt_addr & 0x3FF000) >> 12;
@@ -121,13 +115,28 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
 {
 	uint32_t * pg_table;
 	
-	if (phys_addr == NULL)
-		return -1;
-	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_10_BITS);
 	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
 	
 	return 0;
 }
 
+int32_t set_pt_present(uint32_t virt_addr)
+{
+		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+		pd[pd_index] |=  1;
+}
 
+int32_t set_pg_present(uint32_t virt_addr)
+{
+	uint32_t pd_index;
+	uint32_t pt_index;
+	uint32_t * pg_table;
+		
+	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	pt_index = (virt_addr & 0x3FF000) >> 12;
+	
+	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
+	pg_table[pt_index] |= 1;
+	return 0;
+}
