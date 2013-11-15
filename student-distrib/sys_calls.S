@@ -13,7 +13,7 @@
 .align 4
 halt:
 	movl $1, %eax
-	jmp _system_calls
+	jmp _system_call
 	
 execute:
 	movl $2, %eax
@@ -52,7 +52,7 @@ sigreturn:
 	jmp _system_call
 	
 _system_call:
-	pushl %esp
+	pushl %ebp
 	movl  %esp, %ebp
 
 	movl 8(%ebp), %ebx
@@ -64,6 +64,7 @@ _system_call:
 	/* Move register return value onto stack */
 	movl %eax, 20(%ebp)
 	
+	popl %ebp
 	ret
 	
 system_call:
@@ -83,7 +84,7 @@ done:
 	popl %edi
 	popl %esi
 	popl %ebx
-	ret
+	iret # Is this iret or ret?
 	
 
 # Create the jump table for the system calls

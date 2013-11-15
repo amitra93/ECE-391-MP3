@@ -24,7 +24,6 @@ typedef struct task_t{
 	uint8_t args[128];
 } task_t;
 
-int32_t init_tasks();
 int32_t setup_task_switch(task_t * old_task, task_t * new_task);
 task_t * init_task(uint32_t pid);
 task_t * get_task(uint32_t pid);

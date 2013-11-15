@@ -9,14 +9,15 @@
 		asm volatile("iret");	\
 	}while(0)
 
-#define setup_task_stack(task) 									\
-		do {													\
-			asm volatile(" 										\
-				pushl %0 \n										\
-				pushl %1 \n pushl %2"::"r"((task)->tss.eflags), \
-				"r"((task)->tss.cs), 							\
-				"r"((task)->tss.eip));							\
-		}while(0)
+#define setup_task_stack(task) 								\
+	do {													\
+		asm volatile(" 										\
+			pushl %0 \n										\
+			pushl %1 \n 									\
+			pushl %2"::"r"((task)->tss.eflags), 			\
+			"r"((task)->tss.cs), 							\
+			"r"((task)->tss.eip));							\
+	}while(0)
 		
 
 
@@ -57,7 +58,7 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	if (schedular.cur_task != -1)
 		task->parent_task = get_task(schedular.cur_task);
 		
-	load_program_to_task(task, addr, fname, args);
+	load_program_to_task(task, addr + 0x48000, fname, args);
 	
 	++schedular.num_tasks;
 	
@@ -75,6 +76,11 @@ int32_t end_task(uint32_t pid)
 	--schedular.num_tasks;
 	
 	return 0;
+}
+
+task_t * get_cur_task()
+{
+	return schedular.cur_task < 0 ? NULL : get_task(schedular.cur_task );
 }
 
 int32_t set_cur_task(uint32_t pid)

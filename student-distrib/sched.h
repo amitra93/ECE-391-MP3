@@ -21,5 +21,6 @@ sched_t schedular = {
 int32_t create_task();
 int32_t end_task(uint32_t pid);
 int32_t set_cur_task(uint32_t pid);
+task_t* get_cur_task();
 int32_t switch_task(uint32_t pid);
 #endif /* _SCHED_H */
