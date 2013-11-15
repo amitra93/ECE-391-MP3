@@ -5,8 +5,7 @@
 #define INIT_TASK_ADDR 0x800000
 
 //To-Do: Set file[0]=stdin and file[1]=stdout
-//To-Do: Initialize the TSS
-static task_t * init_task(uint8_t pid)
+task_t * init_task(uint8_t pid)
 {
 	task_t * task;
 	uint32_t stack_addr;
@@ -51,12 +50,11 @@ static task_t * init_task(uint8_t pid)
 	return task;
 }
 
-
 //To-DO: Fill these guys out
 //Save the task's state
-void save_state(task_t * task) { }
+void save_state(task_t * task) { return 0; }
 //Load the task's state
-void load_state(task_t * task){ }
+void load_state(task_t * task){ return 0; }
 
 //Loads task's tss into TSS
 void load_tss(task_t * task)
