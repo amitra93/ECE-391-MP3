@@ -29,6 +29,6 @@ task_t * init_task(uint32_t pid);
 task_t * get_task(uint32_t pid);
 int32_t save_state(task_t * task);
 int32_t load_state(task_t * task);
-int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t * args);
+int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t args [128]);
 
 #endif

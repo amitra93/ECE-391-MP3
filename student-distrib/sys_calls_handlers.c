@@ -1,4 +1,6 @@
 #include "types.h"
+#include "sched.h"
+#include "lib.h"
 
 #define GET_ARGS(arg0, arg1, arg2) 											\
 	do { 									 								\
@@ -12,6 +14,7 @@ uint8_t argsBuffer [128];
 int32_t do_halt (uint8_t status) { return 0; }
 int32_t do_execute (const uint8_t* command) 
 { 
+	#if 0
 	//sudo get args (get from mitra and store in variable)
 	//argsBuffer holds the newly formatted args, terminalBuffer is what text terminal has at execution 
 	//uint8_t *terminalBuffer = magicalMitraFunction();
@@ -45,6 +48,7 @@ int32_t do_execute (const uint8_t* command)
 			programName[pgmNameIndex++]=terminalBuffer[terminalBufferIndex++]; 
 	}
 	argsBuffer[argsBufferIndex] ='\0';
+	#endif
 	
 	//Create page directory...or is it just a page?
 	//Load program into memory
@@ -61,6 +65,16 @@ int32_t do_execute (const uint8_t* command)
 				b) Switching CR3
 			2) Set up Stack
 			3) IRET*/
+	{
+		int32_t pid;
+		uint8_t fname [32] = "testprint";
+		uint8_t args[128] = "nothing nothing nothing";
+		//print_error("Test", 0, 0, 1);
+		pid = create_task(fname, args);
+		if (pid >= 0)
+			switch_task((uint32_t)pid);
+	}
+	//while(1);
 	
 	return 0; 
 }

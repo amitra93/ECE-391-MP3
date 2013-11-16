@@ -11,14 +11,9 @@ typedef struct sched_t {
 	int32_t cur_task;
 } sched_t;
 
-sched_t schedular = {
-	.task_vector = 0,
-	.max_tasks = 6,
-	.num_tasks = 0,
-	.cur_task = -1
-};
+extern sched_t schedular;
 
-int32_t create_task();
+int32_t create_task(const uint8_t * fname, const uint8_t args [128]);
 int32_t end_task(uint32_t pid);
 int32_t set_cur_task(uint32_t pid);
 task_t* get_cur_task();
