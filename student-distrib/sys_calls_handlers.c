@@ -81,7 +81,29 @@ int32_t do_execute ()
 }
 int32_t do_read (int32_t _fd, void* buf, int32_t _nbytes) { return 0; }
 int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) { return 0; }
-int32_t do_open (const uint8_t* filename) { return 0; }
+int32_t do_open (const uint8_t* filename) { 
+	//find the directory entry corresponding to the named file
+	dentry_t dentry;
+	if (read_dentry_by_name (filename, &dentry)<0)
+		return -1;//failure to find file!
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	int i=0;
+	while(curTask->files[i].flags && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+	}
+
+	curTask->files[i].flags |= 1;//in case other bits are used for other things later...
+	curTask->files[i].inode = &dentry;
+	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
+	//TODO somehow set fops commands based on type...
+	//files[i].fops = //set based on type
+	//TODO call open() somehow
+
+	return i; 
+}
 int32_t do_close (int32_t _fd) { return 0; }
 int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
 

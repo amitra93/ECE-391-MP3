@@ -43,7 +43,7 @@ task_t * init_task(uint32_t pid)
 		task->files[i].fops = NULL;
 		task->files[i].inode = NULL;
 		task->files[i].offset = 0;
-		task->files[i].in_use = 0;
+		task->files[i].flags = 0;
 	}
 	for (i = 0; i < 128; i ++)
 		task->args[i] = 0;
