@@ -80,7 +80,26 @@ int32_t do_execute ()
 	return 0; 
 }
 int32_t do_read (int32_t _fd, void* buf, int32_t _nbytes) { return 0; }
-int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) { return 0; }
+int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) {
+	//TODO HOW THE FUCK DO YOU MAKE THIS ONE LINE
+	task_t * curTask = get_cur_task();
+	uint8_t fileType = (curTask->files[_fd].flags>>1)& 0x3; //check the second and third bits of flags for file type
+	switch(fileType){
+		case 0://file is an RTC
+			
+			break;
+		case 1://file is a directory
+			break;
+		case 2://regular file
+			return -1;//read only file system!!! 
+			break;
+		default://invalid file type (checks from before should have prevented this)
+			return -1; 
+
+	}
+	return 0; 
+
+}
 int32_t do_open (const uint8_t* filename) { 
 	//find the directory entry corresponding to the named file
 	dentry_t dentry;
@@ -90,21 +109,36 @@ int32_t do_open (const uint8_t* filename) {
 	if(curTask==NULL)
 		return -1;
 	int i=0;
-	while(curTask->files[i].flags && i<8){
+	while((curTask->files[i].flags & 0x1) && i<8){
 		if(i==7)//at maximum number of files
 			return -1;
 	}
 
-	curTask->files[i].flags |= 1;//in case other bits are used for other things later...
-	curTask->files[i].inode = &dentry;
+	curTask->files[i].flags = (1 | (dentry.file_type<<1));//sets to in use
+	//TODO figure out correct syntax
+	//curTask->files[i].inode = &dentry;
 	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
+	//bit 1 -> if is in use
+	//bits 3 & 2: (remember to use masking when setting)
+	// value 0: regular file
+	// value 1: directory
+	// value 3: RTC
 	//TODO somehow set fops commands based on type...
 	//files[i].fops = //set based on type
 	//TODO call open() somehow
 
 	return i; 
 }
-int32_t do_close (int32_t _fd) { return 0; }
+int32_t do_close (int32_t _fd) { 
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	curTask->files[_fd].flags =0;
+	curTask->files[_fd].inode = NULL;
+	curTask->files[_fd].offset =0;
+	//TODO reset fops
+	return 0; 
+}
 int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
 
 	return 0; 
