@@ -2,32 +2,39 @@
 #include "sched.h"
 #include "lib.h"
 
+//different than the get_args system call...literally gets the arguments for each 
+//system call
 #define GET_ARGS(arg0, arg1, arg2) 											\
 	do { 									 								\
 		asm volatile("														\
-		movl %%ebx, %0 \n movl %%ecx, %1 \n movl %%edx, %2"					\
-		:"=r"(arg0), "=r"(arg1), "=r"(arg2)::"%esi","%edi");	\
+		movl %%ebx, %0	\n													\
+		movl %%ecx, %1	\n													\
+		movl %%edx, %2"														\	
+		:"=r"(arg0), "=r"(arg1), "=r"(arg2)::"%esi","%edi");				\
 	}while(0)
 
-uint8_t argsBuffer [128];	
+
 	
 int32_t do_halt (uint8_t status) { return 0; }
-int32_t do_execute (const uint8_t* command) 
+int32_t do_execute () 
 { 
-	#if 0
-	//sudo get args (get from mitra and store in variable)
-	//argsBuffer holds the newly formatted args, terminalBuffer is what text terminal has at execution 
-	//uint8_t *terminalBuffer = magicalMitraFunction();
-	char trash1,trash2;//just to be safe so we don't break anything
-	GET_ARGS(command, trash1, trash2);
-	char terminalBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotPgmName=0;
+	
+	//argsBuffer holds the newly formatted args
+	uint8_t argsBuffer [128];
+	uint32_t cmd; 
+	uint8_t * command;
+	uint32_t trash1,trash2;//just to be safe so we don't break anything
+	//asm volatile("movl %%ebx, %0 \n movl %%ecx, %1 \n movl %%edx, %2":"=r"(command), "=r"(trash1), "=r"(trash2));			
+	GET_ARGS(cmd,trash1, trash2);
+	command = (uint8_t*)cmd;
+	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
 	uint8_t programName[64];
-	while (buffer[terminalBufferIndex]!='\0')
+	while (command[commandBufferIndex]!='\0')
 	{
-		int i = terminalBufferIndex;
-		while(buffer[i]==' ')//if multiple spaces, go to the last space
+		int i = commandBufferIndex;
+		while(command[i]==' ')//if multiple spaces, go to the last space
 			i++; 
-		if(i!=terminalBufferIndex) //we found at least one space
+		if(i!=commandBufferIndex) //we found at least one space
 		{	
 			if(gotProgamName)//remove spaces from args and copy to 
 			{
@@ -37,18 +44,18 @@ int32_t do_execute (const uint8_t* command)
 			else
 			{
 				gotProgamName=1;
-				programName[pgmNameIndex]='\0'
+				programName[pgmNameIndex]='\0';
 			}
-			terminalBufferIndex =i;//skip to current index accounting for all spaces
+			commandBufferIndex =i;//skip to current index accounting for all spaces
 		}
 		//char copy and increment for the next iteration
 		if(gotProgamName)//putting args into argsbuffer
-			argsBuffer[argsBufferIndex++]=terminalBuffer[terminalBufferIndex++]; 	
+			argsBuffer[argsBufferIndex++]=command[commandBufferIndex++]; 	
 		else//put into programName buffer
-			programName[pgmNameIndex++]=terminalBuffer[terminalBufferIndex++]; 
+			programName[pgmNameIndex++]=command[commandBufferIndex++]; 
 	}
 	argsBuffer[argsBufferIndex] ='\0';
-	#endif
+	programName[pgmNameIndex] ='\0';
 	
 	//Create page directory...or is it just a page?
 	//Load program into memory
@@ -65,16 +72,10 @@ int32_t do_execute (const uint8_t* command)
 				b) Switching CR3
 			2) Set up Stack
 			3) IRET*/
-	{
-		int32_t pid;
-		uint8_t fname [32] = "testprint";
-		uint8_t args[128] = "nothing nothing nothing";
-		//print_error("Test", 0, 0, 1);
-		pid = create_task(fname, args);
-		if (pid >= 0)
-			switch_task((uint32_t)pid);
-	}
-	//while(1);
+	//print_error("Test", 0, 0, 1);
+	int32_t pid = create_task("testprint"/*programName*/, argsBuffer);
+	if (pid >= 0)
+		switch_task((uint32_t)pid);
 	
 	return 0; 
 }
@@ -84,8 +85,7 @@ int32_t do_open (const uint8_t* filename) { return 0; }
 int32_t do_close (int32_t _fd) { return 0; }
 int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
 
-
-return 0; 
+	return 0; 
 }
 int32_t do_vidmap (uint8_t** screen_start) { return 0; }
 int32_t do_set_handler (int32_t _signum, void* handler_address) { return 0; }

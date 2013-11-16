@@ -207,7 +207,7 @@ idt_intel_xf:
 */
 error_code:
 	pusha 					# Push all registers to be saved, 8 Pushes
-	# movl  $0, %ebx 		# In the future, place process id here in EBX. See p150 in Understanding the Linux Kernel
+	movl  $97, %ecx 		# In the future, place process id here in ECX. See p150 in Understanding the Linux Kernel
 	movl 40(%esp), %ebx		# Get the errored instruction pointer
 	movl  36(%esp), %eax  	# Get the error code
 	movl  $-1, 36(%esp)		# Set the error code to -1, differentiates interrupts and sys calls
