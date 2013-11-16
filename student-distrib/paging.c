@@ -143,16 +143,9 @@ int32_t set_pte(uint32_t virt_addr)
 
 int32_t clear_pde(uint32_t virt_addr)
 {
-<<<<<<< HEAD
 	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
 	pd[pd_index] = 0;
-	
 	return 0;
-=======
-		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-		pd[pd_index] = 0;
-		return 0;
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 }
 
 int32_t clear_pte(uint32_t virt_addr)
