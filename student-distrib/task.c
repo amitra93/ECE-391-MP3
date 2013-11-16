@@ -93,20 +93,14 @@ int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname
 	if ((exe_addr = load_program(fname, (uint8_t*)addr)) == -1 || task == NULL)
 		return -1;
 	task->tss.eip = exe_addr;
-<<<<<<< HEAD
+
 	task->tss.esp = addr - 0x48000 + 0x400000 - 4;
 	for ( i = 0; i < 128; i ++)
-=======
-	for ( i = 0; i < 128; i ++){
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 		task->args[i] = args[i];
-	}
-	i=1;
-	while(fname[i]!='\0'){
+		
+	for ( i = 0; i < 32; i ++)
 		task->pName[i] = fname[i];
-		i++;
-	}
-	task->pName[i]='\0';
+	task->pName[31] = 0;
 		
 	return 0;
 }

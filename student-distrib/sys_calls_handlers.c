@@ -2,7 +2,6 @@
 #include "sched.h"
 #include "lib.h"
 
-<<<<<<< HEAD
 #define setup_return_stack(task) 							\
 	do {													\
 		asm volatile("										\
@@ -45,10 +44,9 @@
 				goto *((get_cur_task())->halt_addr);	\
 	}while(0)					
 
-=======
+	
 //different than the get_args system call...literally gets the arguments for each 
 //system call
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 #define GET_ARGS(arg0, arg1, arg2) 											\
 	do { 									 								\
 		asm volatile("														\
@@ -60,7 +58,7 @@
 
 
 	
-<<<<<<< HEAD
+
 int32_t do_halt (uint8_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
@@ -68,11 +66,7 @@ int32_t do_halt (uint8_t status)
 	iret();
 }
 
-int32_t do_execute (const uint8_t* command) 
-=======
-int32_t do_halt (uint8_t status) { return 0; }
 int32_t do_execute () 
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 { 
 	
 	//argsBuffer holds the newly formatted args
@@ -128,29 +122,17 @@ int32_t do_execute ()
 				b) Switching CR3
 			2) Set up Stack
 			3) IRET*/
-<<<<<<< HEAD
-	{
-		int32_t pid;
-		uint8_t fname [32] = "testprint";
-		uint8_t args[128] = "nothing nothing nothing";
-		//print_error("Test", 0, 0, 1);
-		pid = create_task(fname, args);
-		if (pid >= 0)
-			switch_task(pid);
-	}
-	//while(1);
-=======
 	//print_error("Test", 0, 0, 1);
 	int32_t pid = create_task(programName, argsBuffer);
 	if (pid >= 0)
 		switch_task((uint32_t)pid);
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 	
 	return 0; 
 }
 int32_t do_read (int32_t _fd, void* buf, int32_t _nbytes) { return 0; }
 int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) {
 	//TODO HOW THE FUCK DO YOU MAKE THIS ONE LINE
+	//return get_cur_task()->files[fd]->fops->write();
 	task_t * curTask = get_cur_task();
 	uint8_t fileType = (curTask->files[_fd].flags>>1)& 0x3; //check the second and third bits of flags for file type
 	switch(fileType){
@@ -167,14 +149,10 @@ int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) {
 
 	}
 	return 0; 
-
-<<<<<<< HEAD
-	return 0; 
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
 	return 0;
-=======
 }
 int32_t do_open (const uint8_t* filename) { 
 	//find the directory entry corresponding to the named file
@@ -216,9 +194,7 @@ int32_t do_close (int32_t _fd) {
 	return 0; 
 }
 int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
-
 	return 0; 
->>>>>>> 0354ecea9f56ca107f31f74c8d79d7493621e5ce
 }
 int32_t do_set_handler (int32_t _signum, void* handler_address) { return 0; }
 int32_t do_sigreturn (void) { return 0; }
