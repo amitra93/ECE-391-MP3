@@ -9,7 +9,7 @@
 		asm volatile("														\
 		movl %%ebx, %0	\n													\
 		movl %%ecx, %1	\n													\
-		movl %%edx, %2"														\	
+		movl %%edx, %2 \n"													\
 		:"=r"(arg0), "=r"(arg1), "=r"(arg2)::"%esi","%edi");				\
 	}while(0)
 
@@ -73,7 +73,7 @@ int32_t do_execute ()
 			2) Set up Stack
 			3) IRET*/
 	//print_error("Test", 0, 0, 1);
-	int32_t pid = create_task("testprint"/*programName*/, argsBuffer);
+	int32_t pid = create_task(programName, argsBuffer);
 	if (pid >= 0)
 		switch_task((uint32_t)pid);
 	
