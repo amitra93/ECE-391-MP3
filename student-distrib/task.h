@@ -11,6 +11,7 @@ typedef struct task_t{
 	struct task_t * child_task; //Children
 	struct task_t * sibling_task; //Siblings
 
+	uint8_t pName[32];
 	int32_t pid; //PID
 	file_t files[8]; //File array
 	tss_t tss;//TSS

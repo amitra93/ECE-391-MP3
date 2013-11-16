@@ -60,7 +60,7 @@ typedef struct file_t {
 	uint32_t offset;
 	
 	//Flags
-	uint32_t in_use;
+	uint32_t flags;
 	
 } file_t;
 

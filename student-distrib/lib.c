@@ -3,6 +3,7 @@
  */
 
 #include "lib.h"
+#include "task.h"
 #define VIDEO 0xB8000
 #define NUM_COLS 80
 #define NUM_ROWS 25
@@ -55,6 +56,10 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 	//Set cursor position, print errored process, increment line
 	set_cursor_pos((NUM_COLS / 2) - 16, y++);
 	printf("Process ID  : 0x%#x", pid);
+
+	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	task_t * tempTask = get_task(0);//pid);
+	printf("Process Name: %s", tempTask->pName);
 }
 
 void
