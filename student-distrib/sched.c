@@ -9,18 +9,55 @@
 		asm volatile("iret");	\
 	}while(0)
 
-#define setup_task_stack(task) 								\
+#define setup_task_stack(task)							\
+	do {												\
+		asm volatile("									\
+			pushl %0 \n									\
+			pushl %1 \n									\
+			pushl %2 \n									\
+			pushl %3 \n									\
+			pushl %4 \n									\
+			movw $0x2b, %%ax \n							\
+			movw %%ax, %%ds								\
+			"::"r"((task)->tss.ss), 					\
+			"r"((task)->tss.esp), 						\
+			"r"((task)->tss.eflags),					\
+			"r"((task)->tss.cs),						\
+			"r"((task)->tss.eip));						\
+	}while(0)
+	
+#define save_task_state(task)							\
+		do {											\
+		asm volatile("									\
+			movl %%esp, %0	\n							\
+			movl %%ebp, %1								\
+			":"=r"((task)->tss.esp),					\
+			  "=r"((task)->tss.ebp));					\
+	}while(0)
+	
+#define load_task_state(task)							\
+		do {											\
+		asm volatile("									\
+			movl %0, %%esp	\n							\
+			movl %1, %%ebp								\
+			"::"r"((task)->tss.esp),					\
+			   "r"((task)->tss.ebp));					\
+	}while(0)
+	
+#define setup_return_stack(task)							\
 	do {													\
 		asm volatile("										\
 			pushl %0 \n										\
 			pushl %1 \n										\
 			pushl %2 \n										\
 			pushl %3 \n										\
-			pushl %4"::"r"((task)->tss.ss), 				\
+			pushl %%eip \n									\
+			movw $0x2b, %%ax \n								\
+			movw %%ax, %%ds									\
+			"::"r"((task)->tss.ss), 						\
 			"r"((task)->tss.esp), 							\
 			"r"((task)->tss.eflags),						\
-			"r"((task)->tss.cs),							\
-			"r"((task)->tss.eip));							\
+			"r"((task)->tss.cs));							\
 	}while(0)
 		
 sched_t schedular = {
@@ -30,7 +67,7 @@ sched_t schedular = {
 	.cur_task = -1
 };
 	
-static int32_t clear_pid(uint32_t pid)
+static int32_t clear_pid(int32_t pid)
 {
 	schedular.task_vector &= ~(1 << pid);
 	return 0;
@@ -74,13 +111,12 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 		clear_pid(pid);
 		return -1;
 	}
-	task->tss.esp = addr + 0x400000 - 4;
 	++schedular.num_tasks;
 	
 	return pid;
 }
 
-int32_t end_task(uint32_t pid)
+int32_t end_task(int32_t pid)
 {
 	uint32_t addr;
 		
@@ -88,8 +124,11 @@ int32_t end_task(uint32_t pid)
 	addr = 0x800000 + (pid * 0x400000);
 	clear_pte(addr);
 	clear_pid(pid);
+	if (get_task(pid)->parent_task == NULL)
+		schedular.cur_task = -1;
+	else
+		set_cur_task(get_task(pid)->parent_task->pid);
 	--schedular.num_tasks;
-	
 	return 0;
 }
 
@@ -98,7 +137,7 @@ task_t * get_cur_task()
 	return schedular.cur_task < 0 ? NULL : get_task(schedular.cur_task );
 }
 
-int32_t set_cur_task(uint32_t pid)
+int32_t set_cur_task(int32_t pid)
 {
 	uint32_t addr;
 	
@@ -109,18 +148,41 @@ int32_t set_cur_task(uint32_t pid)
 	return 0;
 }
 
-int32_t switch_task(uint32_t pid)
+int32_t switch_task(int32_t pid)
 {
-	task_t * old_task = NULL; 
+	task_t * old_task; 
 	task_t * new_task;
 	
-	if (schedular.cur_task != -1)
-		old_task = get_task(schedular.cur_task);
-	set_cur_task(pid);
+	old_task = get_cur_task();
 	new_task = get_task(pid);
-	setup_task_switch(old_task, new_task);
+	
+	old_task->tss.eip = (uint32_t)(&&halt_addr);
+	
+	set_cur_task(pid);
+	load_tss(new_task);
+	save_task_state(old_task);
 	setup_task_stack(new_task);
 	iret();
+
+halt_addr:
+	load_task_state(old_task);
+	return 0;
+}
+
+int32_t tasks_init()
+{		
+	task_t * init_task;
+	uint8_t fname [32] = "shell";
+	uint8_t args[128] = "";
+	
+	create_task(fname, args);
+	set_cur_task(0);
+	init_task = get_task(0);
+	
+	init_task->tss.cs = 0x0010;
+	init_task->tss.ds = 0x0018;
+	init_task->tss.ss = 0x0018;
+	init_task->tss.ldt_segment_selector = KERNEL_LDT;
 	
 	return 0;
 }

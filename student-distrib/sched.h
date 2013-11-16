@@ -14,8 +14,11 @@ typedef struct sched_t {
 extern sched_t schedular;
 
 int32_t create_task(const uint8_t * fname, const uint8_t args [128]);
-int32_t end_task(uint32_t pid);
-int32_t set_cur_task(uint32_t pid);
+int32_t end_task(int32_t pid);
+int32_t set_cur_task(int32_t pid);
 task_t* get_cur_task();
-int32_t switch_task(uint32_t pid);
+int32_t switch_task(int32_t pid);
+
+int32_t tasks_init();
+
 #endif /* _SCHED_H */

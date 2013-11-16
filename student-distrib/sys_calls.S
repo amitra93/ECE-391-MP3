@@ -50,21 +50,37 @@ set_handler:
 sigreturn:
 	movl $10, %eax
 	jmp _system_call
-	
+
 _system_call:
 	pushl %ebp
 	movl  %esp, %ebp
 
+	# pushl %esi
+	
 	movl 8(%ebp), %ebx
 	movl 12(%ebp), %ecx
 	movl 16(%ebp), %edx
-
+	
+	/*
+	movw %cs, %si
+	andl $3, %esi
+	cmpl $0, %esi
+	je priv_change_push
+	pushl $0
+	pushl $0
+priv_change_push:
+	*/
 	int $0x80
+	/*
+	cmpl $0, %esi
+	je priv_change_pop
+	addl $8, %esp
+priv_change_pop:*/
 	
 	/* Move register return value onto stack */
 	movl %eax, 20(%ebp)
-	
-	popl %ebp
+	# popl %esi
+	leave
 	ret
 	
 system_call:

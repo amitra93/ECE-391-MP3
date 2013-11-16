@@ -15,6 +15,12 @@ extern int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_
 extern int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user);
 extern int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_t pt_index, uint8_t user);
 
+extern unsigned int page_directory;
+extern unsigned int page_table;
+
+extern unsigned int * pd;
+extern unsigned int * pt;
+
 #endif /* ASM */
 
 #endif /* _PAGING_H */

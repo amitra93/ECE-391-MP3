@@ -13,11 +13,9 @@
 #define RW_PRESENT 0x3
 #define PAGE_SIZE_BIT 0x80 /*bit used to set page to 4MB */
 
-extern unsigned int page_directory;
-extern unsigned int page_table;
+unsigned int * pd = &page_directory;
+unsigned int * pt = &page_table;
 
-static unsigned int * pd = &page_directory;
-static unsigned int * pt = &page_table;
 static unsigned int * kernel_page = (unsigned int *) KERNEL_LOCATION;
 
 /* void paging_init()
@@ -123,8 +121,10 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
 
 int32_t set_pde(uint32_t virt_addr)
 {
-		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-		pd[pd_index] |=  1;
+	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	pd[pd_index] |=  1;
+	
+	return 0;
 }
 
 int32_t set_pte(uint32_t virt_addr)
@@ -143,8 +143,10 @@ int32_t set_pte(uint32_t virt_addr)
 
 int32_t clear_pde(uint32_t virt_addr)
 {
-		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-		pd[pd_index] = 0;
+	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	pd[pd_index] = 0;
+	
+	return 0;
 }
 
 int32_t clear_pte(uint32_t virt_addr)

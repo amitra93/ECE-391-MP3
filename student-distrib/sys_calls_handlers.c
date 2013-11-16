@@ -2,6 +2,48 @@
 #include "sched.h"
 #include "lib.h"
 
+#define setup_return_stack(task) 							\
+	do {													\
+		asm volatile("										\
+			pushl %0 \n										\
+			pushl %1 \n										\
+			pushl %2 \n										\
+			pushl %3 \n										\
+			pushl %4 \n										\
+			movw $0x18, %%ax \n								\
+			movw %%ax, %%ds	\n								\
+			"::"a"((task)->tss.ss),							\
+			"b"((task)->tss.esp),							\
+			"c"((task)->tss.eflags),						\
+			"d"((task)->tss.cs),							\
+			"S"((task)->tss.eip));							\
+			asm volatile("									\
+				movl %0, %%ebp":: "r"((task)->tss.ebp));	\
+	}while(0)
+
+#define iret()					\
+	do { 						\
+		asm volatile("iret");	\
+	}while(0)
+
+	
+#define return_from_syscall()	\
+		do { 					\
+			asm volatile("		\
+				addl $20, %%esp	\
+				popl %%edi		\
+				popl %%esi		\
+				popl %%ebx		\
+				iret ");		\
+	}while(0)
+	
+#define return_from_halt()								\
+		do { 											\
+			asm volatile("								\
+				addl $44, %esp");						\
+				goto *((get_cur_task())->halt_addr);	\
+	}while(0)					
+
 #define GET_ARGS(arg0, arg1, arg2) 											\
 	do { 									 								\
 		asm volatile("														\
@@ -11,7 +53,13 @@
 
 uint8_t argsBuffer [128];	
 	
-int32_t do_halt (uint8_t status) { return 0; }
+int32_t do_halt (uint8_t status) 
+{ 
+	task_t * parent_task = get_cur_task()->parent_task;
+	setup_return_stack(parent_task);
+	iret();
+}
+
 int32_t do_execute (const uint8_t* command) 
 { 
 	#if 0
@@ -72,7 +120,7 @@ int32_t do_execute (const uint8_t* command)
 		//print_error("Test", 0, 0, 1);
 		pid = create_task(fname, args);
 		if (pid >= 0)
-			switch_task((uint32_t)pid);
+			switch_task(pid);
 	}
 	//while(1);
 	
@@ -85,8 +133,11 @@ int32_t do_close (int32_t _fd) { return 0; }
 int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
 
 
-return 0; 
+	return 0; 
 }
-int32_t do_vidmap (uint8_t** screen_start) { return 0; }
+int32_t do_vidmap (uint8_t** screen_start) 
+{
+	return 0;
+}
 int32_t do_set_handler (int32_t _signum, void* handler_address) { return 0; }
 int32_t do_sigreturn (void) { return 0; }

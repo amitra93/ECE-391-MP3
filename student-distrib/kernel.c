@@ -15,12 +15,11 @@
 #include "paging.h"
 #include "filesys.h"
 #include "terminal.h"
+#include "sched.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
-
-extern unsigned int * page_directory;
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -213,9 +212,13 @@ entry (unsigned long magic, unsigned long addr)
 	
 	printf("Enabling RTC\n");
 	rtc_open(NULL);
-
+	rtc_set_frequency(128);
+	
 	printf("Enabling keyboard\n");
 	keyboard_init();
+
+	printf("Initializing tasks\n");
+	tasks_init();
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -226,6 +229,8 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Execute the first program (`shell') ... */
 	execute(NULL);
+	
+	printf("Done!");
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

@@ -16,6 +16,7 @@ void do_idt_keyboard(void){
 void do_idt_rtc(void){
 	//test_interrupts();
 	rtc_process_interrupt();
+	
 	// need to send EOI else no more interrupts will be generated
 	send_eoi(RTC);
 }

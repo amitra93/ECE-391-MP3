@@ -5,11 +5,18 @@
 
 #define INIT_TASK_ADDR 0x800000
 
-extern unsigned int page_directory;
-static unsigned int * pd = &page_directory;
+static int32_t init_task_pd(task_t * task)
+{
+	/*uint32_t addr = 0x800000 + (task->pid * 0x400000);
+	uint32_t pd_index = (0x8000000 & 0xFFC00000) >> 22;
+	task->page_directory = (uint32_t*)(0x400000 - (0x2000*pid) - 4 - 0x400000);
+	task->page_directory[pd_index] = (addr & 0xFFC00000) | 0x87;*/
+
+	return 0;
+}
 
 //To-Do: Set file[0]=stdin and file[1]=stdout
-task_t * init_task(uint32_t pid)
+task_t * init_task(int32_t pid)
 {
 	task_t * task;
 	uint32_t stack_addr;
@@ -21,17 +28,18 @@ task_t * init_task(uint32_t pid)
 	* or if they point to the byte right before it.
 	*/
 	
-	stack_addr = 0x400000 - (0x2000*pid) - 4;
-	task = (task_t*)(stack_addr & 0x3FE000);
+	stack_addr = 0x800000 - (0x2000*pid) - 4;
+	task = (task_t*)(stack_addr & 0x7FE000);
+	init_task_pd(task);
 	
 	task->tss.esp0 = stack_addr;
 	task->tss.ss0 = KERNEL_DS;
 	task->tss.ss = USER_DS;
 	task->tss.cs = USER_CS;
 	task->tss.ds = USER_DS;
-	task->tss.cr3 = (uint32_t)pd;
+	task->tss.cr3 = (uint32_t)task->page_directory;
 	task->tss.eip = 0; //Set to this to induce a page fault if no program loaded
-	task->tss.ldt_segment_selector = KERNEL_LDT;
+	task->tss.ldt_segment_selector = 0;
 	
 	task->parent_task = NULL;
 	task->child_task = NULL;
@@ -58,15 +66,15 @@ int32_t save_state(task_t * task) { return 0; }
 int32_t load_state(task_t * task) { return 0; }
 
 //Loads task's tss into TSS
-static void load_tss(task_t * task)
+int32_t load_tss(task_t * task)
 {
-	tss.esp0 = task->tss.esp0;
-	tss.ss0 = task->tss.ss0;
+	tss = task->tss;
+	return 0;
 }
 
-task_t * get_task(uint32_t pid)
+task_t * get_task(int32_t pid)
 {
-	return (task_t*)((0x400000 - (0x2000*pid) - 4) & 0x3FE000);
+	return (task_t*)((0x800000 - (0x2000*pid) - 4) & 0x7FE000);
 }
 
 int32_t setup_task_switch(task_t * old_task, task_t * new_task)
@@ -85,6 +93,7 @@ int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname
 	if ((exe_addr = load_program(fname, (uint8_t*)addr)) == -1 || task == NULL)
 		return -1;
 	task->tss.eip = exe_addr;
+	task->tss.esp = addr - 0x48000 + 0x400000 - 4;
 	for ( i = 0; i < 128; i ++)
 		task->args[i] = args[i];
 	return 0;
