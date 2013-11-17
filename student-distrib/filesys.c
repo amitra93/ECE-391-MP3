@@ -140,7 +140,7 @@ int32_t file_open(const uint8_t* filename) {
 	if (read_dentry_by_name (filename, &dentry)<0)
 		return -1;//failure to find file!
 	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));//sets to in use
-	curTask->files[i].inode = get_inode(dentry.inode_num);
+	curTask->files[i].inode = dentry.inode_num;
 	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
 	return i; 
 }
@@ -150,9 +150,34 @@ int32_t file_close(int32_t fd)
 
 }
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { 
-	if(fd<0 || fd>7)
+	if(fd<0 || fd>7)//TODO look to see if should be bw 2 and 7
 		return -1;
-	return 0; 
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	uint8_t * tempbuf = (uint8_t *) buf;
+	inode_t* tempinode = get_inode(curTask->files[fd].inode);
+	if (curTask->files[fd].offset >= tempinode->len){
+		return 0;
+	}
+	int32_t returnVal = read_data (curTask->files[fd].inode, curTask->files[fd].offset, tempbuf, nbytes > tempinode->len ? tempinode->len : nbytes);
+	if(returnVal!=-1)
+		curTask->files[fd].offset+=nbytes;
+
+	return returnVal;
+	/*if(curTask->files[fd].offset>=curTask->files[fd].inode)
+		return 0;
+	uint8_t * targetbuf = (uint8_t *) buf;
+	uint8_t * tempbuf = file_sys->dentries[curTask->files[fd].offset].file_name;
+	int i=0;
+	while(tempbuf[i]!='\0' && i<32){
+		targetbuf[i]=tempbuf[i];
+		i++;
+	}
+	curTask->files[fd].offset++;
+	return i; 
+
+	return 0; */
 
 }
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }

@@ -174,11 +174,20 @@ int32_t do_close (int32_t fd) {
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	task_t * curTask = get_cur_task();
-	int i;
-	if(nbytes>16)//we dont have this much space for args
+	if(curTask==NULL || buf==NULL)
 		return -1;
-	for(i=0; i<nbytes; i++){
-		buf[i]=curTask->args[i];
+	int i, size = 0;
+
+	while (curTask->args[size] != '\0' && size<nbytes){
+		size++;
+	}
+
+	if (size == nbytes - 1){
+		return -1;
+	}
+
+	for(i=0; i<=size; i++){
+		 buf[i]=curTask->args[i];
 	}
 	return 0; 
 }
