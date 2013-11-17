@@ -79,6 +79,11 @@ int32_t file_close(int32_t fd);
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes);
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes);
 
+int32_t directory_close(int32_t fd);
+int32_t directory_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t directory_write(int32_t fd, const void* buf, int32_t nbytes);
+int32_t directory_open(const uint8_t* directory);
+
 file_sys_t * file_sys;
 
 extern fops_t rtc_fops;

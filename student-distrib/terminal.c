@@ -55,7 +55,6 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 			input[buffer_pointer] = string[i];
 			if (string[i] == '\n' || string[i] == '\r'){
 				buffer_pointer = 0;
-				input[buffer_pointer] = '\n';
 				on_new_line = 0;
 			}
 			if (buffer_pointer >= NUM_COLS && !on_new_line){

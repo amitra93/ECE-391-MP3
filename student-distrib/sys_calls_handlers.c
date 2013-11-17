@@ -134,19 +134,16 @@ int32_t do_open (const uint8_t* filename) {
 	dentry_t dentry;
 	if (read_dentry_by_name (filename, &dentry)<0)
 		return -1;//failure to find file!
+
+	int i=0;
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
 		return -1;
-	int i=0;
 	while((curTask->files[i].flags & 0x1) && i<8){
 		if(i==7)//at maximum number of files
 			return -1;
+		i++;
 	}
-
-	curTask->files[i].flags = (1 | (dentry.file_type<<1));//sets to in use
-	curTask->files[i].inode = dentry.inode_num;
-	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
-	
 	switch (dentry.file_type)
 	{
 		case 0:
@@ -161,8 +158,9 @@ int32_t do_open (const uint8_t* filename) {
 		default:
 			return -1;
 	}
-	curTask->files[i].fops->open(filename);
-	return i; 
+	if(curTask->files[i].fops->open(filename)<0)
+		return -1;
+	return i;
 }
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
@@ -176,11 +174,20 @@ int32_t do_close (int32_t fd) {
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	task_t * curTask = get_cur_task();
-	int i;
-	if(nbytes>16)//we dont have this much space for args
+	if(curTask==NULL || buf==NULL)
 		return -1;
-	for(i=0; i<nbytes; i++){
-		buf[i]=curTask->args[i];
+	int i, size = 0;
+
+	while (curTask->args[size] != '\0' && size<nbytes){
+		size++;
+	}
+
+	if (size == nbytes - 1){
+		return -1;
+	}
+
+	for(i=0; i<=size; i++){
+		 buf[i]=curTask->args[i];
 	}
 	return 0; 
 }

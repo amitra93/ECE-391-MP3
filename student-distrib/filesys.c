@@ -1,4 +1,6 @@
 #include "lib.h"
+#include "sched.h"
+#include "types.h"
 #include "filesys.h"
 #include "terminal.h"
 #include "rtc.h"
@@ -14,6 +16,10 @@ fops_t rtc_fops = {
 };
 
 fops_t dir_fops = {
+	.open = directory_open,
+	.close = directory_close,
+	.write = directory_write,
+	.read=  directory_read
 };
 
 fops_t file_fops = {
@@ -79,9 +85,88 @@ int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length)
 	return -1;
 }
 
-int32_t file_open(const uint8_t* filename) { return 0; }
-int32_t file_close(int32_t fd) { return 0; }
-int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { return 0; }
+int32_t directory_open(const uint8_t* filename) { 
+	int i=0;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	while((curTask->files[i].flags & 0x1) && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+		i++;
+	}
+	curTask->files[i].flags = (uint32_t) (1 | (1<<1));
+	curTask->files[i].inode = NULL;//ignore bc of directory
+	curTask->files[i].offset =1;
+	return i; 
+}
+
+int32_t directory_close(int32_t fd) { return 0; }
+int32_t directory_read(int32_t fd, void* buf, int32_t nbytes) { 
+	if(fd<0 || fd>7)
+		return -1;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	if(curTask->files[fd].offset>file_sys->num_inodes)
+		return 0;
+	uint8_t * targetbuf = (uint8_t *) buf;
+	uint8_t * tempbuf = file_sys->dentries[curTask->files[fd].offset].file_name;
+	int i=0;
+	while(tempbuf[i]!='\0' && i<32){
+		targetbuf[i]=tempbuf[i];
+		i++;
+	}
+	curTask->files[fd].offset++;
+	return i; 
+}
+int32_t directory_write(int32_t fd, const void* buf, int32_t nbytes) { 
+	return -1; 
+}
+
+
+int32_t file_open(const uint8_t* filename) { 
+
+	int i=0;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	while((curTask->files[i].flags & 0x1) && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+		i++;
+	}
+	dentry_t dentry;
+	if (read_dentry_by_name (filename, &dentry)<0)
+		return -1;//failure to find file!
+	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));//sets to in use
+	curTask->files[i].inode = dentry.inode_num;
+	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
+	return i; 
+}
+int32_t file_close(int32_t fd) 
+{ 
+	return 0; 
+
+}
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { 
+	if(fd<0 || fd>7)//TODO look to see if should be bw 2 and 7
+		return -1;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	uint8_t * tempbuf = (uint8_t *) buf;
+	inode_t* tempinode = get_inode(curTask->files[fd].inode);
+	if (curTask->files[fd].offset >= tempinode->len){
+		return 0;
+	}
+	int32_t returnVal = read_data (curTask->files[fd].inode, curTask->files[fd].offset, tempbuf, nbytes > tempinode->len ? tempinode->len : nbytes);
+	if(returnVal!=-1)
+		curTask->files[fd].offset+=nbytes;
+
+	return returnVal;
+
+}
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }
 
 /* read_dentry_by_name (const uint8_t* fname, dentry_t* dentry)
@@ -93,8 +178,14 @@ int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry)
 {
 	uint32_t i,j;
-	uint32_t equal, found = -1;
+	int32_t equal, found = -1;
 	
+	if(fname[0]=='.'){
+		dentry->file_type = file_sys->dentries[0].file_type;
+		dentry->inode_num = file_sys->dentries[0].inode_num;
+		dentry->file_name[0] = '.';
+		return 0;
+	}
 	//Search through directory to find file with name
 	for (i = 0; i < file_sys->num_dentries; i ++)
 	{
