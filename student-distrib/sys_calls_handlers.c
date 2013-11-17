@@ -68,7 +68,7 @@ int32_t do_execute (const uint8_t* command)
 			else
 			{
 				gotProgamName=1;
-				programName[pgmNameIndex]='\0';
+				programName[pgmNameIndex++]='\0';
 			}
 			commandBufferIndex =i;//skip to current index accounting for all spaces
 		}
