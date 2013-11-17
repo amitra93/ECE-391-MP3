@@ -28,7 +28,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	int i = 0;
 	char* output = (char*) buf;
 	output[i] = '\0';
-	while (i < nbytes || output[i] != '\n'){
+	while (i < nbytes && output[i] != '\n'){
 		output[i] = keyboard_get_last_printable_key();
 		i++;
 	}

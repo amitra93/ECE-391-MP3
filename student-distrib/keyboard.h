@@ -31,7 +31,7 @@ int is_uppercase;
 
 int is_control_pressed;
 
-int keyboard_interrupt_received;
+volatile int keyboard_interrupt_received;
 unsigned char keyboard_last_printable_key;
 
 /* Externally-visible functions */
