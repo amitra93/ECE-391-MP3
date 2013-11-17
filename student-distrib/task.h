@@ -18,6 +18,7 @@ typedef struct task_t{
 	
 	uint32_t * page_directory;
 	uint32_t * page_table;
+	uint8_t * video_mem;
 	
 	//States (Task Running, Task Stopped, Interruptible, Uninterruptible, Should be halted)
 	

@@ -3,55 +3,12 @@
 #include "lib.h"
 #include "filesys.h"
 
-#define return_from_halt(status, ebp, esp, eip)	\
-	do {										\
-		asm volatile("							\
-			movl %0, %%ebp		\n				\
-			movl %1, %%esp		\n				\
-			movl %2, %%edx		\n				\
-			jmp *%%edx"::"r"(ebp),				\
-				"r"(esp),						\
-				"d"(eip));						\
-	}while(0)
-	
-#define setup_return_stack(task) 							\
-	do {													\
-		asm volatile("										\
-			movl %0, %%ebp":: "r"((task)->tss.ebp));		\
-		asm volatile("										\
-			pushl %0 \n										\
-			pushl %1 \n										\
-			pushl %2 \n										\
-			pushl %3 \n										\
-			pushl %4 \n										\
-			movw $0x18, %%ax \n								\
-			movw %%ax, %%ds	\n								\
-			"::"a"((task)->tss.ss),							\
-			"b"((task)->tss.esp),							\
-			"c"((task)->tss.eflags),						\
-			"d"((task)->tss.cs),							\
-			"S"((task)->tss.eip));							\
-	}while(0)
-	
-//different than the get_args system call...literally gets the arguments for each 
-//system call
-#define GET_ARGS(arg0, arg1, arg2) 											\
-	do { 									 								\
-		asm volatile("														\
-		movl %%ebx, %0	\n													\
-		movl %%ecx, %1	\n													\
-		movl %%edx, %2 \n"													\
-		:"=r"(arg0), "=r"(arg1), "=r"(arg2)::"%esi","%edi");				\
-	}while(0)
+extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
 
-
-//To-Do: Send the status to the parent program
-int32_t do_halt (uint8_t status) 
+int32_t do_halt (uint32_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
-	return_from_halt(status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
-	
-	//We will never reach here...
+	return_from_halt((uint8_t)status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
 	return 0;
 }
 
@@ -125,6 +82,7 @@ int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
+	*screen_start = get_cur_task()->video_mem;
 	return 0;
 }
 int32_t do_open (const uint8_t* filename) { 

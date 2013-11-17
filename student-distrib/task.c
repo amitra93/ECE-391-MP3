@@ -4,8 +4,10 @@
 #include "task.h"
 #include "sched.h"
 
-#define INIT_TASK_ADDR 0x800000
-#define EXECUTION_ADDR 0x8000000
+#define VIDEO 0xB8000
+#define INIT_TASK_ADDR   0x800000
+#define EXECUTION_ADDR  0x8000000
+#define VIRTUAL_VID_MEM 0x8800000
 #define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
 #define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
 #define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
@@ -27,6 +29,7 @@ static int32_t init_task_pd(task_t * task)
 	
 	task->page_directory = (uint32_t*)(addr);
 	task->page_table = (uint32_t*)(addr) + 1024;
+	task->video_mem = (uint8_t*)(VIRTUAL_VID_MEM);
 	
 	old_pd = pd;
 	old_pt = pt;
@@ -64,6 +67,9 @@ static int32_t init_task_pd(task_t * task)
 	
 	//Set up mapped task memory
 	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
+	
+	//Set up video memory
+	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
 	pd = old_pd;
 	pt = old_pt;

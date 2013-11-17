@@ -178,7 +178,7 @@ int32_t set_cur_task(int32_t pid)
 
 int32_t switch_task(int32_t pid)
 {
-	int32_t ret = -1;
+	int32_t ret = 0;
 	task_t * old_task; 
 	task_t * new_task;
 	
@@ -195,7 +195,9 @@ int32_t switch_task(int32_t pid)
 	iret();
 
 halt_addr:
-	//asm volatile("movl %%eax, %0;":"=r"(ret));
+	asm volatile("movb %%al, %0;":"=g"(ret));
+	if ((int8_t)ret == -1)
+		ret = -1;
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());
 	return ret;
