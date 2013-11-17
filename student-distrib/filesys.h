@@ -75,10 +75,14 @@ int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length);
 int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr);
 
 int32_t file_open(const uint8_t* filename);
-int32_t directory_open(const uint8_t* directory);
 int32_t file_close(int32_t fd);
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes);
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes);
+
+int32_t directory_close(int32_t fd);
+int32_t directory_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t directory_write(int32_t fd, const void* buf, int32_t nbytes);
+int32_t directory_open(const uint8_t* directory);
 
 file_sys_t * file_sys;
 

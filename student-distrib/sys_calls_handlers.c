@@ -134,13 +134,33 @@ int32_t do_open (const uint8_t* filename) {
 	dentry_t dentry;
 	if (read_dentry_by_name (filename, &dentry)<0)
 		return -1;//failure to find file!
-	if(filename[0]=='.'){//directory input
-		return directory_open(filename);
-	}
-	else{//add case for RTC later, but that's another issue...
-		return file_open(filename);
-	}
 
+	int i=0;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	while((curTask->files[i].flags & 0x1) && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+		i++;
+	}
+	switch (dentry.file_type)
+	{
+		case 0:
+			curTask->files[i].fops = &rtc_fops;
+			break;	
+		case 1:
+			curTask->files[i].fops = &dir_fops;
+			break;
+		case 2:
+			curTask->files[i].fops = &file_fops;
+			break;
+		default:
+			return -1;
+	}
+	if(curTask->files[i].fops->open(filename)<0)
+		return -1;
+	return i;
 }
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
