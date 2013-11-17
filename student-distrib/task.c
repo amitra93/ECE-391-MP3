@@ -40,7 +40,7 @@ task_t * init_task(int32_t pid)
 	task->tss.cr3 = (uint32_t)task->page_directory;
 	task->tss.eip = 0; //Set to this to induce a page fault if no program loaded
 	task->tss.ldt_segment_selector = 0;
-	
+	task->tss.eflags = 1 << 9;
 	task->parent_task = NULL;
 	task->child_task = NULL;
 	task->sibling_task = NULL;

@@ -219,7 +219,7 @@ do { \
 	str.reserved0 = 0;  \
 	str.reserved1 = 1; \
 	str.reserved2 = 1; \
-	str.reserved3 = 0; \
+	str.reserved3 = 1; \
 	str.present = 1; \
 	str.dpl = 3; \
 	str.seg_selector = 0x0010; \

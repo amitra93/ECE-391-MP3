@@ -95,11 +95,10 @@ process_keypress(void)
 	//printf("-->%x<--\n", char_pressed);
 
 	keyboard_interrupt_received = 1;
-
-
 }
 
 unsigned char keyboard_get_last_printable_key(void){
 	while (!keyboard_interrupt_received);
+	keyboard_interrupt_received = 0;
 	return keyboard_last_printable_key;
 }

@@ -28,11 +28,13 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	int i = 0;
 	char* output = (char*) buf;
 	output[i] = '\0';
-	while (i < nbytes && output[i] != '\n'){
+	while (i < nbytes){
 		output[i] = keyboard_get_last_printable_key();
+		if (output[i] == '\n')
+			break;
 		i++;
 	}
-	return 0;
+	return i;
 }
 
 
@@ -44,6 +46,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	}
 	int i;
 	char* string = (char*) buf;
+	cli();
 	for (i = 0; i < nbytes; i++){
 		if (fd){
 			if (buffer_pointer >= BUFFER_SIZE) {
@@ -66,6 +69,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 		get_cursor_pos(&old_screen_x, &old_screen_y);
 		printf("%c", string[i]);
 	}
+	sti();
 	return 0;
 }
 

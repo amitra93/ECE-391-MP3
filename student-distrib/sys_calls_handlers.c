@@ -51,10 +51,11 @@ int32_t do_execute (const uint8_t* command)
 	uint8_t argsBuffer [128];
 
 	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
-	uint8_t programName[64];
-	while (command[commandBufferIndex]!='\0')
+	uint8_t programName[32];
+	uint32_t i;
+	while (command[commandBufferIndex]!='\0' && command[commandBufferIndex]!='\n')
 	{
-		int i = commandBufferIndex;
+		i = commandBufferIndex;
 		while(command[i]==' ')//if multiple spaces, go to the last space
 			i++; 
 		if(i!=commandBufferIndex) //we found at least one space
@@ -78,7 +79,8 @@ int32_t do_execute (const uint8_t* command)
 			programName[pgmNameIndex++]=command[commandBufferIndex++]; 
 	}
 	argsBuffer[argsBufferIndex] ='\0';
-	programName[pgmNameIndex] ='\0';
+	for (i = pgmNameIndex; i < 32; i ++)
+		programName[i] = 0;
 	
 	//Create page directory...or is it just a page?
 	//Load program into memory
@@ -96,9 +98,7 @@ int32_t do_execute (const uint8_t* command)
 			2) Set up Stack
 			3) IRET*/
 	//print_error("Test", 0, 0, 1);
-	uint8_t pname [32] = "shell";
-	uint8_t ab [128] = "";
-	int32_t pid = create_task(pname, ab);
+	int32_t pid = create_task(programName, argsBuffer);
 	if (pid >= 0)
 		switch_task((uint32_t)pid);
 	
