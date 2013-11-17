@@ -169,16 +169,7 @@ int32_t do_open (const uint8_t* filename) {
 		default:
 			return -1;
 	}
-	
-	//bit 1 -> if is in use
-	//bits 3 & 2: (remember to use masking when setting)
-	// value 0: regular file
-	// value 1: directory
-	// value 3: RTC
-	//TODO somehow set fops commands based on type...
-	//files[i].fops = //set based on type
-	//TODO call open() somehow
-
+	curTask->files[i].fops->open(filename);
 	return i; 
 }
 int32_t do_close (int32_t fd) { 
