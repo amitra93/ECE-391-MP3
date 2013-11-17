@@ -150,9 +150,10 @@ int32_t end_task(int32_t pid)
 	get_cr3(pd);
 	
 	addr = 0x800000 + (pid * 0x400000);
-	//clear_pid(pid);
+	clear_pid(pid);
+	clear_pde(addr);
 	
-	pd[(addr & 0xFFC00000) >> 22] = 0;
+	//pd[(addr & 0xFFC00000) >> 22] = 0;
 	--schedular.num_tasks;
 	
 	set_cur_task(parent_task->pid);
@@ -186,8 +187,8 @@ int32_t switch_task(int32_t pid)
 	old_task->tss.eip = (uint32_t)(&&halt_addr);
 	
 	set_cur_task(pid);
-	load_tss(new_task);
 	save_task_state(old_task);
+	load_tss(new_task);
 	setup_task_stack(new_task);
 	set_task_cr3(new_task);
 	iret();
@@ -195,6 +196,7 @@ int32_t switch_task(int32_t pid)
 halt_addr:
 	//set_cur_task(get_cur_task()->parent_task->pid);
 	end_task(get_cur_task()->pid);
+	load_tss(get_cur_task());
 	return 0;
 }
 

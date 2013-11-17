@@ -91,6 +91,7 @@ task_t * init_task(int32_t pid)
 	init_task_pd(task);
 	
 	task->tss.esp = EXECUTION_ADDR + 0x400000 - 4;
+	task->tss.ebp = 0;
 	task->tss.esp0 = stack_addr;
 	task->tss.ss0 = KERNEL_DS;
 	task->tss.ss = USER_DS;

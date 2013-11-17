@@ -70,6 +70,7 @@ _system_call:
 	ret
 	
 system_call:
+	pushl %ebp
 	pushl %ebx
 	pushl %esi
 	pushl %edi
@@ -101,6 +102,7 @@ done:
 	popl %edi
 	popl %esi
 	popl %ebx
+	popl %ebp
 	iret # Is this iret or ret?
 	
 

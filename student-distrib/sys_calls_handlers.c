@@ -50,8 +50,6 @@ int32_t do_halt (uint8_t status)
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
 	return_from_halt(parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
-	//setup_return_stack(parent_task);
-	goto *(void*)(parent_task->tss.eip);
 	
 	//We will never reach here...
 	return 0;

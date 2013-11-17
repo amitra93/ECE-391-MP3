@@ -2,8 +2,11 @@
  * vim:ts=4 noexpandtab
  */
 
+#include "paging.h"
 #include "lib.h"
 #include "task.h"
+#include "sched.h"
+
 #define VIDEO 0xB8000
 #define NUM_COLS 80
 #define NUM_ROWS 25
@@ -23,7 +26,12 @@ static char* video_mem = (char *)VIDEO;
 */
 void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
 {
-	int32_t str_len, x, y;
+	int32_t str_len, x, y, starty, index;
+	uint32_t cr2;
+	pid = get_cur_task()->pid;
+	//asm volatile("movl %%cr3, %0":"=r"(pd));			
+	pd = get_cur_task()->page_directory;
+	asm volatile("movl %%cr2, %0":"=r"(cr2));
 	
 	// Get length of description
 	str_len = strlen(description);
@@ -32,8 +40,8 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 	clear();
 	
 	//Find the center of the screen
-	x = (NUM_COLS / 2) - 16;
-	y = (NUM_ROWS / 2) - 2;
+	x = 0;
+	y = 0;
 	
 	//Set the cursor to the middle of the screen
 	set_cursor_pos(x, y);
@@ -42,24 +50,41 @@ void print_error(char * description, uint32_t error_code, uint32_t instr_ptr, ui
 	printf("Error       : %s", description);
 	
 	//Center, and increment line
-	x = (NUM_COLS / 2);
 	y ++;
 	
 	//Set cursor position, print error code, increment line
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	set_cursor_pos(x, y++);
 	printf("Error Code  : 0x%#x", error_code);
 	
 	//Set cursor position, print errored instruction, increment line
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	set_cursor_pos(x, y++);
 	printf("Instruction : 0x%#x", instr_ptr);
 	
 	//Set cursor position, print errored process, increment line
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
+	set_cursor_pos(x, y++);
 	printf("Process ID  : 0x%#x", pid);
 
-	set_cursor_pos((NUM_COLS / 2) - 16, y++);
-	task_t * tempTask = get_task(0);//pid);
-	printf("Process Name: %s", tempTask->pName);
+	set_cursor_pos(x, y++);
+	printf("Process Name: %s", get_cur_task()->pName);
+	
+	set_cursor_pos(x, y++);
+	printf("Violated Mem: 0x%#x 0x%#x", pd, cr2);
+	
+	set_cursor_pos(x, y++);
+	printf("Violated PDE: 0x%#x", pd[cr2>>22]);
+	
+	starty = y;
+	index = 0;
+	for (x = 1; x < NUM_COLS; x += 16)
+	for (y = starty; y < NUM_ROWS; y ++)
+		{
+			if (index >= 90)
+				break;
+			set_cursor_pos(x, y);
+			printf("%d:0x%#x", index, pd[index]);
+			++index;
+		}
+	
 }
 
 void
