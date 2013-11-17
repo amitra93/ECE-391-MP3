@@ -104,16 +104,15 @@ int32_t do_execute (const uint8_t* command)
 	
 	return 0; 
 }
-int32_t do_read (int32_t fd, void* buf, int32_t nbytes) { return 0; }
+int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
+{
+	return (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
+ }
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
 	
 	//TODO HOW THE FUCK DO YOU MAKE THIS ONE LINE
-	task_t * curTask = get_cur_task();
-	if (curTask->files[fd].flags)
-		return curTask->files[fd].fops->write(fd, buf, nbytes);
-	else
-		return -1;
-	
+	return (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
+
 	//return get_cur_task()->files[fd]->fops->write();
 	/*task_t * curTask = get_cur_task();
 	uint8_t fileType = (curTask->files[_fd].flags>>1)& 0x3; //check the second and third bits of flags for file type
@@ -130,7 +129,6 @@ int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
 			return -1; 
 
 	}*/
-	return 0; 
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
