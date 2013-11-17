@@ -177,10 +177,17 @@ int32_t do_close (int32_t fd) {
 	curTask->files[fd].flags =0;
 	curTask->files[fd].inode = NULL;
 	curTask->files[fd].offset =0;
-	//TODO reset fops
+	curTask->files[i].fops = NULL;
 	return 0; 
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
+	task_t * curTask = get_cur_task();
+	int i;
+	if(nbytes>16)//we dont have this much space for args
+		return -1;
+	for(i=0; i<nbytes; i++){
+		buf[i]=curTask->args[i];
+	}
 	return 0; 
 }
 int32_t do_set_handler (int32_t signum, void* handler_address) { return 0; }
