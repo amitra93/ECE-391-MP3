@@ -41,6 +41,7 @@ task_t * init_task(int32_t pid)
 	task->tss.eip = 0; //Set to this to induce a page fault if no program loaded
 	task->tss.ldt_segment_selector = 0;
 	task->tss.eflags = 1 << 9;
+	
 	task->parent_task = NULL;
 	task->child_task = NULL;
 	task->sibling_task = NULL;
@@ -54,6 +55,7 @@ task_t * init_task(int32_t pid)
 		task->files[i].flags = 0;
 	}
 	
+	//set stdin, stdout
 	task->files[0].fops = &term_fops;
 	task->files[0].flags = 1;
 	task->files[1].fops = &term_fops;

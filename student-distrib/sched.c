@@ -9,6 +9,13 @@
 		asm volatile("iret");	\
 	}while(0)
 
+#define invtlb()										\
+		do {											\
+		asm volatile("									\
+			movl %cr3, %eax \n						\
+			movl %eax, %cr3");								\
+	}while(0)
+	
 #define setup_task_stack(task)							\
 	do {												\
 		asm volatile("									\
@@ -162,10 +169,13 @@ int32_t switch_task(int32_t pid)
 	load_tss(new_task);
 	save_task_state(old_task);
 	setup_task_stack(new_task);
+	invtlb();
 	iret();
 
 halt_addr:
 	load_task_state(old_task);
+	end_task(new_task->pid);
+	invtlb();
 	return 0;
 }
 

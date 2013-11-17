@@ -6,6 +6,8 @@
 #define setup_return_stack(task) 							\
 	do {													\
 		asm volatile("										\
+			movl %0, %%ebp":: "r"((task)->tss.ebp));		\
+		asm volatile("										\
 			pushl %0 \n										\
 			pushl %1 \n										\
 			pushl %2 \n										\
@@ -18,8 +20,6 @@
 			"c"((task)->tss.eflags),						\
 			"d"((task)->tss.cs),							\
 			"S"((task)->tss.eip));							\
-			asm volatile("									\
-				movl %0, %%ebp":: "r"((task)->tss.ebp));	\
 	}while(0)
 	
 //different than the get_args system call...literally gets the arguments for each 
@@ -39,7 +39,7 @@ int32_t do_halt (uint8_t status)
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
 	setup_return_stack(parent_task);
-	iret();
+	goto *((void*)(parent_task->tss.eip));
 	
 	//We will never reach here...
 	return 0;

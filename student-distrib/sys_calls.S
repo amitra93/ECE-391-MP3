@@ -1,5 +1,7 @@
 #define ASM 1
 
+#include "x86_desc.h"
+
 .data
 
 	/* Set up the assembly interface as global */
@@ -71,12 +73,19 @@ system_call:
 	pushl %ebx
 	pushl %esi
 	pushl %edi
-
+	pushw %ds
+	pushw %es
+	pushw %fs
+	
 	cmpl  $1, %eax
 	jl	  done
 	
 	cmpl  $10, %eax
 	jg   done
+	
+	movw  $KERNEL_DS, %si
+	movw  %si, %ds
+	
 	pushl %edx
 	pushl %ecx
 	pushl %ebx
@@ -86,6 +95,9 @@ system_call:
 	addl $12, %esp
 	
 done:
+	popw %fs
+	popw %es
+	popw %ds
 	popl %edi
 	popl %esi
 	popl %ebx
