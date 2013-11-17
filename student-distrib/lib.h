@@ -155,4 +155,9 @@ do {                                    \
 			);                      \
 } while(0)
 
+#define iret()					\
+	do { 						\
+		asm volatile("iret");	\
+	}while(0)
+
 #endif /* _LIB_H */

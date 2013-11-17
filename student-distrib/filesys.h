@@ -43,10 +43,10 @@ typedef struct file_sys_t {
 //To-do: Fill out arguments
 //Return -1 for failure, 0 for success
 typedef struct fops_t{
-	uint32_t (*open)();
-	uint32_t (*close)();
-	uint32_t (*read)();
-	uint32_t (*write)();
+	int32_t (*open)(const uint8_t* filename);
+	int32_t (*close)(int32_t fd);
+	int32_t (*read)(int32_t fd, void* buf, int32_t nbytes);
+	int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
 } fops_t;
 
 typedef struct file_t {
@@ -64,7 +64,6 @@ typedef struct file_t {
 	
 } file_t;
 
-
 void test_file_system();
 void test_loader();
 
@@ -72,13 +71,20 @@ int32_t init_file_system(uint32_t * start_addr);
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
+int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length);
 int32_t load_program(const uint8_t* fname, uint8_t * pgrm_addr);
 
-int32_t write_file(uint32_t offset, const uint8_t* buf, uint32_t length);
-int32_t close_file();
-int32_t open_file();
+int32_t file_open(const uint8_t* filename);
+int32_t file_close(int32_t fd);
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes);
 
 file_sys_t * file_sys;
+
+extern fops_t rtc_fops;
+extern fops_t dir_fops;
+extern fops_t file_fops;
+extern fops_t term_fops;
 
 #endif /* ASM */
 

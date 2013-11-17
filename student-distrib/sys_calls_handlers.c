@@ -1,6 +1,7 @@
 #include "types.h"
 #include "sched.h"
 #include "lib.h"
+#include "filesys.h"
 
 #define setup_return_stack(task) 							\
 	do {													\
@@ -20,30 +21,6 @@
 			asm volatile("									\
 				movl %0, %%ebp":: "r"((task)->tss.ebp));	\
 	}while(0)
-
-#define iret()					\
-	do { 						\
-		asm volatile("iret");	\
-	}while(0)
-
-	
-#define return_from_syscall()	\
-		do { 					\
-			asm volatile("		\
-				addl $20, %%esp	\
-				popl %%edi		\
-				popl %%esi		\
-				popl %%ebx		\
-				iret ");		\
-	}while(0)
-	
-#define return_from_halt()								\
-		do { 											\
-			asm volatile("								\
-				addl $44, %esp");						\
-				goto *((get_cur_task())->halt_addr);	\
-	}while(0)					
-
 	
 //different than the get_args system call...literally gets the arguments for each 
 //system call
@@ -57,26 +34,22 @@
 	}while(0)
 
 
-	
-
+//To-Do: Send the status to the parent program
 int32_t do_halt (uint8_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
 	setup_return_stack(parent_task);
 	iret();
+	
+	//We will never reach here...
+	return 0;
 }
 
-int32_t do_execute () 
+int32_t do_execute (const uint8_t* command) 
 { 
-	
 	//argsBuffer holds the newly formatted args
 	uint8_t argsBuffer [128];
-	uint32_t cmd; 
-	uint8_t * command;
-	uint32_t trash1,trash2;//just to be safe so we don't break anything
-	//asm volatile("movl %%ebx, %0 \n movl %%ecx, %1 \n movl %%edx, %2":"=r"(command), "=r"(trash1), "=r"(trash2));			
-	GET_ARGS(cmd,trash1, trash2);
-	command = (uint8_t*)cmd;
+
 	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
 	uint8_t programName[64];
 	while (command[commandBufferIndex]!='\0')
@@ -123,17 +96,26 @@ int32_t do_execute ()
 			2) Set up Stack
 			3) IRET*/
 	//print_error("Test", 0, 0, 1);
-	int32_t pid = create_task(programName, argsBuffer);
+	uint8_t pname [32] = "shell";
+	uint8_t ab [128] = "";
+	int32_t pid = create_task(pname, ab);
 	if (pid >= 0)
 		switch_task((uint32_t)pid);
 	
 	return 0; 
 }
-int32_t do_read (int32_t _fd, void* buf, int32_t _nbytes) { return 0; }
-int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) {
+int32_t do_read (int32_t fd, void* buf, int32_t nbytes) { return 0; }
+int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
+	
 	//TODO HOW THE FUCK DO YOU MAKE THIS ONE LINE
-	//return get_cur_task()->files[fd]->fops->write();
 	task_t * curTask = get_cur_task();
+	if (curTask->files[fd].flags)
+		return curTask->files[fd].fops->write(fd, buf, nbytes);
+	else
+		return -1;
+	
+	//return get_cur_task()->files[fd]->fops->write();
+	/*task_t * curTask = get_cur_task();
 	uint8_t fileType = (curTask->files[_fd].flags>>1)& 0x3; //check the second and third bits of flags for file type
 	switch(fileType){
 		case 0://file is an RTC
@@ -147,7 +129,7 @@ int32_t do_write (int32_t _fd, const void* buf, int32_t _nbytes) {
 		default://invalid file type (checks from before should have prevented this)
 			return -1; 
 
-	}
+	}*/
 	return 0; 
 }
 int32_t do_vidmap (uint8_t** screen_start) 
@@ -172,6 +154,22 @@ int32_t do_open (const uint8_t* filename) {
 	//TODO figure out correct syntax
 	//curTask->files[i].inode = &dentry;
 	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
+	
+	switch (dentry.file_type)
+	{
+		case 0:
+			curTask->files[i].fops = &rtc_fops;
+			break;	
+		case 1:
+			curTask->files[i].fops = &dir_fops;
+			break;
+		case 2:
+			curTask->files[i].fops = &file_fops;
+			break;
+		default:
+			return -1;
+	}
+	
 	//bit 1 -> if is in use
 	//bits 3 & 2: (remember to use masking when setting)
 	// value 0: regular file
@@ -183,18 +181,18 @@ int32_t do_open (const uint8_t* filename) {
 
 	return i; 
 }
-int32_t do_close (int32_t _fd) { 
+int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
 		return -1;
-	curTask->files[_fd].flags =0;
-	curTask->files[_fd].inode = NULL;
-	curTask->files[_fd].offset =0;
+	curTask->files[fd].flags =0;
+	curTask->files[fd].inode = NULL;
+	curTask->files[fd].offset =0;
 	//TODO reset fops
 	return 0; 
 }
-int32_t do_getargs (uint8_t* buf, int32_t _nbytes) {
+int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	return 0; 
 }
-int32_t do_set_handler (int32_t _signum, void* handler_address) { return 0; }
+int32_t do_set_handler (int32_t signum, void* handler_address) { return 0; }
 int32_t do_sigreturn (void) { return 0; }

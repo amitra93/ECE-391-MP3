@@ -212,7 +212,6 @@ entry (unsigned long magic, unsigned long addr)
 	
 	printf("Enabling RTC\n");
 	rtc_open(NULL);
-	rtc_set_frequency(128);
 	
 	printf("Enabling keyboard\n");
 	keyboard_init();
@@ -228,7 +227,7 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	execute(NULL);
+	execute("shell");
 	
 	printf("Done!");
 	

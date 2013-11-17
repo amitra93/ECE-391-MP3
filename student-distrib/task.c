@@ -53,6 +53,12 @@ task_t * init_task(int32_t pid)
 		task->files[i].offset = 0;
 		task->files[i].flags = 0;
 	}
+	
+	task->files[0].fops = &term_fops;
+	task->files[0].flags = 1;
+	task->files[1].fops = &term_fops;
+	task->files[1].flags = 1;
+	
 	for (i = 0; i < 128; i ++)
 		task->args[i] = 0;
 	

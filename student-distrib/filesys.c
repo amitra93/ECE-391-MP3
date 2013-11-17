@@ -1,9 +1,34 @@
 #include "lib.h"
 #include "filesys.h"
 #include "terminal.h"
+#include "rtc.h"
 
 #define ELF_MAGIC_SIZE 4 //Bytes
 #define ELF_MAGIC 0x464c457f //Elf Magic number
+
+fops_t rtc_fops = {
+	.open = rtc_open,
+	.close = rtc_close,
+	.write = rtc_write,
+	.read = rtc_read
+};
+
+fops_t dir_fops = {
+};
+
+fops_t file_fops = {
+	.open = file_open,
+	.close = file_close,
+	.write = file_write,
+	.read = file_read
+};
+
+fops_t term_fops = {
+	.open = terminal_open,
+	.close = terminal_close,
+	.write = terminal_write,
+	.read = terminal_read
+};
 
 /* get_inode(uint32_t inode)
  *   DESCRIPTION: Gets a specific inode at location 
@@ -49,32 +74,15 @@ int32_t init_file_system(uint32_t * start_addr)
  *   OUTPUTS: -1, using a read-file system
  *   SIDE EFFECTS: none
  */
-int32_t write_file(uint32_t offset, const uint8_t* buf, uint32_t length)
+int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length)
 {
 	return -1;
 }
 
-/* close_file()
- *   DESCRIPTION: Close file stub
- *   INPUTS: ?
- *   OUTPUTS: ?
- *   SIDE EFFECTS: ?
- */
-int32_t close_file()
-{
-	return 0;
-}
-
-/* open_file()
- *   DESCRIPTION: Open file stub
- *   INPUTS: ?
- *   OUTPUTS: ?
- *   SIDE EFFECTS: ?
- */
-int32_t open_file()
-{
-	return 0;
-}
+int32_t file_open(const uint8_t* filename) { return 0; }
+int32_t file_close(int32_t fd) { return 0; }
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { return 0; }
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }
 
 /* read_dentry_by_name (const uint8_t* fname, dentry_t* dentry)
  *   DESCRIPTION: Searches for and gets a dentry by its name
@@ -328,3 +336,4 @@ void test_file_system()
 		for(j = 0; j < 1000000000; j ++);
 	}
 }
+
