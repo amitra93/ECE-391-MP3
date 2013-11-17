@@ -134,6 +134,13 @@ int32_t do_close (int32_t fd) {
 		return 0;
 	}
 
+	if ((curTask->files[fd].flags & 0x1) != 1)
+		return -1;
+	curTask->files[fd].fops->close(fd);
+	curTask->files[fd].flags =0;
+	curTask->files[fd].inode = NULL;
+	curTask->files[fd].offset =0;
+	curTask->files[fd].fops = NULL;
 
 	return 0; 
 }

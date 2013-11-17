@@ -185,6 +185,8 @@ int32_t switch_task(int32_t pid)
 	old_task = get_cur_task();
 	new_task = get_task(pid);
 	
+	printf("\n======== Now Running: %s(%d) ========\n", new_task->pName, pid);
+	
 	old_task->tss.eip = (uint32_t)(&&halt_addr);
 	
 	set_cur_task(pid);
@@ -198,6 +200,7 @@ halt_addr:
 	asm volatile("movb %%al, %0;":"=g"(ret));
 	if ((int8_t)ret == -1)
 		ret = -1;
+	printf("======== Exited %s(%d) with %d status ========\n", new_task->pName, pid, ret);
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());
 	return ret;
