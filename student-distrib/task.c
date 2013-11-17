@@ -2,15 +2,71 @@
 #include "types.h"
 #include "x86_desc.h"
 #include "task.h"
+#include "sched.h"
 
 #define INIT_TASK_ADDR 0x800000
+#define EXECUTION_ADDR 0x8000000
+#define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
+#define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
+#define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
+#define NUM_PAGES 1024 /*number of pages in a page directory*/
+#define SIZE_4KB_PAGE 0x1000 /*this size of a 4kb page (4KB!)*/
+#define CR4_4MB_PAGE_BIT 0x10 /*bit of CR4 control register that enables 4mb paging*/
+#define CR0_PAGE_ENBL_BIT 0x80000000 /*bit of CR0 control register that enables paging*/
+#define SUPERVISOR_RW_PRESENT 0x3 /*bits necessary to set supervisor to priv., r/w adn pressent*/
+#define RW_PRESENT 0x3
+#define USER_RW_PRESENT 0x7
+#define PAGE_SIZE_BIT 0x80 /*bit used to set page to 4MB */
+
 
 static int32_t init_task_pd(task_t * task)
 {
-	/*uint32_t addr = 0x800000 + (task->pid * 0x400000);
-	uint32_t pd_index = (0x8000000 & 0xFFC00000) >> 22;
-	task->page_directory = (uint32_t*)(0x400000 - (0x2000*pid) - 4 - 0x400000);
-	task->page_directory[pd_index] = (addr & 0xFFC00000) | 0x87;*/
+	uint32_t i;
+	uint32_t old_pd, old_pt;
+	uint32_t tmp_addr, addr = 0x800000 + (task->pid * 0x400000);
+	
+	task->page_directory = (uint32_t*)(addr);
+	task->page_table = (uint32_t*)(addr) + 1024;
+	
+	old_pd = pd;
+	old_pt = pt;
+	pd = task->page_directory;
+	pt = task->page_table;
+	
+	pd[0] = (((unsigned int) pt) & FIRST_20_BITS);
+	//set page as 4KB, set supervisor priv., set r/w, and present
+	pd[0] |= SUPERVISOR_RW_PRESENT; 
+	
+	tmp_addr = 0;
+	for ( i = 0; i < NUM_PAGES; i ++)
+	{
+		//Set up page table base address
+		//Set the first entry to not be present for seg faults (previously set off in x86_desc)
+		if (i != 0)
+			pt[i] = tmp_addr | SUPERVISOR_RW_PRESENT; //set page as 4KB, set supervisor priv., set r/w, and present
+		tmp_addr += SIZE_4KB_PAGE;//4KBytes added to get to the next 4kb page address;
+	}
+	
+	//sets up 4MB page for kernel and puts proper dir. address in
+	pd[1] = (((unsigned int) KERNEL_LOCATION) & FIRST_10_BITS);
+	//set page as 4MB, set supervisor priv., set r/w, and present
+	pd[1] |=  ( PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT);  
+	
+	//Set up user-space memory
+	pd[2 + task->pid] = (((unsigned int) addr) & FIRST_10_BITS);
+	//set page as 4MB, set supervisor priv., set r/w, and present
+	pd[2 + task->pid] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
+
+	//Set up user-space memory
+	pd[EXECUTION_ADDR>>22] = (((unsigned int) addr) & FIRST_10_BITS);
+	//set page as 4MB, set supervisor priv., set r/w, and present
+	pd[EXECUTION_ADDR>>22] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
+	
+	//Set up mapped task memory
+	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
+	
+	pd = old_pd;
+	pt = old_pt;
 
 	return 0;
 }
@@ -30,8 +86,11 @@ task_t * init_task(int32_t pid)
 	
 	stack_addr = 0x800000 - (0x2000*pid) - 4;
 	task = (task_t*)(stack_addr & 0x7FE000);
+	task->pid = pid;	
+	
 	init_task_pd(task);
 	
+	task->tss.esp = EXECUTION_ADDR + 0x400000 - 4;
 	task->tss.esp0 = stack_addr;
 	task->tss.ss0 = KERNEL_DS;
 	task->tss.ss = USER_DS;
@@ -45,7 +104,6 @@ task_t * init_task(int32_t pid)
 	task->parent_task = NULL;
 	task->child_task = NULL;
 	task->sibling_task = NULL;
-	task->pid = pid;	
 	
 	for (i = 0; i < 8; i ++)
 	{
@@ -101,8 +159,7 @@ int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname
 	if ((exe_addr = load_program(fname, (uint8_t*)addr)) == -1 || task == NULL)
 		return -1;
 	task->tss.eip = exe_addr;
-
-	task->tss.esp = addr - 0x48000 + 0x400000 - 4;
+	
 	for ( i = 0; i < 128; i ++)
 		task->args[i] = args[i];
 		

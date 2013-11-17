@@ -165,19 +165,6 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
 		curTask->files[fd].offset+=nbytes;
 
 	return returnVal;
-	/*if(curTask->files[fd].offset>=curTask->files[fd].inode)
-		return 0;
-	uint8_t * targetbuf = (uint8_t *) buf;
-	uint8_t * tempbuf = file_sys->dentries[curTask->files[fd].offset].file_name;
-	int i=0;
-	while(tempbuf[i]!='\0' && i<32){
-		targetbuf[i]=tempbuf[i];
-		i++;
-	}
-	curTask->files[fd].offset++;
-	return i; 
-
-	return 0; */
 
 }
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }
