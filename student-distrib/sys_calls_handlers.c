@@ -172,5 +172,5 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	}
 	return 0; 
 }
-int32_t do_set_handler (int32_t signum, void* handler_address) { return 0; }
-int32_t do_sigreturn (void) { return 0; }
+int32_t do_set_handler (int32_t signum, void* handler_address) { return -1; }
+int32_t do_sigreturn (void) { return -1; }
