@@ -81,6 +81,6 @@ void keyboard_init(void);
  */
 void process_keypress(void);
 
-unsigned char keyboard_get_last_printable_key(void);
+unsigned char keyboard_wait_for_new_line(int max_chars);
 
 #endif /* _KEYBOARD_H */
