@@ -120,7 +120,9 @@ int32_t do_open (const uint8_t* filename) {
 }
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
+	if(curTask==NULL || fd < 0)
+		return -1;
+	if ((curTask->files[fd].flags & 0x1) != 1)
 		return -1;
 	curTask->files[fd].flags =0;
 	curTask->files[fd].inode = NULL;
