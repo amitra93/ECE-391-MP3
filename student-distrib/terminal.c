@@ -79,14 +79,18 @@ terminal_close(int32_t fd){
 }
 
 void terminal_backspace(){
-	if (buffer_pointer > 0) buffer_pointer--;
+	if (buffer_pointer <= SHELL_OFFSET){
+		return;
+	}
+	buffer_pointer--;
 	clear_line(old_screen_y);
-	if (buffer_pointer > 0 && on_new_line && old_screen_x == 7 && old_screen_y > 0){
+	if (buffer_pointer > 0 && on_new_line && old_screen_x == 0 && old_screen_y > 0){
 		on_new_line = 0;
 		old_screen_y--;
 	}
 	set_cursor_pos(0, old_screen_y);
-	if (buffer_pointer < NUM_COLS) terminal_write(0, input, buffer_pointer);
+	if (buffer_pointer < NUM_COLS) terminal_write
+		(0, input, buffer_pointer);
 	else terminal_write(0, input+NUM_COLS, buffer_pointer-NUM_COLS);
 	//if (old_screen_x > 0) old_screen_x--;
 }

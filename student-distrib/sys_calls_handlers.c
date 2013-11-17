@@ -110,25 +110,8 @@ int32_t do_read (int32_t fd, void* buf, int32_t nbytes)
  }
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
 	
-	//TODO HOW THE FUCK DO YOU MAKE THIS ONE LINE
 	return (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
 
-	//return get_cur_task()->files[fd]->fops->write();
-	/*task_t * curTask = get_cur_task();
-	uint8_t fileType = (curTask->files[_fd].flags>>1)& 0x3; //check the second and third bits of flags for file type
-	switch(fileType){
-		case 0://file is an RTC
-			
-			break;
-		case 1://file is a directory
-			break;
-		case 2://regular file
-			return -1;//read only file system!!! 
-			break;
-		default://invalid file type (checks from before should have prevented this)
-			return -1; 
-
-	}*/
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
@@ -149,8 +132,7 @@ int32_t do_open (const uint8_t* filename) {
 	}
 
 	curTask->files[i].flags = (1 | (dentry.file_type<<1));//sets to in use
-	//TODO figure out correct syntax
-	//curTask->files[i].inode = &dentry;
+	curTask->files[i].inode = dentry.inode_num;
 	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
 	
 	switch (dentry.file_type)
@@ -190,5 +172,5 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	}
 	return 0; 
 }
-int32_t do_set_handler (int32_t signum, void* handler_address) { return 0; }
-int32_t do_sigreturn (void) { return 0; }
+int32_t do_set_handler (int32_t signum, void* handler_address) { return -1; }
+int32_t do_sigreturn (void) { return -1; }
