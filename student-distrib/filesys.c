@@ -146,6 +146,16 @@ int32_t file_open(const uint8_t* filename) {
 }
 int32_t file_close(int32_t fd) 
 { 
+	if(fd<0 || fd>7)
+		return -1;
+	task_t * curTask = get_cur_task();
+	if(curTask==NULL)
+		return -1;
+	if(!(curTask->files[fd].flags & 0x1) )//not open!!
+		return -1;
+	curTask->files[fd].flags=0;
+	curTask->files[fd].inode=0;
+	curTask->files[fd].offset=0;
 	return 0; 
 
 }
