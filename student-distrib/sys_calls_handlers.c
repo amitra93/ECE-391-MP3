@@ -177,7 +177,7 @@ int32_t do_close (int32_t fd) {
 	curTask->files[fd].flags =0;
 	curTask->files[fd].inode = NULL;
 	curTask->files[fd].offset =0;
-	curTask->files[i].fops = NULL;
+	curTask->files[fd].fops = NULL;
 	return 0; 
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
