@@ -3,6 +3,17 @@
 #include "lib.h"
 #include "filesys.h"
 
+#define return_from_halt(ebp, esp, eip)			\
+	do {										\
+		asm volatile("							\
+			movl %0, %%ebp		\n				\
+			movl %1, %%esp		\n				\
+			movl %2, %%edx		\n				\
+			jmp *%%edx"::"r"(ebp),				\
+				"r"(esp),						\
+				"d"(eip));						\
+	}while(0)
+	
 #define setup_return_stack(task) 							\
 	do {													\
 		asm volatile("										\
@@ -38,8 +49,9 @@
 int32_t do_halt (uint8_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
-	setup_return_stack(parent_task);
-	goto *((void*)(parent_task->tss.eip));
+	return_from_halt(parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
+	//setup_return_stack(parent_task);
+	goto *(void*)(parent_task->tss.eip);
 	
 	//We will never reach here...
 	return 0;

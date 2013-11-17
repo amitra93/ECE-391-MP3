@@ -45,10 +45,8 @@
 #define load_task_state(task)							\
 		do {											\
 		asm volatile("									\
-			movl %0, %%esp	\n							\
-			movl %1, %%ebp								\
-			"::"r"((task)->tss.esp),					\
-			   "r"((task)->tss.ebp));					\
+			movl %0, %%esp								\
+			"::"r"((task)->tss.esp));					\
 	}while(0)
 	
 #define setup_return_stack(task)							\
@@ -129,12 +127,9 @@ int32_t end_task(int32_t pid)
 		
 	//Map the file image into memory
 	addr = 0x800000 + (pid * 0x400000);
-	clear_pte(addr);
-	clear_pid(pid);
-	if (get_task(pid)->parent_task == NULL)
-		schedular.cur_task = -1;
-	else
-		set_cur_task(get_task(pid)->parent_task->pid);
+	//clear_pid(pid);
+	set_cur_task(get_task(pid)->parent_task->pid);
+	clear_pde(addr);
 	--schedular.num_tasks;
 	return 0;
 }
@@ -173,9 +168,9 @@ int32_t switch_task(int32_t pid)
 	iret();
 
 halt_addr:
-	load_task_state(old_task);
-	end_task(new_task->pid);
 	invtlb();
+	//set_cur_task(get_cur_task()->parent_task->pid);
+	end_task(get_cur_task()->pid);
 	return 0;
 }
 
