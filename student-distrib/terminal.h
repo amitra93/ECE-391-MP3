@@ -11,6 +11,7 @@
 /* Constants and variables */
 #define BUFFER_SIZE		128
 #define NUM_COLS		80
+#define SHELL_OFFSET	7
 
 char input[BUFFER_SIZE];
 int buffer_pointer;
