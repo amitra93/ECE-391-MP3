@@ -9,11 +9,24 @@
 		asm volatile("iret");	\
 	}while(0)
 
-#define invtlb()										\
+#define get_cr3(cr3)											\
+	do {														\
+		asm volatile("											\
+			movl %%cr3, %0":"=r"(cr3));							\
+	}while(0)
+	
+#define set_task_cr3(task)										\
+		do {													\
+		asm volatile("											\
+			movl %0, %%eax \n									\
+			movl %%eax, %%cr3"::"r"((task)->page_directory));	\
+	}while(0)
+	
+#define invtlb(task)										\
 		do {											\
 		asm volatile("									\
-			movl %cr3, %eax \n						\
-			movl %eax, %cr3");								\
+			movl %cr3, %eax \n							\
+			movl %eax, %cr3");						\
 	}while(0)
 	
 #define setup_task_stack(task)							\
@@ -104,7 +117,13 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 		
 	//Map the file image into memory
 	addr = 0x800000 + (pid * 0x400000);
+
+	get_cr3(pd);
 	map_page_directory(addr, addr, 1, 1);
+	//Set up user-space memory
+	//pd[2 + pid] = (((unsigned int) addr) & 0xFFC00000);
+	//set page as 4MB, set supervisor priv., set r/w, and present
+	//pd[2 + pid] |=  (0x87);  
 	
 	//Load the file image
 	task = init_task(pid);
@@ -124,13 +143,19 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 int32_t end_task(int32_t pid)
 {
 	uint32_t addr;
-		
+	task_t * parent_task = get_task(pid)->parent_task;
+	
 	//Map the file image into memory
+	set_task_cr3(parent_task);
+	get_cr3(pd);
+	
 	addr = 0x800000 + (pid * 0x400000);
 	//clear_pid(pid);
-	set_cur_task(get_task(pid)->parent_task->pid);
-	clear_pde(addr);
+	
+	pd[(addr & 0xFFC00000) >> 22] = 0;
 	--schedular.num_tasks;
+	
+	set_cur_task(parent_task->pid);
 	return 0;
 }
 
@@ -141,11 +166,11 @@ task_t * get_cur_task()
 
 int32_t set_cur_task(int32_t pid)
 {
-	uint32_t addr;
+	//uint32_t addr;
 	
 	schedular.cur_task = pid;
-	addr = 0x800000 + (pid * 0x400000);
-	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
+	//addr = 0x800000 + (pid * 0x400000);
+	//map_page_directory(addr, EXECUTION_ADDR, 1, 1);
 	
 	return 0;
 }
@@ -164,11 +189,10 @@ int32_t switch_task(int32_t pid)
 	load_tss(new_task);
 	save_task_state(old_task);
 	setup_task_stack(new_task);
-	invtlb();
+	set_task_cr3(new_task);
 	iret();
 
 halt_addr:
-	invtlb();
 	//set_cur_task(get_cur_task()->parent_task->pid);
 	end_task(get_cur_task()->pid);
 	return 0;
