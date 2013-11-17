@@ -3,7 +3,7 @@
 #include "lib.h"
 #include "filesys.h"
 
-#define return_from_halt(ebp, esp, eip)			\
+#define return_from_halt(status, ebp, esp, eip)	\
 	do {										\
 		asm volatile("							\
 			movl %0, %%ebp		\n				\
@@ -49,7 +49,7 @@
 int32_t do_halt (uint8_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
-	return_from_halt(parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
+	return_from_halt(status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
 	
 	//We will never reach here...
 	return 0;
@@ -116,11 +116,11 @@ int32_t do_execute (const uint8_t* command)
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
-	return (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
+	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1);
  }
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
 	
-	return (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
+	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1);
 
 }
 int32_t do_vidmap (uint8_t** screen_start) 
@@ -189,5 +189,7 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	}
 	return 0; 
 }
+
 int32_t do_set_handler (int32_t signum, void* handler_address) { return -1; }
+
 int32_t do_sigreturn (void) { return -1; }

@@ -227,9 +227,10 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	execute("shell");
-	
-	printf("Done!");
+	while(1)
+	{
+		execute("shell");
+	}
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
