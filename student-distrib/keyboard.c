@@ -105,7 +105,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 		i++;
 		keyboard_interrupt_received = 0;
 		if (keyboard_last_printable_key == '\n'){
-			break;
+			return i;
 		}
 		
 		
