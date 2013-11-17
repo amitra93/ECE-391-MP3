@@ -1,4 +1,6 @@
 #include "lib.h"
+#include "sched.h"
+#include "types.h"
 #include "filesys.h"
 #include "terminal.h"
 #include "rtc.h"
@@ -14,6 +16,10 @@ fops_t rtc_fops = {
 };
 
 fops_t dir_fops = {
+	.open = NULL,
+	.close = NULL,
+	.write = NULL,
+	.read=  NULL
 };
 
 fops_t file_fops = {
@@ -79,7 +85,62 @@ int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length)
 	return -1;
 }
 
-int32_t file_open(const uint8_t* filename) { return 0; }
+int32_t directory_open(const uint8_t* directory) { 
+	task_t * curTask = get_cur_task();
+	int i=0;
+	while((curTask->files[i].flags & 0x1) && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+		i++;
+	}
+	dentry_t dentry;
+	dentry.file_type = file_sys->dentries[1].file_type;
+	dentry.inode_num = (uint32_t) file_sys->dentries[1].inode_num;
+	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));
+	curTask->files[i].inode = NULL;//ignore bc of directory
+	curTask->files[i].offset =0;
+	curTask->files[i].fops = &dir_fops;
+
+	//open the directory
+	//curTask->files[i].fops->open(directory);
+
+	return 0; 
+}
+int32_t file_open(const uint8_t* filename) { 
+	dentry_t dentry;
+	task_t * curTask = get_cur_task();
+	int i=0;
+	while((curTask->files[i].flags & 0x1) && i<8){
+		if(i==7)//at maximum number of files
+			return -1;
+		i++;
+	}
+	if (read_dentry_by_name (filename, &dentry)<0)
+		return -1;//failure to find file!
+	if(curTask==NULL)
+		return -1;
+	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));//sets to in use
+	curTask->files[i].inode = get_inode(dentry.inode_num);
+	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
+	
+	switch (dentry.file_type)
+	{
+		case 0:
+			curTask->files[i].fops = &rtc_fops;
+			break;	
+		case 1:
+			curTask->files[i].fops = &dir_fops;
+			break;
+		case 2:
+			curTask->files[i].fops = &file_fops;
+			break;
+		default:
+			return -1;
+
+	}
+	curTask->files[i].fops->open(filename);
+	return i; 
+}
 int32_t file_close(int32_t fd) { return 0; }
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { return 0; }
 int32_t file_write(int32_t fd, const void* buf, int32_t nbytes) { return -1; }
