@@ -114,7 +114,7 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
 	uint32_t * pg_table;
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_10_BITS);
-	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | SUPERVISOR_RW_PRESENT;
+	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
 	
 	return 0;
 }
