@@ -25,14 +25,14 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	if (buf == NULL){
 		return -1;
 	}
-	int i = 0;
 	char* output = (char*) buf;
-	output[i] = '\0';
-	while (i < nbytes){
-		output[i] = keyboard_get_last_printable_key();
-		if (output[i] == '\n')
-			break;
-		i++;
+	output[0] = '\0';
+	int old_buffer_pointer = buffer_pointer;
+	int i = keyboard_wait_for_new_line(nbytes);
+	int j = 0;
+	while (j < i){
+		output[j] = input[old_buffer_pointer+j];
+		j++;
 	}
 	return i;
 }
@@ -52,8 +52,10 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 			if (buffer_pointer >= BUFFER_SIZE) {
 				return -1;
 			}
+			input[buffer_pointer] = string[i];
 			if (string[i] == '\n' || string[i] == '\r'){
 				buffer_pointer = 0;
+				input[buffer_pointer] = '\n';
 				on_new_line = 0;
 			}
 			if (buffer_pointer >= NUM_COLS && !on_new_line){
@@ -61,7 +63,6 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 				printf("%c", newline);
 				on_new_line = 1;
 			}
-			input[buffer_pointer] = string[i];
 			if (!(string[i] == '\n' || string[i] == '\r')){
 				buffer_pointer++;
 			}

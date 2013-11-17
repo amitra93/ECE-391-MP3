@@ -87,17 +87,29 @@ process_keypress(void)
 		return;
 	}
 
+	keyboard_last_printable_key = char_to_print;
+	
 	// if character is a letter or number (not a special char), print it
 	if (char_to_print != '\0') {
 		terminal_write(1, &char_to_print, 1);
+		keyboard_interrupt_received = 1;
 	}
 	//printf("-->%x<--\n", char_pressed);
-	keyboard_last_printable_key = char_to_print;
-	keyboard_interrupt_received = 1;
+	
 }
 
-unsigned char keyboard_get_last_printable_key(void){
-	while (!keyboard_interrupt_received || keyboard_last_printable_key=='\0');
-	keyboard_interrupt_received = 0;
-	return keyboard_last_printable_key;
+unsigned char keyboard_wait_for_new_line(int max_chars){
+	int i = 0;
+	while (i < max_chars){
+		while (!keyboard_interrupt_received);
+		i++;
+		keyboard_interrupt_received = 0;
+		if (keyboard_last_printable_key == '\n'){
+			break;
+		}
+		
+		
+	}
+
+	return i;
 }
