@@ -295,6 +295,7 @@ set_cursor_pos(int32_t x, int32_t y)
 		screen_y = y;
 }
 
+
 /* Convert a number to its ASCII representation, with base "radix" */
 int8_t*
 itoa(uint32_t value, int8_t* buf, int32_t radix)

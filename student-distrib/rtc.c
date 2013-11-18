@@ -31,7 +31,8 @@ rtc_read(int32_t fd, void* buf, int32_t nbytes)
 int
 rtc_write(int32_t fd, const void* buf, int32_t nbytes)
 {
-	return rtc_set_frequency(nbytes);
+	int32_t freq = *((int32_t*) buf);
+	return rtc_set_frequency(freq);
 }
 
 
