@@ -1,6 +1,7 @@
 #include "sched.h"
 #include "paging.h"
 #include "filesys.h"
+#include "lib.h"
 
 #define EXECUTION_ADDR 0x8000000
 
@@ -200,7 +201,7 @@ halt_addr:
 	asm volatile("movb %%al, %0;":"=g"(ret));
 	if ((int8_t)ret == -1)
 		ret = -1;
-	printf("======== Exited %s(%d) with %d status ========\n", new_task->pName, pid, ret);
+	printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());
 	return ret;

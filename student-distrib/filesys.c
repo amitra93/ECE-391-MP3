@@ -42,7 +42,7 @@ fops_t term_fops = {
  *   OUTPUTS: inode pointer
  *   SIDE EFFECTS: none
  */
-static inode_t * get_inode(uint32_t inode)
+inode_t * get_inode(uint32_t inode)
 {
 	if (inode >= file_sys->num_inodes)
 		return NULL;
@@ -86,6 +86,7 @@ int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length)
 }
 
 int32_t directory_open(const uint8_t* filename) { 
+	#if 0
 	int i=0;
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
@@ -98,10 +99,12 @@ int32_t directory_open(const uint8_t* filename) {
 	curTask->files[i].flags = (uint32_t) (1 | (1<<1));
 	curTask->files[i].inode = NULL;//ignore bc of directory
 	curTask->files[i].offset =1;
-	return i; 
+	#endif
+	return 0; 
 }
 
 int32_t directory_close(int32_t fd) { 
+#if 0
 	if(fd<2 || fd>6)
 		return -1;
 	task_t * curTask = get_cur_task();
@@ -112,6 +115,7 @@ int32_t directory_close(int32_t fd) {
 	curTask->files[fd].flags=0;
 	curTask->files[fd].inode=0;
 	curTask->files[fd].offset=0;
+#endif
 	return 0; 
 }
 int32_t directory_read(int32_t fd, void* buf, int32_t nbytes) { 
@@ -139,6 +143,7 @@ int32_t directory_write(int32_t fd, const void* buf, int32_t nbytes) {
 
 int32_t file_open(const uint8_t* filename) { 
 
+#if 0
 	int i=0;
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
@@ -152,12 +157,14 @@ int32_t file_open(const uint8_t* filename) {
 	if (read_dentry_by_name (filename, &dentry)<0)
 		return -1;//failure to find file!
 	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));//sets to in use
-	curTask->files[i].inode = dentry.inode_num;
+	curTask->files[i].inode = get_inode(dentry.inode_num);
 	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
-	return i; 
+#endif
+	return 0; 
 }
 int32_t file_close(int32_t fd) 
 { 
+#if 0
 	if(fd<2 || fd>6)
 		return -1;
 	task_t * curTask = get_cur_task();
@@ -168,6 +175,7 @@ int32_t file_close(int32_t fd)
 	curTask->files[fd].flags=0;
 	curTask->files[fd].inode=0;
 	curTask->files[fd].offset=0;
+#endif
 	return 0; 
 
 }
@@ -178,11 +186,11 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
 	if(curTask==NULL)
 		return -1;
 	uint8_t * tempbuf = (uint8_t *) buf;
-	inode_t* tempinode = get_inode(curTask->files[fd].inode);
+	inode_t* tempinode = curTask->files[fd].inode;
 	if (curTask->files[fd].offset >= tempinode->len){
 		return 0;
 	}
-	int32_t returnVal = read_data (curTask->files[fd].inode, curTask->files[fd].offset, tempbuf, nbytes > tempinode->len ? tempinode->len : nbytes);
+	int32_t returnVal = read_data (curTask->files[fd].dentry.inode_num, curTask->files[fd].offset, tempbuf, nbytes > tempinode->len ? tempinode->len : nbytes);
 	if(returnVal!=-1)
 		curTask->files[fd].offset+=nbytes;
 

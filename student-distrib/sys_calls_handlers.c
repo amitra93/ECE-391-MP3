@@ -74,11 +74,10 @@ int32_t do_execute (const uint8_t* command)
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
 	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1);
- }
-int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) {
-	
+}
+int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
+{
 	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1);
-
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
@@ -88,10 +87,20 @@ int32_t do_vidmap (uint8_t** screen_start)
 int32_t do_open (const uint8_t* filename) { 
 	//find the directory entry corresponding to the named file
 	dentry_t dentry;
-	if (read_dentry_by_name (filename, &dentry)<0)
+	uint8_t fname [32] = {'\0'};
+	uint32_t i = 0;
+	
+	while (*filename != '\0')
+	{
+		fname[i] = *filename;
+		filename ++;
+		i ++;
+	}
+	
+	if (read_dentry_by_name (fname, &dentry)<0)
 		return -1;//failure to find file!
 
-	int i=0;
+	i=0;
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
 		return -1;
@@ -103,18 +112,24 @@ int32_t do_open (const uint8_t* filename) {
 	switch (dentry.file_type)
 	{
 		case 0:
+			curTask->files[i].flags = (1<<dentry.file_type) | 1;
 			curTask->files[i].fops = &rtc_fops;
 			break;	
 		case 1:
+			curTask->files[i].flags = (1<<dentry.file_type) | 1;
 			curTask->files[i].fops = &dir_fops;
 			break;
 		case 2:
+			curTask->files[i].flags = (1<<dentry.file_type) | 1;
 			curTask->files[i].fops = &file_fops;
 			break;
 		default:
 			return -1;
 	}
-	if(curTask->files[i].fops->open(filename)<0)
+	curTask->files[i].dentry = dentry;
+	curTask->files[i].inode = get_inode(dentry.inode_num);
+	curTask->files[i].offset = 0;
+	if(curTask->files[i].fops->open(filename) < 0)
 		return -1;
 	return i;
 }

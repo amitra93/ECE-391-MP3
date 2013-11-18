@@ -54,6 +54,7 @@ typedef struct file_t {
 	fops_t * fops;
 
 	//Pointer to dentry
+	dentry_t dentry;
 	inode_t * inode;
 	
 	//State if open or closed
@@ -68,6 +69,7 @@ void test_file_system();
 void test_loader();
 
 int32_t init_file_system(uint32_t * start_addr);
+inode_t * get_inode(uint32_t inode);
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);

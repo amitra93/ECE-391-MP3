@@ -26,7 +26,8 @@ Aborts
 */
 
 #include "lib.h"
-
+#include "sys_calls.h"
+#include "terminal.h"
 /*
 *  GET_ARGS(error, instr_ptr, pid)
 *  Description: Gets the arguments from registers

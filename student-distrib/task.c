@@ -7,7 +7,7 @@
 #define VIDEO 0xB8000
 #define INIT_TASK_ADDR   0x800000
 #define EXECUTION_ADDR  0x8000000
-#define VIRTUAL_VID_MEM 0x8800000
+#define VIRTUAL_VID_MEM 0x10000000
 #define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
 #define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
 #define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
@@ -24,7 +24,7 @@
 static int32_t init_task_pd(task_t * task)
 {
 	uint32_t i;
-	uint32_t old_pd, old_pt;
+	uint32_t *old_pd, *old_pt;
 	uint32_t tmp_addr, addr = 0x800000 + (task->pid * 0x400000);
 	
 	task->page_directory = (uint32_t*)(addr);

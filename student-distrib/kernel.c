@@ -229,7 +229,8 @@ entry (unsigned long magic, unsigned long addr)
 	/* Execute the first program (`shell') ... */
 	while(1)
 	{
-		execute("shell");
+		uint8_t pname [32] = "shell";
+		execute(pname);
 	}
 	
 	/* Spin (nicely, so we don't chew up cycles) */

@@ -10,27 +10,12 @@
 int
 rtc_open(const uint8_t* filename)
 {
-	int i=0;
-	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
-		return -1;
-	while((curTask->files[i].flags & 0x1) && i<8){
-		if(i==7)//at maximum number of files
-			return -1;
-		i++;
-	}
-	dentry_t dentry;
-	if (read_dentry_by_name (filename, &dentry)<0)
-		return -1;//failure to find file!
-	curTask->files[i].flags = (uint32_t) (1 );
-	curTask->files[i].inode = dentry.inode_num;
-	curTask->files[i].offset =1;
 	rtc_init();
 	enable_irq(8);
 	
 	//set default frequency to 2 hz
 	rtc_set_frequency(2);
-	return i;
+	return 0;
 }
 
 

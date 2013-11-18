@@ -19,3 +19,4 @@ return_from_halt:
 	movl %ecx, %esp
 	
 	jmp *%edx
+	
