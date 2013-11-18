@@ -23,20 +23,15 @@
 			movl %%eax, %%cr3"::"r"((task)->page_directory));	\
 	}while(0)
 	
-#define invtlb(task)										\
-		do {											\
-		asm volatile("									\
-			movl %cr3, %eax \n							\
-			movl %eax, %cr3");						\
-	}while(0)
-	
 #define setup_task_stack(task)							\
 	do {												\
 		asm volatile("									\
-			pushl %0 \n									\
+			pushw $0 \n									\
+			pushw %0 \n									\
 			pushl %1 \n									\
 			pushl %2 \n									\
-			pushl %3 \n									\
+			pushw $0 \n									\
+			pushw %3 \n									\
 			pushl %4 \n									\
 			movw $0x2b, %%ax \n							\
 			movw %%ax, %%ds								\
@@ -56,28 +51,6 @@
 			  "=r"((task)->tss.ebp));					\
 	}while(0)
 	
-#define load_task_state(task)							\
-		do {											\
-		asm volatile("									\
-			movl %0, %%esp								\
-			"::"r"((task)->tss.esp));					\
-	}while(0)
-	
-#define setup_return_stack(task)							\
-	do {													\
-		asm volatile("										\
-			pushl %0 \n										\
-			pushl %1 \n										\
-			pushl %2 \n										\
-			pushl %3 \n										\
-			pushl %%eip \n									\
-			movw $0x2b, %%ax \n								\
-			movw %%ax, %%ds									\
-			"::"r"((task)->tss.ss), 						\
-			"r"((task)->tss.esp), 							\
-			"r"((task)->tss.eflags),						\
-			"r"((task)->tss.cs));							\
-	}while(0)
 		
 sched_t schedular = {
 	.task_vector = 0,
