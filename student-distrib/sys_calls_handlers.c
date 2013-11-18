@@ -16,7 +16,8 @@ int32_t do_execute (const uint8_t* command)
 { 
 	//argsBuffer holds the newly formatted args
 	uint8_t argsBuffer [128];
-
+	if(command==NULL)
+		return -1;
 	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
 	uint8_t programName[32];
 	uint32_t i;
@@ -50,6 +51,7 @@ int32_t do_execute (const uint8_t* command)
 		programName[i] = 0;
 	
 	int32_t pid = create_task(programName, argsBuffer);
+
 	if (pid < 0)
 		return -1;
 	switch_task((uint32_t)pid);
