@@ -29,7 +29,7 @@ static int32_t init_task_pd(task_t * task)
 	
 	task->page_directory = (uint32_t*)(addr);
 	task->page_table = (uint32_t*)(addr) + 1024;
-	task->video_mem = (uint8_t*)(VIRTUAL_VID_MEM);
+	task->video_mem = (uint8_t*)(VIRTUAL_VID_MEM) + VIDEO;
 	
 	old_pd = pd;
 	old_pt = pt;
@@ -65,11 +65,16 @@ static int32_t init_task_pd(task_t * task)
 	//set page as 4MB, set supervisor priv., set r/w, and present
 	pd[EXECUTION_ADDR>>22] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
 	
+	//Set up user-space memory
+	pd[VIRTUAL_VID_MEM>>22] = (((unsigned int) VIDEO) & FIRST_10_BITS);
+	//set page as 4MB, set supervisor priv., set r/w, and present
+	pd[VIRTUAL_VID_MEM>>22] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
+	
 	//Set up mapped task memory
-	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
+	//map_page_directory(addr, EXECUTION_ADDR, 1, 1);
 	
 	//Set up video memory
-	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
 	pd = old_pd;
 	pt = old_pt;
