@@ -7,6 +7,8 @@
 
 #include "types.h"
 
+#define VIDEO 0xB8000
+
 /*
 *   This function clears the screen and draws the error description, error code, 
 *   instruction pointer, and process id.

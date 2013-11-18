@@ -103,7 +103,7 @@ done:
 	popl %esi
 	popl %ebx
 	popl %ebp
-	iret # Is this iret or ret?
+	iret
 	
 
 # Create the jump table for the system calls

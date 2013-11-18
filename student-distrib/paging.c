@@ -2,17 +2,6 @@
 #include "lib.h"
 #include "filesys.h"
 
-#define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
-#define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
-#define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
-#define NUM_PAGES 1024 /*number of pages in a page directory*/
-#define SIZE_4KB_PAGE 0x1000 /*this size of a 4kb page (4KB!)*/
-#define CR4_4MB_PAGE_BIT 0x10 /*bit of CR4 control register that enables 4mb paging*/
-#define CR0_PAGE_ENBL_BIT 0x80000000 /*bit of CR0 control register that enables paging*/
-#define SUPERVISOR_RW_PRESENT 0x3 /*bits necessary to set supervisor to priv., r/w adn pressent*/
-#define RW_PRESENT 0x3
-#define PAGE_SIZE_BIT 0x80 /*bit used to set page to 4MB */
-
 unsigned int * pd = &page_directory;
 unsigned int * pt = &page_table;
 

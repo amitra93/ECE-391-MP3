@@ -3,32 +3,33 @@
 #include "x86_desc.h"
 #include "task.h"
 #include "sched.h"
+#include "lib.h"
 
-#define VIDEO 0xB8000
+#define KERNEL_STACK_MASK 0x7FE000
+#define KERNEL_STACK_SIZE 0x2000
 #define INIT_TASK_ADDR   0x800000
 #define EXECUTION_ADDR  0x8000000
 #define VIRTUAL_VID_MEM 0x10000000
-#define FIRST_20_BITS 0xFFFFF000 /*first 20 bits of 32 bit value used for mask*/
-#define FIRST_10_BITS 0xFFC00000 /*first 10 bits of 32 bit value used for mask*/
-#define KERNEL_LOCATION   0x400000 /*starting location in memory where kernel resides*/
-#define NUM_PAGES 1024 /*number of pages in a page directory*/
-#define SIZE_4KB_PAGE 0x1000 /*this size of a 4kb page (4KB!)*/
-#define CR4_4MB_PAGE_BIT 0x10 /*bit of CR4 control register that enables 4mb paging*/
-#define CR0_PAGE_ENBL_BIT 0x80000000 /*bit of CR0 control register that enables paging*/
-#define SUPERVISOR_RW_PRESENT 0x3 /*bits necessary to set supervisor to priv., r/w adn pressent*/
-#define RW_PRESENT 0x3
-#define USER_RW_PRESENT 0x7
-#define PAGE_SIZE_BIT 0x80 /*bit used to set page to 4MB */
+#define ELAGS_IF 0x200
 
+uint32_t get_task_addr(uint32_t pid)
+{
+	return INIT_TASK_ADDR + (pid * SIZE_4MB_PAGE);
+}
+
+uint32_t get_task_stack_addr(uint32_t pid)
+{
+	return INIT_TASK_ADDR - (KERNEL_STACK_SIZE * pid) - 4;
+}
 
 static int32_t init_task_pd(task_t * task)
 {
 	uint32_t i;
 	uint32_t *old_pd, *old_pt;
-	uint32_t tmp_addr, addr = 0x800000 + (task->pid * 0x400000);
+	uint32_t tmp_addr, addr = get_task_addr(task->pid);
 	
 	task->page_directory = (uint32_t*)(addr);
-	task->page_table = (uint32_t*)(addr) + 1024;
+	task->page_table = (uint32_t*)(addr) + NUM_PAGES;
 	task->video_mem = (uint8_t*)(VIRTUAL_VID_MEM) + VIDEO;
 	
 	old_pd = pd;
@@ -51,30 +52,16 @@ static int32_t init_task_pd(task_t * task)
 	}
 	
 	//sets up 4MB page for kernel and puts proper dir. address in
-	pd[1] = (((unsigned int) KERNEL_LOCATION) & FIRST_10_BITS);
-	//set page as 4MB, set supervisor priv., set r/w, and present
-	pd[1] |=  ( PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT);  
+	map_page_directory(KERNEL_LOCATION, KERNEL_LOCATION, 1, 0);
 	
 	//Set up user-space memory
-	pd[2 + task->pid] = (((unsigned int) addr) & FIRST_10_BITS);
-	//set page as 4MB, set supervisor priv., set r/w, and present
-	pd[2 + task->pid] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
-
-	//Set up user-space memory
-	pd[EXECUTION_ADDR>>22] = (((unsigned int) addr) & FIRST_10_BITS);
-	//set page as 4MB, set supervisor priv., set r/w, and present
-	pd[EXECUTION_ADDR>>22] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
-	
-	//Set up user-space memory
-	pd[VIRTUAL_VID_MEM>>22] = (((unsigned int) VIDEO) & FIRST_10_BITS);
-	//set page as 4MB, set supervisor priv., set r/w, and present
-	pd[VIRTUAL_VID_MEM>>22] |=  ( PAGE_SIZE_BIT | USER_RW_PRESENT);  
+	map_page_directory(addr, addr, 1, 1);
 	
 	//Set up mapped task memory
-	//map_page_directory(addr, EXECUTION_ADDR, 1, 1);
-	
+	map_page_directory(addr, EXECUTION_ADDR, 1, 1);
+
 	//Set up video memory
-	//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
 	pd = old_pd;
 	pt = old_pt;
@@ -88,13 +75,13 @@ task_t * init_task(int32_t pid)
 	uint32_t stack_addr;
 	uint8_t i;
 	
-	stack_addr = 0x800000 - (0x2000*pid) - 4;
-	task = (task_t*)(stack_addr & 0x7FE000);
+	stack_addr = get_task_stack_addr(pid);
+	task = (task_t*)(stack_addr & KERNEL_STACK_MASK);
 	task->pid = pid;	
 	
 	init_task_pd(task);
 	
-	task->tss.esp = EXECUTION_ADDR + 0x400000 - 4;
+	task->tss.esp = EXECUTION_ADDR + SIZE_4MB_PAGE - 4;
 	task->tss.ebp = 0;
 	task->tss.esp0 = stack_addr;
 	task->tss.ss0 = KERNEL_DS;
@@ -102,9 +89,9 @@ task_t * init_task(int32_t pid)
 	task->tss.cs = USER_CS;
 	task->tss.ds = USER_DS;
 	task->tss.cr3 = (uint32_t)task->page_directory;
-	task->tss.eip = 0; //Set to this to induce a page fault if no program loaded
+	task->tss.eip = 0; 
 	task->tss.ldt_segment_selector = 0;
-	task->tss.eflags = 1 << 9;
+	task->tss.eflags = ELAGS_IF;
 	
 	task->parent_task = NULL;
 	task->child_task = NULL;
@@ -145,7 +132,7 @@ int32_t load_tss(task_t * task)
 
 task_t * get_task(int32_t pid)
 {
-	return (task_t*)((0x800000 - (0x2000*pid) - 4) & 0x7FE000);
+	return (task_t*)((INIT_TASK_ADDR - (KERNEL_STACK_SIZE*pid) - 4) & KERNEL_STACK_MASK);
 }
 
 int32_t setup_task_switch(task_t * old_task, task_t * new_task)

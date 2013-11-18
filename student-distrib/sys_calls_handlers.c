@@ -49,35 +49,19 @@ int32_t do_execute (const uint8_t* command)
 	for (i = pgmNameIndex; i < 32; i ++)
 		programName[i] = 0;
 	
-	//Create page directory...or is it just a page?
-	//Load program into memory
-		//load_program(&programName, uint8_t * pgrm_addr)
-
-	/*	Create new task struct
-			1) Get PID
-			2) FD Array: Sets the Stdin, Stdout
-			3) Sets children/parent/siblings
-	
-		Context Switch
-			1) Switch TSS 
-				a) Switching the segments
-				b) Switching CR3
-			2) Set up Stack
-			3) IRET*/
-	//print_error("Test", 0, 0, 1);
 	int32_t pid = create_task(programName, argsBuffer);
-	if (pid >= 0)
-		switch_task((uint32_t)pid);
-	
+	if (pid < 0)
+		return -1;
+	switch_task((uint32_t)pid);
 	return 0; 
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
-	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1);
+	return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
 }
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
 {
-	return fd < 0 ? -1 : ((get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1);
+	return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
@@ -137,24 +121,11 @@ int32_t do_open (const uint8_t* filename) {
 }
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
-	if(curTask==NULL || fd < 2 || fd>6)
+	if(curTask==NULL || fd < 2 || fd>7)
 		return -1;
-		
-	/*
-	if(curTask->files[fd].fops != NULL)
-	{
-		return curTask->files[fd].fops->close(fd);
-	}
-	else{
-		curTask->files[fd].flags =0;
-		curTask->files[fd].inode = NULL;
-		curTask->files[fd].offset =0;
-		curTask->files[fd].fops = NULL;
-		return 0;
-	}*/
-
 	if ((curTask->files[fd].flags & 0x1) != 1)
 		return -1;
+
 	curTask->files[fd].fops->close(fd);
 	curTask->files[fd].flags =0;
 	curTask->files[fd].inode = NULL;

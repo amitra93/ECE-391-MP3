@@ -3,7 +3,9 @@
 #include "filesys.h"
 #include "lib.h"
 
+#define DEBUG
 #define EXECUTION_ADDR 0x8000000
+#define PROGRAM_IMAGE 0x48000
 
 #define iret()					\
 	do { 						\
@@ -51,7 +53,6 @@
 			  "=r"((task)->tss.ebp));					\
 	}while(0)
 	
-		
 sched_t schedular = {
 	.task_vector = 0,
 	.max_tasks = 7,
@@ -90,21 +91,18 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 		return -1;
 		
 	//Map the file image into memory
-	addr = 0x800000 + (pid * 0x400000);
+	addr = get_task_addr(pid);
 
+	//Set up user-space memory
 	get_cr3(pd);
 	map_page_directory(addr, addr, 1, 1);
-	//Set up user-space memory
-	//pd[2 + pid] = (((unsigned int) addr) & 0xFFC00000);
-	//set page as 4MB, set supervisor priv., set r/w, and present
-	//pd[2 + pid] |=  (0x87);  
 	
 	//Load the file image
 	task = init_task(pid);
 	if (schedular.cur_task != -1)
 		task->parent_task = get_task(schedular.cur_task);
 		
-	if (load_program_to_task(task, addr + 0x48000, fname, args) == -1)
+	if (load_program_to_task(task, addr + PROGRAM_IMAGE, fname, args) == -1)
 	{
 		clear_pid(pid);
 		return -1;
@@ -123,11 +121,10 @@ int32_t end_task(int32_t pid)
 	set_task_cr3(parent_task);
 	get_cr3(pd);
 	
-	addr = 0x800000 + (pid * 0x400000);
+	addr = get_task_addr(pid);
 	clear_pid(pid);
 	clear_pde(addr);
 	
-	//pd[(addr & 0xFFC00000) >> 22] = 0;
 	--schedular.num_tasks;
 	
 	set_cur_task(parent_task->pid);
@@ -141,12 +138,7 @@ task_t * get_cur_task()
 
 int32_t set_cur_task(int32_t pid)
 {
-	//uint32_t addr;
-	
-	schedular.cur_task = pid;
-	//addr = 0x800000 + (pid * 0x400000);
-	//map_page_directory(addr, EXECUTION_ADDR, 1, 1);
-	
+	schedular.cur_task = pid;	
 	return 0;
 }
 
@@ -159,7 +151,9 @@ int32_t switch_task(int32_t pid)
 	old_task = get_cur_task();
 	new_task = get_task(pid);
 	
+	#ifdef DEBUG
 	printf("\n======== Now Running: %s(%d) ========\n", new_task->pName, pid);
+	#endif
 	
 	old_task->tss.eip = (uint32_t)(&&halt_addr);
 	
@@ -174,7 +168,11 @@ halt_addr:
 	asm volatile("movb %%al, %0;":"=g"(ret));
 	if ((int8_t)ret == -1)
 		ret = -1;
+		
+	#ifdef DEBUG
 	printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);
+	#endif
+	
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());
 	return ret;
