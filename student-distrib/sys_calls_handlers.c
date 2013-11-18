@@ -135,8 +135,20 @@ int32_t do_open (const uint8_t* filename) {
 }
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
-	if(curTask==NULL || fd < 0)
+	if(curTask==NULL || fd < 2 || fd>6)
 		return -1;
+	if(curTask->files[fd].fops != NULL)
+	{
+		return curTask->files[fd].fops->close(fd);
+	}
+	else{
+		curTask->files[fd].flags =0;
+		curTask->files[fd].inode = NULL;
+		curTask->files[fd].offset =0;
+		curTask->files[fd].fops = NULL;
+		return 0;
+	}
+
 	if ((curTask->files[fd].flags & 0x1) != 1)
 		return -1;
 	curTask->files[fd].fops->close(fd);
@@ -144,6 +156,7 @@ int32_t do_close (int32_t fd) {
 	curTask->files[fd].inode = NULL;
 	curTask->files[fd].offset =0;
 	curTask->files[fd].fops = NULL;
+
 	return 0; 
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {

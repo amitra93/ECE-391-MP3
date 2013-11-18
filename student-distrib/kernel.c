@@ -194,8 +194,7 @@ entry (unsigned long magic, unsigned long addr)
 		
 	}
 		
-	terminal_open(NULL);
-	printf("Enabling terminal\n");
+	
 	
 
 	/* Init the PIC */
@@ -224,6 +223,10 @@ entry (unsigned long magic, unsigned long addr)
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
 	printf("Enabling Interrupts\n");
+
+	printf("Enabling terminal\n");
+	terminal_open(NULL);
+	
 	sti();
 
 	/* Execute the first program (`shell') ... */
