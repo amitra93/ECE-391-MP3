@@ -23,7 +23,11 @@ int
 rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
 	interrupt_received = 0;
-	while (!interrupt_received);
+	while (1)
+	{
+		if (interrupt_received == 1)
+			break;
+	}
 	return 0;
 }
 
