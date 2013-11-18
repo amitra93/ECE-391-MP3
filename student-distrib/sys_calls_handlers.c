@@ -16,7 +16,8 @@ int32_t do_execute (const uint8_t* command)
 { 
 	//argsBuffer holds the newly formatted args
 	uint8_t argsBuffer [128];
-
+	if(command==NULL)
+		return -1;
 	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
 	uint8_t programName[32];
 	uint32_t i;
@@ -49,27 +50,14 @@ int32_t do_execute (const uint8_t* command)
 	for (i = pgmNameIndex; i < 32; i ++)
 		programName[i] = 0;
 	
-	//Create page directory...or is it just a page?
-	//Load program into memory
-		//load_program(&programName, uint8_t * pgrm_addr)
-
-	/*	Create new task struct
-			1) Get PID
-			2) FD Array: Sets the Stdin, Stdout
-			3) Sets children/parent/siblings
-	
-		Context Switch
-			1) Switch TSS 
-				a) Switching the segments
-				b) Switching CR3
-			2) Set up Stack
-			3) IRET*/
-	//print_error("Test", 0, 0, 1);
 	int32_t pid = create_task(programName, argsBuffer);
-	if (pid >= 0)
+	if (pid >= 0){
 		switch_task((uint32_t)pid);
-	
-	return 0; 
+		return 0;
+	}
+	else
+		return -1;
+ 
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {

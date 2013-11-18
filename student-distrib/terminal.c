@@ -50,7 +50,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	for (i = 0; i < nbytes; i++){
 		if (fd){
 			if (buffer_pointer >= BUFFER_SIZE) {
-				return -1;
+				return BUFFER_SIZE-buffer_pointer;
 			}
 			input[buffer_pointer] = string[i];
 			if (string[i] == '\n' || string[i] == '\r'){
