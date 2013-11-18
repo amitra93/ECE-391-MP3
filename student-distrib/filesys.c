@@ -323,7 +323,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 	for (i = 0; i < length; i ++)
 	{
 		//Copy byte
-		buf[i] = dblock->data[i + offset];
+		buf[i] = dblock->data[(i + offset) % DATABLOCK_SIZE];
 		
 		//If the next byte is in the next page, get the beginning of next page
 		if ( (i + 1 + offset) % DATABLOCK_SIZE == 0)

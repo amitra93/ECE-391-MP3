@@ -77,18 +77,11 @@ static int32_t init_task_pd(task_t * task)
 	return 0;
 }
 
-//To-Do: Set file[0]=stdin and file[1]=stdout
 task_t * init_task(int32_t pid)
 {
 	task_t * task;
 	uint32_t stack_addr;
 	uint8_t i;
-	
-	/*
-	* DEBUG MESSAGE:
-	* The esp's might be incorrect. I don't know if they point directly to the last byte, 
-	* or if they point to the byte right before it.
-	*/
 	
 	stack_addr = 0x800000 - (0x2000*pid) - 4;
 	task = (task_t*)(stack_addr & 0x7FE000);

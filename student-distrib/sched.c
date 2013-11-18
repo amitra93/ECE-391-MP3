@@ -54,7 +54,7 @@
 		
 sched_t schedular = {
 	.task_vector = 0,
-	.max_tasks = 6,
+	.max_tasks = 7,
 	.num_tasks = 0,
 	.cur_task = -1
 };
