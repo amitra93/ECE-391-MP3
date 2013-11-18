@@ -18,7 +18,7 @@
 #define SIXTEEN			0x0F
 #define TOP4BITS		0xF0
 
-int interrupt_received;
+volatile int interrupt_received;
 
 
 /* Externally-visible functions */
