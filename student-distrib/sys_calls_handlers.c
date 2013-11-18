@@ -5,10 +5,10 @@
 
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
 
-int32_t do_halt (uint32_t status) 
+int32_t do_halt (uint8_t status) 
 { 
 	task_t * parent_task = get_cur_task()->parent_task;
-	return_from_halt((uint8_t)status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
+	return_from_halt(status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
 	return 0;
 }
 
@@ -54,8 +54,7 @@ int32_t do_execute (const uint8_t* command)
 
 	if (pid < 0)
 		return -1;
-	switch_task((uint32_t)pid);
-	return 0; 
+	return switch_task((uint32_t)pid);
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {

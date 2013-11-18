@@ -5,6 +5,16 @@
 #include "filesys.h"
 #include "x86_desc.h"
 
+typedef enum task_state {
+	TASK_RUNNING = 0,
+	TASK_STOPPED,
+	TASK_PREEMPT,
+	TASK_SUICIDE,
+	TASK_EXCEPTION,
+	TASK_INTERRUPTIBLE,
+	TASK_UNINTERRUPTIBLE
+} task_state;
+
 //To-Do: Fill out rest of struct
 typedef struct task_t{
 	struct task_t * parent_task; //Parent
@@ -21,7 +31,7 @@ typedef struct task_t{
 	uint8_t * video_mem;
 	
 	//States (Task Running, Task Stopped, Interruptible, Uninterruptible, Should be halted)
-	
+	task_state state;
 	//Signals
 	
 	//Scheduling Statistics

@@ -55,7 +55,7 @@
 	
 sched_t schedular = {
 	.task_vector = 0,
-	.max_tasks = 7,
+	.max_tasks = 30,
 	.num_tasks = 0,
 	.cur_task = -1
 };
@@ -136,9 +136,23 @@ task_t * get_cur_task()
 	return schedular.cur_task < 0 ? NULL : get_task(schedular.cur_task );
 }
 
+task_state get_cur_task_state()
+{
+	return get_cur_task()->state;
+}
+
 int32_t set_cur_task(int32_t pid)
 {
+	if (get_cur_task() != NULL)
+		get_cur_task()->state = TASK_PREEMPT;
 	schedular.cur_task = pid;	
+	get_cur_task()->state = TASK_RUNNING;
+	return 0;
+}
+
+int32_t set_cur_task_state(task_state state)
+{
+	get_cur_task()->state = state;
 	return 0;
 }
 
@@ -165,9 +179,9 @@ int32_t switch_task(int32_t pid)
 	iret();
 
 halt_addr:
-	asm volatile("movb %%al, %0;":"=g"(ret));
-	if ((int8_t)ret == -1)
-		ret = -1;
+	asm volatile("movb %%al, %0;":"=m"(ret));
+	if (get_cur_task_state() == TASK_EXCEPTION)
+		ret = 256;
 		
 	#ifdef DEBUG
 	printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);

@@ -28,6 +28,7 @@ Aborts
 #include "lib.h"
 #include "sys_calls.h"
 #include "terminal.h"
+#include "sched.h"
 /*
 *  GET_ARGS(error, instr_ptr, pid)
 *  Description: Gets the arguments from registers
@@ -55,7 +56,8 @@ void do_common_intr(void){
 	uint8_t key;
 	sti();
 	terminal_read(0, &key, 1);
-	halt(-1);
+	set_cur_task_state(TASK_EXCEPTION);
+	halt(0);
 }
 
 /* Generate an unknown interrupt exception */
