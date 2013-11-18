@@ -101,7 +101,11 @@ process_keypress(void)
 unsigned char keyboard_wait_for_new_line(int max_chars){
 	int i = 0;
 	while (i < max_chars){
-		while (!keyboard_interrupt_received);
+		while (1)
+		{
+			if (keyboard_interrupt_received == 1)
+				break;
+		}
 		i++;
 		keyboard_interrupt_received = 0;
 		if (keyboard_last_printable_key == '\n'){

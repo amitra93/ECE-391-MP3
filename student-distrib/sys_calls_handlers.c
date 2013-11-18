@@ -81,6 +81,8 @@ int32_t do_write (int32_t fd, const void* buf, int32_t nbytes)
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
+	if (screen_start < 0x8000000 || screen_start >= 0x8400000)
+		return -1;
 	*screen_start = get_cur_task()->video_mem;
 	return 0;
 }
