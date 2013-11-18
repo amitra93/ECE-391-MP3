@@ -55,7 +55,7 @@ void do_common_intr(void){
 	uint8_t key;
 	sti();
 	terminal_read(0, &key, 1);
-	halt(0);
+	halt(-1);
 }
 
 /* Generate an unknown interrupt exception */
