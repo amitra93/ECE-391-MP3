@@ -7,6 +7,7 @@
 #include "task.h"
 #include "sched.h"
 
+#define VIDEO 0xB8000
 #define NUM_COLS 80
 #define NUM_ROWS 25
 #define ATTRIB 0x7
@@ -290,8 +291,11 @@ set_cursor_pos(int32_t x, int32_t y)
 {
 	if (x >= 0 && x < NUM_COLS)
 		screen_x = x;
-	if (y >= 0 && y < NUM_ROWS)
+	if (y >= 0 &&
+	 y < NUM_ROWS)
 		screen_y = y;
+	//outb(screen_x, 0x0E);
+	//outb(screen_y, 0x0F);
 }
 
 

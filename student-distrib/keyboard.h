@@ -12,27 +12,59 @@
 #define CMD_REG			0x64
 
 
-/* Special keys */
-#define LSHIFT_PRESS	0x2A
-#define RSHIFT_PRESS	0x36
-#define	CAPS_PRESS		0x3A
-#define LSHIFT_RELEASE	0xAA
-#define RSHIFT_RELEASE	0xB6
-#define LCNTL_PRESS		0x1D
-#define LCNTL_RELEASE	0x9D
-#define L_PRESS			0x26
-#define BKSP_PRESS		0x0E
+// ______________KEYBOARD CHARACTER STUFF______________
+
+
+typedef struct key {
+	unsigned char lowercase_char;
+	unsigned char uppercase_char;
+	unsigned char shift_char;
+	unsigned char pressed;
+	unsigned char to_display;
+} key;
+
+
+
+typedef struct key_orientation {
+	key* keyboard_key;
+	unsigned char orientation;
+} key_orientation;
+
+
+void init_keys();
+
+unsigned char is_shift_pressed();
+
+unsigned char is_caps_lock_pressed();
+
+unsigned char is_control_pressed();
+
+unsigned char is_alt_pressed();
+
+unsigned char is_enter_pressed();
+
+unsigned char is_pressed(key* keyboard_key);
+
+unsigned char print_key(key* keyboard_key);
+
+//____________END KEYBOARD CHARACTER STUFF_____________
+
+
+
+
 
 // global variable to select between uppercase and lowercase letters
-char* array_to_use;
+//char* array_to_use;
 
 // determine status of whether SHIFT/CAPS is pressed or not
-int is_uppercase;
+//int is_uppercase;
 
-int is_control_pressed;
+//int is_control_pressed;
 
-volatile int keyboard_interrupt_received;
-unsigned char keyboard_last_printable_key;
+volatile int shortcut_received;
+
+
+//unsigned char keyboard_last_printable_key;
 
 /* Externally-visible functions */
 
@@ -46,7 +78,7 @@ unsigned char keyboard_last_printable_key;
  * OUTPUTS: none
  * SIDE EFFECTS: sets variable that determines whether to select from uppercase or lowercase array
  */
-void determine_case(unsigned char char_pressed);
+//void determine_case(unsigned char char_pressed);
 
 /*
  * void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
@@ -56,7 +88,7 @@ void determine_case(unsigned char char_pressed);
  * OUTPUTS: none
  * SIDE EFFECTS: sets variable that determines whether to select from uppercase or lowercase array
  */
-void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
+//void change_keys_pressed(unsigned char char_pressed, unsigned char char_to_print);
 
 
 /*
@@ -80,6 +112,8 @@ void keyboard_init(void);
  * SIDE EFFECTS: sends relevant keypresses to the console
  */
 void process_keypress(void);
+
+void process_shortcuts(void);
 
 unsigned char keyboard_wait_for_new_line(int max_chars);
 
