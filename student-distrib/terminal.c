@@ -62,6 +62,7 @@ int
 terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	int i;
 	terminal* current_terminal = get_current_terminal();
+	set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 	if (buf == NULL || fd != 1 || current_terminal->in_use){
 		return -1;
 	}
@@ -77,6 +78,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 		}
 		printf("%c", string[i]);
 	}
+	get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
 	current_terminal->in_use = 0;
 	return 0;
 }
@@ -87,7 +89,15 @@ terminal_close(int32_t fd){
 }
 
 void terminal_backspace(){
-
+	terminal* current_terminal = get_current_terminal();
+	if (current_terminal->input.input_pointer <= 0){
+		return;
+	}
+	current_terminal->screen_x -= current_terminal->input.input_pointer;
+	terminal_write(1,&current_terminal->input.line, current_terminal->input.input_pointer-1);
+	char str = ' ';
+	printf("%c",str);
+	current_terminal->input.input_pointer--;
 }
 
 void terminal_clear(){
@@ -101,7 +111,7 @@ void terminal_clear(){
 
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_current_terminal();
-	if (current_terminal->input.input_pointer >= BUFFER_SIZE){
+	if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 		return;
 	}
 	current_terminal->input.line[current_terminal->input.input_pointer++] = char_to_print;
@@ -111,6 +121,9 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 	}
 	if (!(current_terminal->in_use)){
 		terminal_write(1, &char_to_print, 1);
+		if (current_terminal->screen_x == 0 && current_terminal->screen_y == 0){
+			current_terminal->screen_y++;
+		}
 	}
 }
 

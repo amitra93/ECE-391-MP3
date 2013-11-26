@@ -10,7 +10,7 @@
 #define DATA_PORT		0x60
 #define STATUS_REG		0x64
 #define CMD_REG			0x64
-
+#define BUFFER_SIZE		128
 
 // ______________KEYBOARD CHARACTER STUFF______________
 

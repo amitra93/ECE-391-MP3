@@ -58,7 +58,7 @@
  key g 				= { 'g' , 'G' , 'G' , 0, 1 };
  key h 				= { 'h' , 'H' , 'H' , 0, 1 };
  key j 				= { 'j' , 'J' , 'J' , 0, 1 };
- key k 				= { 'w' , 'W' , 'W' , 0, 1 };
+ key k 				= { 'k' , 'K' , 'K' , 0, 1 };
  key l 				= { 'l' , 'L' , 'L' , 0, 1 };
  key semicolon 		= { ';' , ';' , ':' , 0, 1 };
 key single_quote 	= { '\'', '\'', '\"', 0, 1 };
@@ -609,6 +609,7 @@ void process_shortcuts(void){
 	}
 	if (is_pressed(&backspace)){
 		terminal_backspace();
+		backspace.pressed = 0;
 		shortcut_received = 1;
 		return;
 	}
@@ -643,7 +644,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 	terminal* current_terminal = get_current_terminal();
 	int old_input_pointer = current_terminal->input.input_pointer;
 	while (old_input_pointer > current_terminal->input.input_pointer - max_chars){
-		if (is_enter_pressed()){
+		if (is_enter_pressed() && current_terminal->input.input_pointer < BUFFER_SIZE-1){
 			enter.pressed = 0;
 			keypad_enter.pressed = 0;
 			return get_last_terminal_line()->input_pointer - old_input_pointer;
