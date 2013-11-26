@@ -6,6 +6,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "keyboard.h"
+#include "sched.h"
 
 int
 terminal_open(const uint8_t* filename){	
@@ -16,6 +17,7 @@ terminal_open(const uint8_t* filename){
 		terminal_list[i].screen_x = 0;
 		terminal_list[i].screen_y = 0;
 		terminal_list[i].history_index = 0;
+		terminal_list[i].starting_offset = 0;
 		terminal_list[i].input.input_pointer = 0;
 		for (j = 0; j < BUFFER_SIZE; j++){
 			terminal_list[i].input.line[j] = '\0';
@@ -40,6 +42,9 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	if (buf == NULL){
 		return -1;
 	}
+	int temp;
+	terminal* current_terminal = get_current_terminal();
+	get_cursor_pos(&current_terminal->starting_offset, &temp);
 	if (nbytes <= 0){
 		return 0;
 	}
@@ -74,7 +79,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	for (i = 0; i < nbytes; i++){
 		if (i % nbytes == 0 && i > 0){
 			char newline = '\n';
-			printf("%c", newline);
+			printf("%c", &newline);
 		}
 		printf("%c", string[i]);
 	}
@@ -93,11 +98,30 @@ void terminal_backspace(){
 	if (current_terminal->input.input_pointer <= 0){
 		return;
 	}
-	current_terminal->screen_x -= current_terminal->input.input_pointer;
-	terminal_write(1,&current_terminal->input.line, current_terminal->input.input_pointer-1);
-	char str = ' ';
-	printf("%c",str);
-	current_terminal->input.input_pointer--;
+	/*
+	if (current_terminal->screen_x <= 0){
+		current_terminal->screen_x = NUM_COLS - 1;
+		current_terminal->screen_y--;
+	}
+	*/
+	if (current_terminal->input.input_pointer <= NUM_COLS - current_terminal->starting_offset){
+		if (current_terminal->screen_x == 0){
+			current_terminal->screen_x = NUM_COLS;
+		}
+		current_terminal->screen_x -= current_terminal->input.input_pointer;
+		terminal_write(1,&current_terminal->input.line, current_terminal->input.input_pointer-1);
+		char str = ' ';
+		printf("%c",str);
+		current_terminal->input.input_pointer--;
+	}
+	else {
+		current_terminal->screen_x -= (current_terminal->input.input_pointer + NUM_COLS - current_terminal->starting_offset);
+		terminal_write(1,&current_terminal->input.line + NUM_COLS - current_terminal->starting_offset, current_terminal->input.input_pointer - 1 - NUM_COLS + current_terminal->starting_offset);
+		char str = ' ';
+		printf("%c",str);
+		current_terminal->input.input_pointer--;
+
+	}
 }
 
 void terminal_clear(){
@@ -116,12 +140,16 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 	}
 	current_terminal->input.line[current_terminal->input.input_pointer++] = char_to_print;
 	if (char_to_print == '\n'){
-		terminal_copy_to_history();
+		int8_t* shell_name = "shell";
+		int8_t* cur_task_name = (int8_t*) get_cur_task()->pName;
+		if (!strncmp(cur_task_name, shell_name, 5)){
+			terminal_copy_to_history();
+		}
 		current_terminal->input.input_pointer = 0;
 	}
 	if (!(current_terminal->in_use)){
 		terminal_write(1, &char_to_print, 1);
-		if (current_terminal->screen_x == 0 && current_terminal->screen_y == 0){
+		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
 			current_terminal->screen_y++;
 		}
 	}

@@ -13,6 +13,7 @@
 #define NUM_ROWS						25
 #define BUFFER_SIZE						128
 #define MAX_SUPPORTED_HISTORY			16
+#define SHELL_OFFSET					7
 
 typedef struct terminal_line {
 	int input_pointer;
@@ -23,8 +24,10 @@ typedef struct terminal {
 	int screen_x;
 	int screen_y;
 	int history_index;
+	int starting_offset;
 	volatile int in_use;
 	terminal_line input;
+	terminal_line previous_input;
 	char video_memory[NUM_ROWS * NUM_COLS];
 	terminal_line input_history[MAX_SUPPORTED_HISTORY];
 } terminal;
