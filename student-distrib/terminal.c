@@ -17,6 +17,7 @@ terminal_open(const uint8_t* filename){
 		terminal_list[i].screen_x = 0;
 		terminal_list[i].screen_y = 0;
 		terminal_list[i].history_index = 0;
+		terminal_list[i].chars_printed = 0;
 		terminal_list[i].starting_offset = 0;
 		terminal_list[i].input.input_pointer = 0;
 		for (j = 0; j < BUFFER_SIZE; j++){
@@ -77,11 +78,19 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	char* string = (char*) buf;
 	current_terminal->in_use = 1;
 	for (i = 0; i < nbytes; i++){
-		if (i % nbytes == 0 && i > 0){
+		if (current_terminal->chars_printed > NUM_COLS){
 			char newline = '\n';
-			printf("%c", &newline);
+			printf("%c", newline);
+			current_terminal->chars_printed = 0;
+		}
+		else if (string[i] == '\n'){
+			current_terminal->chars_printed = 0;
+		}
+		else if (string[i] == '\0'){
+			continue;
 		}
 		printf("%c", string[i]);
+		current_terminal->chars_printed++;
 	}
 	get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
 	current_terminal->in_use = 0;
@@ -140,17 +149,17 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 	}
 	current_terminal->input.line[current_terminal->input.input_pointer++] = char_to_print;
 	if (char_to_print == '\n'){
-		int8_t* shell_name = "shell";
-		int8_t* cur_task_name = (int8_t*) get_cur_task()->pName;
-		if (!strncmp(cur_task_name, shell_name, 5)){
-			terminal_copy_to_history();
-		}
+		terminal_copy_to_history();
 		current_terminal->input.input_pointer = 0;
 	}
 	if (!(current_terminal->in_use)){
 		terminal_write(1, &char_to_print, 1);
 		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
 			current_terminal->screen_y++;
+			if (current_terminal->screen_y >= NUM_ROWS -1){
+				scroll_up();
+			}
+			current_terminal->chars_printed = 0;
 		}
 	}
 }
@@ -160,23 +169,34 @@ terminal* get_current_terminal(){
 }
 
 terminal_line* get_last_terminal_line(){
-	int temp = 0;
+	//int temp = 0;
 	terminal* current_terminal = get_current_terminal();
-	if (current_terminal->history_index > 0){
-		temp = current_terminal->history_index - 1;
-	}
-	return &current_terminal->input_history[temp];
+	//if (current_terminal->history_index > 0){
+	//	temp = current_terminal->history_index - 1;
+	//}
+	return &current_terminal->previous_input;
 }
 
 void terminal_copy_to_history(){
 	int i = 0;
+	int8_t* shell_name = "shell";
+	int8_t* cur_task_name = (int8_t*) get_cur_task()->pName;
+	int not_copy_to_history = strncmp(cur_task_name, shell_name, 5);
 	terminal* current_terminal = get_current_terminal();
-	current_terminal->input_history[current_terminal->history_index].input_pointer = current_terminal->input.input_pointer;
+	if (!not_copy_to_history){
+		current_terminal->input_history[current_terminal->history_index].input_pointer = current_terminal->input.input_pointer;
+	}
+	current_terminal->previous_input.input_pointer = current_terminal->input.input_pointer;
 	while (i < current_terminal->input.input_pointer){
-		current_terminal->input_history[current_terminal->history_index].line[i] = current_terminal->input.line[i];
+		current_terminal->previous_input.line[i] = current_terminal->input.line[i];
+		if (!not_copy_to_history){
+			current_terminal->input_history[current_terminal->history_index].line[i] = current_terminal->input.line[i];
+		}
 		i++;
 	}
-	current_terminal->history_index++;
+	if (!not_copy_to_history){
+		current_terminal->history_index++;
+	}
 }
 
 void set_current_terminal(int terminal_index){
