@@ -23,6 +23,8 @@ extern void idt_keyboard(void);
  * OUTPUTS: none
  * SIDE EFFECTS: Calls RTC interrupt testing functions
  */
-extern void idt_rtc(void);		
+extern void idt_rtc(void);	
+
+extern void idt_pit(void);	
 
 #endif /* _HARDWARE_INTR_H_ */

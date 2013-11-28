@@ -16,6 +16,7 @@
 #include "filesys.h"
 #include "terminal.h"
 #include "sched.h"
+#include "pit.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -189,9 +190,9 @@ entry (unsigned long magic, unsigned long addr)
 		SET_SYSTEM_GATE(idt[0x80], system_call);
 
 		/* Initialize hardware interrupts */
+		SET_INTR_GATE(idt[32], &idt_pit);
 		SET_INTR_GATE(idt[33], &idt_keyboard);
 		SET_INTR_GATE(idt[40], &idt_rtc);
-		
 	}
 		
 	
@@ -214,10 +215,13 @@ entry (unsigned long magic, unsigned long addr)
 	
 	printf("Enabling keyboard\n");
 	keyboard_init();
-
+	
 	printf("Initializing tasks\n");
 	tasks_init();
 
+	printf("Enabling PIT\n");
+	pit_init();
+	
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close

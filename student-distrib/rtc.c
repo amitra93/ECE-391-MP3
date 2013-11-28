@@ -52,20 +52,22 @@ rtc_close(int32_t fd)
 void
 rtc_process_interrupt(void)
 {
-	cli();
+	unsigned long flags;
+	cli_and_save(flags);
 	// Register C must be read on each interrupt, else more interrupts will not be generated
 	outb(STATUS_REG_C, REGISTER);
 	// we don't care about the value for now
 	inb(IO_PORT);
 	interrupt_received = 1;
-	sti();
+	restore_flags(flags);
 }
 
 
 void
 rtc_init(void)
 {
-	cli();
+	unsigned long flags;
+	cli_and_save(flags);
 	
 	// select Register B and disable NMI
 	outb(STATUS_REG_B, REGISTER);
@@ -78,18 +80,21 @@ rtc_init(void)
 
 	interrupt_received = 0;
 
-	sti();
+	restore_flags(flags);
 
 }
 
 int32_t
 rtc_set_frequency(int32_t frequency){
+	unsigned long flags;
+	cli_and_save(flags);
 	if (frequency < 2 || frequency > 1024){
+		restore_flags(flags);
 		return -1;
 	}
-	cli();
 	int32_t power_of_2 = rtc_get_power_of_2(frequency);
 	if (power_of_2 == INT_MAX){
+		restore_flags(flags);
 		return -1;
 	}
 	int32_t rate = (16 - power_of_2);
@@ -98,7 +103,7 @@ rtc_set_frequency(int32_t frequency){
 	char prev = inb(IO_PORT);
 	outb(STATUS_REG_A, REGISTER);
 	outb((prev & TOP4BITS) | rate, IO_PORT);
-	sti();
+	restore_flags(flags);
 	return 0;
 }
 

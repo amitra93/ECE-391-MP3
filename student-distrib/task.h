@@ -22,7 +22,8 @@ typedef struct task_t{
 	struct task_t * sibling_task; //Siblings
 
 	uint8_t pName[32];
-	int32_t pid; //PID
+	int32_t pid; //Process ID
+	int32_t ptid; //Process Tree ID
 	file_t files[8]; //File array
 	tss_t tss;//TSS
 	

@@ -5,9 +5,9 @@
 
 .align 4
 .data
-	.globl idt_keyboard, idt_rtc
+	.globl idt_keyboard, idt_rtc, idt_pit
 
-	.extern do_idt_keyboard, do_idt_rtc
+	.extern do_idt_keyboard, do_idt_rtc, do_idt_pit
 
 
 _idt_keyboard:
@@ -15,6 +15,9 @@ _idt_keyboard:
 
 _idt_rtc:
 	.long	do_idt_rtc
+	
+_idt_pit:
+	.long 	do_idt_pit
 	
 	/* 
 	* The follwoing code sets up a small calling convention for hardware interrupts by pushing the interrupt handler address onto the stack and jumping to the handle_idt function
@@ -32,6 +35,9 @@ idt_rtc:
 	pushl (_idt_rtc)
 	jmp handle_idt
 
+idt_pit:
+	pushl (_idt_pit)
+	jmp handle_idt
 /*
 * EDI : Handler Address
 */

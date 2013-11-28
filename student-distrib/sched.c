@@ -55,9 +55,15 @@
 	
 sched_t schedular = {
 	.task_vector = 0,
-	.max_tasks = 30,
+	.max_tasks = 7,
 	.num_tasks = 0,
-	.cur_task = -1
+	.cur_task = -1,
+	
+	.ptree_tasks = {-1},
+	.ptree_vector = 0,
+	.max_ptrees = 3,
+	.num_ptrees = 0,
+	.cur_ptree = -1,
 };
 	
 static int32_t clear_pid(int32_t pid)
@@ -80,6 +86,35 @@ static int32_t get_new_pid()
 	return -1;
 }
 
+static int32_t clear_ptid(int32_t ptid)
+{
+	schedular.ptree_vector &= ~(1 << ptid);
+	return 0;
+}
+
+static int32_t get_new_ptid()
+{
+	uint32_t i;
+	for (i = 0; i < schedular.max_ptrees; i ++)
+	{
+		if ( (schedular.ptree_vector & (1 << i)) == 0)
+		{
+			schedular.ptree_vector |= 1 << i;
+			return i;
+		}
+	}
+	return -1;
+}
+
+int32_t create_ptree ()
+{
+	int32_t ptid;
+	if ((ptid = get_new_ptid()) < 0)
+		return -1;
+	++num_ptrees;
+	ptree_tasks[ptid] = -1;
+}
+
 int32_t create_task(const uint8_t * fname, const uint8_t * args)
 {
 	task_t * task;
@@ -89,7 +124,7 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	//Get a new pid
 	if ( (pid = get_new_pid()) < 0)
 		return -1;
-		
+	
 	//Map the file image into memory
 	addr = get_task_addr(pid);
 
