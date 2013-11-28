@@ -107,12 +107,27 @@ void terminal_backspace(){
 	if (current_terminal->input.input_pointer <= 0){
 		return;
 	}
+	current_terminal->chars_printed--;
+	current_terminal->input.input_pointer--;
+	if (current_terminal->input.input_pointer != NUM_COLS+1){
+		current_terminal->screen_x--;
+	}
+	else {
+		if (current_terminal->screen_y > 0){
+			current_terminal->screen_y--;
+		}
+		current_terminal->screen_x = NUM_COLS - 1;
+	}
+	char str = '_';
+	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
+	printf("%c", str);
 	/*
 	if (current_terminal->screen_x <= 0){
 		current_terminal->screen_x = NUM_COLS - 1;
 		current_terminal->screen_y--;
 	}
 	*/
+	/*
 	if (current_terminal->input.input_pointer <= NUM_COLS - current_terminal->starting_offset){
 		if (current_terminal->screen_x == 0){
 			current_terminal->screen_x = NUM_COLS;
@@ -129,8 +144,8 @@ void terminal_backspace(){
 		char str = ' ';
 		printf("%c",str);
 		current_terminal->input.input_pointer--;
-
 	}
+	*/
 }
 
 void terminal_clear(){
