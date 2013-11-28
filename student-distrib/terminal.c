@@ -103,13 +103,12 @@ terminal_close(int32_t fd){
 }
 
 void terminal_backspace(){
+	char str = ' ';
 	terminal* current_terminal = get_current_terminal();
 	if (current_terminal->input.input_pointer <= 0){
 		return;
 	}
-	current_terminal->chars_printed--;
-	current_terminal->input.input_pointer--;
-	if (current_terminal->input.input_pointer != NUM_COLS+1){
+	if (current_terminal->input.input_pointer != (NUM_COLS - current_terminal->starting_offset)){
 		current_terminal->screen_x--;
 	}
 	else {
@@ -118,7 +117,8 @@ void terminal_backspace(){
 		}
 		current_terminal->screen_x = NUM_COLS - 1;
 	}
-	char str = '_';
+	current_terminal->chars_printed--;
+	current_terminal->input.input_pointer--;
 	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
 	printf("%c", str);
 	/*
