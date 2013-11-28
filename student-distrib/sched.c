@@ -3,7 +3,7 @@
 #include "filesys.h"
 #include "lib.h"
 
-#define DEBUG
+#define DEBUG		
 #define EXECUTION_ADDR 0x8000000
 #define PROGRAM_IMAGE 0x48000
 
@@ -200,9 +200,9 @@ int32_t switch_task(int32_t pid)
 	old_task = get_cur_task();
 	new_task = get_task(pid);
 	
-	#ifdef DEBUG
-	printf("\n======== Now Running: %s(%d) ========\n", new_task->pName, pid);
-	#endif
+	//#ifdef DEBUG
+	//printf("\n======== Now Running: %s(%d) ========\n", new_task->pName, pid);
+	//#endif
 	
 	old_task->tss.eip = (uint32_t)(&&halt_addr);
 	
@@ -218,9 +218,9 @@ halt_addr:
 	if (get_cur_task_state() == TASK_EXCEPTION)
 		ret = 256;
 		
-	#ifdef DEBUG
-	printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);
-	#endif
+	//#ifdef DEBUG
+	//printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);
+	//#endif
 	
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());

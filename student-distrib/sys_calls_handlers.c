@@ -2,11 +2,18 @@
 #include "sched.h"
 #include "lib.h"
 #include "filesys.h"
+#include "terminal.h"
 
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
 
 int32_t do_halt (uint8_t status) 
 { 
+	int x, y;
+	get_cursor_pos(&x, &y);
+	if (x > 0){
+		char str = '\n';
+		terminal_write(1, &str, 1);
+	}
 	task_t * parent_task = get_cur_task()->parent_task;
 	return_from_halt(status, parent_task->tss.ebp, parent_task->tss.esp, parent_task->tss.eip);
 	return 0;
