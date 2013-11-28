@@ -12,7 +12,7 @@ typedef struct sched_t {
 	
 	int32_t ptree_tasks[32];
 	int32_t ptree_vector;
-	uint32_t max_prees;
+	uint32_t max_ptrees;
 	uint32_t num_ptrees;
 	int32_t cur_ptree;
 	

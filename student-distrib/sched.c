@@ -111,8 +111,9 @@ int32_t create_ptree ()
 	int32_t ptid;
 	if ((ptid = get_new_ptid()) < 0)
 		return -1;
-	++num_ptrees;
-	ptree_tasks[ptid] = -1;
+	++schedular.num_ptrees;
+	schedular.ptree_tasks[ptid] = -1;
+	return ptid;
 }
 
 int32_t create_task(const uint8_t * fname, const uint8_t * args)
