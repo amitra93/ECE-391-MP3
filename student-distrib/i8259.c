@@ -46,7 +46,6 @@ i8259_init(void)
 	outb(slave_mask, SLAVE_DATA);
 	
 	restore_flags(flags);
-	sti();
 }
 
 /* Enable (unmask) the specified IRQ */
@@ -75,7 +74,6 @@ enable_irq(uint32_t irq_num)
 	}
 	
 	restore_flags(flags);
-	sti();
 	
 }
 
@@ -100,10 +98,7 @@ disable_irq(uint32_t irq_num)
 		outb(master_mask, MASTER_DATA);
 	}
 	
-	restore_flags(flags);
-	sti();
-	
-	
+	restore_flags(flags);	
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */

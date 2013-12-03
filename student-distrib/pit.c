@@ -1,6 +1,8 @@
 #include "pit.h"
 #include "lib.h"
 #include "i8259.h"
+#include "sched.h"
+#include "task.h"
 
 #define PIT_IRQ_NUM 0
 
@@ -35,17 +37,79 @@
 #define BINARY_MODE					0x0 //16-bit Binary
 #define BCD_MODE					0x1 //Four-digit BCD
 
+#define get_cs(cs)\
+		do {					\
+		asm volatile("			\
+			movw 68(%%ebp), %0;	\
+			":"=r"(cs));		\
+		}while(0)
+
+#define setup_task_stack(task)\
+	do {												\
+		asm volatile("									\
+			movw %0, 80(%%ebp)			;				\
+			movl %1, 76(%%ebp) 			;				\
+			movl %2, 72(%%ebp)			;				\
+			movw %3, 68(%%ebp)			;				\
+			movl %4, 64(%%ebp)			;				\
+			movw $0x2b, %%ax 			;				\
+			movw %%ax, %%ds				;				\
+			"::"g"((task)->tss.ss), 					\
+			"g"((task)->tss.esp), 						\
+			"g"((task)->tss.eflags),					\
+			"g"((task)->tss.cs),						\
+			"g"((task)->tss.eip));						\
+	}while(0)
+
+#define setup_syscall_stack(task)\
+	do {												\
+		asm volatile("									\
+			movl %0, 72(%%ebp)			;				\
+			movw %1, 68(%%ebp)			;				\
+			movl %2, 64(%%ebp)			;				\
+			movw $0x18, %%ax 			;				\
+			movw %%ax, %%ds				;				\
+			"::"g"((task)->sys_tss.eflags),					\
+			"g"((task)->sys_tss.cs),						\
+			"g"((task)->sys_tss.eip));						\
+	}while(0)
+	
+#define save_task_state(task)			\
+		do {							\
+			asm volatile("					\
+				movw 80(%%ebp), %0;			\
+				movl 76(%%ebp), %1;			\
+				movl 72(%%ebp), %2;			\
+				movw 68(%%ebp), %3;			\
+				movl 64(%%ebp), %4;			\
+				":"=g"((task)->tss.ss), 	\
+				"=g"((task)->tss.esp), 		\
+				"=g"((task)->tss.eflags),	\
+				"=g"((task)->tss.cs),		\
+				"=g"((task)->tss.eip));		\
+		}while(0)
+		
+#define save_syscall_state(task)			\
+		do {								\
+			asm volatile("						\
+				movl 72(%%ebp), %0;				\
+				movw 68(%%ebp), %1;				\
+				movl 64(%%ebp), %2;				\
+				":"=g"((task)->sys_tss.eflags),	\
+				"=g"((task)->sys_tss.cs),		\
+				"=g"((task)->sys_tss.eip));		\
+		}while(0)
+
+
 int32_t pit_init()
 {	
 	uint8_t port, data;
-		
-	cli();
+	
 	port = PIT_COMMAND;
 	data = ACCESS_MODE_LOHIBYTE | OPERATING_MODE_3;
 	outb (data, port);
 	pit_set_frequency(100);
 	pit_enable();
-	sti();
 	
 	return 0;
 }
@@ -70,6 +134,32 @@ int32_t pit_set_frequency(uint32_t frequency)
 
 void pit_process_interrupt()
 {
+	task_t * cur_task = get_cur_task();	
+	uint16_t cs;
+	get_cs(cs);
+	
+	
+	//If we interrupted a user program
+	if (cs == USER_CS)
+	{
+		//Update the state of task to running
+		set_cur_task_state(TASK_RUNNING);
+		save_task_state(cur_task);
+	}
+	
+	//If we interrupted a system call
+	else if (cs == KERNEL_CS)
+	{
+		//Update the state of task to a system call
+		set_cur_task_state(TASK_SYS_CALL);
+		save_syscall_state(cur_task);
+	}
+	
+	cur_task = switch_task(get_next_task()->pid);
+	/*if (get_cur_task_state() == TASK_RUNNING)
+		setup_task_stack(cur_task);
+	else if (get_cur_task_state() == TASK_SYS_CALL)
+		setup_syscall_stack(cur_task);*/
 }
 
 void pit_enable()

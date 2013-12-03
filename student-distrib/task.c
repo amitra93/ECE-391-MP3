@@ -92,6 +92,7 @@ task_t * init_task(int32_t pid)
 	task->tss.eip = 0; 
 	task->tss.ldt_segment_selector = 0;
 	task->tss.eflags = ELAGS_IF;
+	task->sys_tss = task->tss;
 	
 	task->parent_task = NULL;
 	task->child_task = NULL;
@@ -126,7 +127,10 @@ int32_t load_state(task_t * task) { return 0; }
 //Loads task's tss into TSS
 int32_t load_tss(task_t * task)
 {
-	tss = task->tss;
+	if (task->state == TASK_RUNNING)
+		tss = task->tss;
+	else if (task->state == TASK_SYS_CALL)
+		tss = task->sys_tss;
 	return 0;
 }
 

@@ -172,6 +172,11 @@ task_t * get_cur_task()
 	return schedular.cur_task < 0 ? NULL : get_task(schedular.cur_task );
 }
 
+task_t * get_next_task()
+{
+	return get_cur_task();
+}
+
 task_state get_cur_task_state()
 {
 	return get_cur_task()->state;
@@ -179,10 +184,7 @@ task_state get_cur_task_state()
 
 int32_t set_cur_task(int32_t pid)
 {
-	if (get_cur_task() != NULL)
-		get_cur_task()->state = TASK_PREEMPT;
 	schedular.cur_task = pid;	
-	get_cur_task()->state = TASK_RUNNING;
 	return 0;
 }
 
@@ -192,7 +194,16 @@ int32_t set_cur_task_state(task_state state)
 	return 0;
 }
 
-int32_t switch_task(int32_t pid)
+task_t * switch_task(int32_t pid)
+{
+	task_t * new_task = get_task(pid);
+	set_cur_task(pid);
+	load_tss(new_task);
+	set_task_cr3(new_task);
+	return new_task;
+}
+
+int32_t execute_task(int32_t pid)
 {
 	int32_t ret = 0;
 	task_t * old_task; 
@@ -200,11 +211,8 @@ int32_t switch_task(int32_t pid)
 	
 	old_task = get_cur_task();
 	new_task = get_task(pid);
-	
-	//#ifdef DEBUG
-	//printf("\n======== Now Running: %s(%d) ========\n", new_task->pName, pid);
-	//#endif
-	
+	new_task->state = TASK_RUNNING;
+
 	old_task->tss.eip = (uint32_t)(&&halt_addr);
 	
 	set_cur_task(pid);
@@ -219,10 +227,6 @@ halt_addr:
 	if (get_cur_task_state() == TASK_EXCEPTION)
 		ret = 256;
 		
-	//#ifdef DEBUG
-	//printf("======== Exited %s(%d) with status %d ========\n\n", new_task->pName, pid, ret);
-	//#endif
-	
 	end_task(get_cur_task()->pid);
 	load_tss(get_cur_task());
 	return ret;

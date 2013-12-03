@@ -66,9 +66,6 @@ rtc_process_interrupt(void)
 void
 rtc_init(void)
 {
-	unsigned long flags;
-	cli_and_save(flags);
-	
 	// select Register B and disable NMI
 	outb(STATUS_REG_B, REGISTER);
 	// read current value of Register B
@@ -79,9 +76,6 @@ rtc_init(void)
 	outb(prev | BIT6_MASK, IO_PORT);
 
 	interrupt_received = 0;
-
-	restore_flags(flags);
-
 }
 
 int32_t

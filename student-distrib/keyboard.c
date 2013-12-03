@@ -603,8 +603,9 @@ void process_shortcuts(void){
 	}
 	if (is_control_pressed() && is_pressed(&c)){
 		//printf("\nWill halt later\n");
+		shortcut_received = 0;
+		send_eoi(1);
 		halt(1);
-		shortcut_received = 1;
 		return;
 	}
 	if (is_pressed(&backspace)){

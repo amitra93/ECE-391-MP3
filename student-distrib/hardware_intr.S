@@ -43,10 +43,12 @@ idt_pit:
 */
 handle_idt:
 	pusha 					# Push all registers to be saved, 8 Pushes
-	movl  32(%esp), %edi 	# Get the handler address	
+	pushf
+	movl  36(%esp), %edi 	# Get the handler address	
 	call *%edi				# Go to ISR
+	popf
 	popa					# Pop off all saved registers
-	addl $4, %esp 			# Pop off error code and function address
+	addl $4, %esp 			# Pop off function address
 	iret
 	
 	

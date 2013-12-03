@@ -58,10 +58,9 @@ int32_t do_execute (const uint8_t* command)
 		programName[i] = 0;
 	
 	int32_t pid = create_task(programName, argsBuffer);
-
 	if (pid < 0)
 		return -1;
-	return switch_task((uint32_t)pid);
+	return execute_task((uint32_t)pid);
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {

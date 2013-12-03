@@ -12,7 +12,8 @@ typedef enum task_state {
 	TASK_SUICIDE,
 	TASK_EXCEPTION,
 	TASK_INTERRUPTIBLE,
-	TASK_UNINTERRUPTIBLE
+	TASK_UNINTERRUPTIBLE,
+	TASK_SYS_CALL
 } task_state;
 
 //To-Do: Fill out rest of struct
@@ -26,6 +27,7 @@ typedef struct task_t{
 	int32_t ptid; //Process Tree ID
 	file_t files[8]; //File array
 	tss_t tss;//TSS
+	tss_t sys_tss; //TSS used in a system call
 	
 	uint32_t * page_directory;
 	uint32_t * page_table;

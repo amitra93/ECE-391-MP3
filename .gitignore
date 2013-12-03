@@ -1,0 +1,15 @@
+# compiled sources #
+####################
+*.o
+*.dep
+
+# Images #
+##########
+*.img
+mp3.img
+
+# Misc #
+########
+bootimg
+dev_env
+debug.sh

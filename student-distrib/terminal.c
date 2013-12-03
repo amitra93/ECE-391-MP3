@@ -167,6 +167,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 		terminal_copy_to_history();
 		current_terminal->input.input_pointer = 0;
 	}
+	current_terminal->in_use=0;
 	if (!(current_terminal->in_use)){
 		terminal_write(1, &char_to_print, 1);
 		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
