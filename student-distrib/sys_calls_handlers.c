@@ -21,7 +21,7 @@ int32_t do_halt (uint8_t status)
 
 int32_t do_execute (const uint8_t* command) 
 { 
-	if (command >= (uint8_t*)0x8000000 && command < (uint8_t*)0x8400000)
+	//if (command >= (uint8_t*)0x8000000 && command < (uint8_t*)0x8400000)
 	{
 		//argsBuffer holds the newly formatted args
 		uint8_t argsBuffer [128];
@@ -65,19 +65,19 @@ int32_t do_execute (const uint8_t* command)
 		return execute_task((uint32_t)pid);
 	}
 	
-	return -1;
+	//return -1;
 }
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
-	if (buf >= (uint8_t*)0x8000000 && buf < (uint8_t*)0x8400000)
+	//if (buf >= (void*)0x8000000 && buf < (void*)0x8400000)
 		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
-	return -1;
+	//return -1;
 }
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
 {
-	if (buf >= (uint8_t*)0x8000000 && buf < (uint8_t*)0x8400000)
+	//if (buf >= (void*)0x8000000 && buf < (void*)0x8400000)
 		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
-	return -1;
+	//return -1;
 }
 int32_t do_vidmap (uint8_t** screen_start) 
 {
@@ -152,7 +152,7 @@ int32_t do_close (int32_t fd) {
 }
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	
-	if (buf >= (uint8_t*)0x8000000 && buf < (uint8_t*)0x8400000)
+	//if (buf >= (uint8_t*)0x8000000 && buf < (uint8_t*)0x8400000)
 	{
 		task_t * curTask = get_cur_task();
 		if(curTask==NULL || buf==NULL)
@@ -172,7 +172,7 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 		}
 		return 0; 
 	}
-	return -1;
+	//return -1;
 }
 
 int32_t do_set_handler (int32_t signum, void* handler_address) { return -1; }
