@@ -2,6 +2,7 @@
 ####################
 *.o
 *.dep
+*.exe
 
 # Images #
 ##########
@@ -13,3 +14,4 @@ mp3.img
 bootimg
 dev_env
 debug.sh
+*.bk

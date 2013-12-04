@@ -49,8 +49,8 @@
 		asm volatile("									\
 			movl %%esp, %0	\n							\
 			movl %%ebp, %1								\
-			":"=r"((task)->tss.esp),					\
-			  "=r"((task)->tss.ebp));					\
+			":"=r"((task)->ret_esp),					\
+			  "=r"((task)->ret_ebp));					\
 	}while(0)
 	
 sched_t schedular = {
@@ -59,7 +59,7 @@ sched_t schedular = {
 	.num_tasks = 0,
 	.cur_task = -1,
 	
-	.ptree_tasks = {-1},
+	.ptree_tasks = {[0 ... 31] = -1},
 	.ptree_vector = 0,
 	.max_ptrees = 3,
 	.num_ptrees = 0,
@@ -88,6 +88,7 @@ static int32_t get_new_pid()
 
 static int32_t clear_ptid(int32_t ptid)
 {
+	schedular.ptree_tasks[ptid] = -1;
 	schedular.ptree_vector &= ~(1 << ptid);
 	return 0;
 }
@@ -121,7 +122,8 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	task_t * task;
 	int32_t pid;
 	uint32_t addr;
-	
+	unsigned long flags;
+	cli_and_save(flags);
 	//Get a new pid
 	if ( (pid = get_new_pid()) < 0)
 		return -1;
@@ -136,21 +138,28 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	//Load the file image
 	task = init_task(pid);
 	if (schedular.cur_task != -1)
+	{
 		task->parent_task = get_task(schedular.cur_task);
+		task->ptid = task->parent_task->ptid;
+	}
 		
 	if (load_program_to_task(task, addr + PROGRAM_IMAGE, fname, args) == -1)
 	{
 		clear_pid(pid);
+		restore_flags(flags);
 		return -1;
 	}
-	++schedular.num_tasks;
 	
+	++schedular.num_tasks;
+	restore_flags(flags);
 	return pid;
 }
 
 int32_t end_task(int32_t pid)
 {
 	uint32_t addr;
+	unsigned long flags;
+	cli_and_save(flags);
 	task_t * parent_task = get_task(pid)->parent_task;
 	
 	//Map the file image into memory
@@ -162,8 +171,9 @@ int32_t end_task(int32_t pid)
 	clear_pde(addr);
 	
 	--schedular.num_tasks;
-	
+	set_ptree_task(parent_task->ptid, parent_task->pid);
 	set_cur_task(parent_task->pid);
+	restore_flags(flags);
 	return 0;
 }
 
@@ -174,6 +184,20 @@ task_t * get_cur_task()
 
 task_t * get_next_task()
 {
+	uint32_t i;
+	for (i = schedular.cur_ptree; i < schedular.max_ptrees; i ++)
+	{
+		if ( (schedular.ptree_vector & (1 << i)) > 0)
+			return get_task(schedular.ptree_tasks[i]);
+	}
+	
+	for (i = 0; i < schedular.cur_ptree; i ++)
+	{
+		if ( (schedular.ptree_vector & (1 << i)) > 0)
+			return get_task(schedular.ptree_tasks[i]);
+	}
+	
+	//If there are no other active tasks, return current
 	return get_cur_task();
 }
 
@@ -185,6 +209,19 @@ task_state get_cur_task_state()
 int32_t set_cur_task(int32_t pid)
 {
 	schedular.cur_task = pid;	
+	schedular.cur_ptree = get_task(pid)->ptid;
+	return 0;
+}
+
+int32_t set_ptree_task(int32_t ptid, int32_t pid)
+{
+	schedular.ptree_tasks[ptid] = pid;
+	return 0;
+}
+
+int32_t clear_ptree_task(int32_t ptid)
+{
+	schedular.ptree_tasks[ptid] = -1;
 	return 0;
 }
 
@@ -213,9 +250,11 @@ int32_t execute_task(int32_t pid)
 	new_task = get_task(pid);
 	new_task->state = TASK_RUNNING;
 
-	old_task->tss.eip = (uint32_t)(&&halt_addr);
+	old_task->ret_eip = (uint32_t)(&&halt_addr);
 	
 	set_cur_task(pid);
+	set_ptree_task(new_task->ptid, pid);
+	
 	save_task_state(old_task);
 	load_tss(new_task);
 	setup_task_stack(new_task);
@@ -240,7 +279,10 @@ int32_t tasks_init()
 	
 	create_task(fname, args);
 	set_cur_task(0);
+	
 	init_task = get_task(0);
+	init_task->ptid = create_ptree();
+	set_ptree_task(init_task->ptid, init_task->pid);
 	
 	init_task->tss.cs = 0x0010;
 	init_task->tss.ds = 0x0018;

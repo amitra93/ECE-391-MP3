@@ -92,7 +92,11 @@ task_t * init_task(int32_t pid)
 	task->tss.eip = 0; 
 	task->tss.ldt_segment_selector = 0;
 	task->tss.eflags = ELAGS_IF;
+	
 	task->sys_tss = task->tss;
+	task->sys_tss.ss = KERNEL_DS;
+	task->sys_tss.cs = KERNEL_CS;
+	task->sys_tss.ds = KERNEL_DS;
 	
 	task->parent_task = NULL;
 	task->child_task = NULL;

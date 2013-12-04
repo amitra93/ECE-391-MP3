@@ -1,4 +1,4 @@
-ALL: cat grep hello ls pingpong counter shell sigtest testprint syserr
+ALL: cat grep hello ls pingpong counter shell sigtest testprint syserr test
 
 %.o: %.c
 	gcc -c -Wall -o $@ $<
@@ -65,6 +65,13 @@ syserr.exe: ece391syserr.o ece391syscall.o  ece391support.o
 syserr: syserr.exe
 	../elfconvert syserr.exe
 	mv syserr.exe.converted to_fsdir/syserr
+	
+test.exe: ece391test.o ece391syscall.o  ece391support.o
+	gcc -nostdlib -o test.exe ece391test.o ece391syscall.o ece391support.o
+test: test.exe
+	../elfconvert test.exe
+	mv test.exe.converted to_fsdir/test
+
 
 clean::
 	rm -f *~ *.o

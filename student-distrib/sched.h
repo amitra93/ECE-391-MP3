@@ -24,6 +24,8 @@ int32_t tasks_init();
 int32_t create_task(const uint8_t * fname, const uint8_t args [128]);
 int32_t end_task(int32_t pid);
 int32_t set_cur_task(int32_t pid);
+int32_t set_ptree_task(int32_t ptid, int32_t pid);
+int32_t clear_ptree_task(int32_t ptid);
 int32_t set_cur_task_state(task_state state);
 task_t* get_cur_task();
 task_t* get_next_task();

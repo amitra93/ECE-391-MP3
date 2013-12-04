@@ -155,11 +155,11 @@ void pit_process_interrupt()
 		save_syscall_state(cur_task);
 	}
 	
-	cur_task = switch_task(get_next_task()->pid);
-	/*if (get_cur_task_state() == TASK_RUNNING)
+	cur_task = switch_task(get_next_task()->pid);	
+	if (get_cur_task_state() == TASK_RUNNING)
 		setup_task_stack(cur_task);
 	else if (get_cur_task_state() == TASK_SYS_CALL)
-		setup_syscall_stack(cur_task);*/
+		setup_syscall_stack(cur_task);
 }
 
 void pit_enable()

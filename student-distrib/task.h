@@ -29,6 +29,10 @@ typedef struct task_t{
 	tss_t tss;//TSS
 	tss_t sys_tss; //TSS used in a system call
 	
+	uint32_t ret_ebp;
+	uint32_t ret_esp;
+	uint32_t ret_eip;
+	
 	uint32_t * page_directory;
 	uint32_t * page_table;
 	uint8_t * video_mem;
