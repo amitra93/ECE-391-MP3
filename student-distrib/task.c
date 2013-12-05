@@ -9,7 +9,6 @@
 #define KERNEL_STACK_SIZE 0x2000
 #define INIT_TASK_ADDR   0x800000
 #define EXECUTION_ADDR  0x8000000
-#define VIRTUAL_VID_MEM 0x10000000
 #define ELAGS_IF 0x200
 
 uint32_t get_task_addr(uint32_t pid)

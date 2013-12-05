@@ -231,12 +231,21 @@ int32_t set_cur_task_state(task_state state)
 	return 0;
 }
 
-task_t * switch_task(int32_t pid)
+task_t * switch_task(int32_t old_pid, int32_t new_pid)
 {
-	task_t * new_task = get_task(pid);
-	set_cur_task(pid);
+	task_t * new_task = get_task(new_pid);
+	
+	//Map the old process' video memory to garbage
+	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	
+	set_cur_task(new_pid);
 	load_tss(new_task);
 	set_task_cr3(new_task);
+	get_cr3(pd);
+	
+	//Map the new process' video memory to the real deal
+	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	
 	return new_task;
 }
 
@@ -259,6 +268,7 @@ int32_t execute_task(int32_t pid)
 	load_tss(new_task);
 	setup_task_stack(new_task);
 	set_task_cr3(new_task);
+	get_cr3(pd);
 	iret();
 
 halt_addr:

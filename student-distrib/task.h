@@ -1,6 +1,7 @@
 #ifndef TASK__H
 #define TASK__H
 
+#include "lib.h"
 #include "types.h"
 #include "filesys.h"
 #include "x86_desc.h"

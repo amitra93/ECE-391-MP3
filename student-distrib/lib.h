@@ -8,6 +8,8 @@
 #include "types.h"
 
 #define VIDEO 0xB8000
+#define VIRTUAL_VID_MEM 0x10000000
+#define GARBAGE_VID_MEM 0x10400000
 
 /*
 *   This function clears the screen and draws the error description, error code, 
@@ -21,6 +23,9 @@ void test_interrupts(void);
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
+int32_t vprintf(int8_t *format, ...);
+void vputc(uint8_t c);
+int32_t vputs(int8_t *s);
 void set_cursor_pos(int32_t x, int32_t y);
 
 void get_cursor_pos(int32_t* x, int32_t* y);

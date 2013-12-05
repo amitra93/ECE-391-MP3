@@ -80,7 +80,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	for (i = 0; i < nbytes; i++){
 		if (current_terminal->chars_printed > NUM_COLS){
 			char newline = '\n';
-			printf("%c", newline);
+			vprintf("%c", newline);
 			current_terminal->chars_printed = 0;
 		}
 		else if (string[i] == '\n'){
@@ -89,7 +89,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 		else if (string[i] == '\0'){
 			continue;
 		}
-		printf("%c", string[i]);
+		vprintf("%c", string[i]);
 		current_terminal->chars_printed++;
 	}
 	get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
@@ -120,7 +120,7 @@ void terminal_backspace(){
 	current_terminal->chars_printed--;
 	current_terminal->input.input_pointer--;
 	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
-	printf("%c", str);
+	vprintf("%c", str);
 	/*
 	if (current_terminal->screen_x <= 0){
 		current_terminal->screen_x = NUM_COLS - 1;
@@ -135,14 +135,14 @@ void terminal_backspace(){
 		current_terminal->screen_x -= current_terminal->input.input_pointer;
 		terminal_write(1,&current_terminal->input.line, current_terminal->input.input_pointer-1);
 		char str = ' ';
-		printf("%c",str);
+		vprintf("%c",str);
 		current_terminal->input.input_pointer--;
 	}
 	else {
 		current_terminal->screen_x -= (current_terminal->input.input_pointer + NUM_COLS - current_terminal->starting_offset);
 		terminal_write(1,&current_terminal->input.line + NUM_COLS - current_terminal->starting_offset, current_terminal->input.input_pointer - 1 - NUM_COLS + current_terminal->starting_offset);
 		char str = ' ';
-		printf("%c",str);
+		vprintf("%c",str);
 		current_terminal->input.input_pointer--;
 	}
 	*/

@@ -31,6 +31,6 @@ task_t* get_cur_task();
 task_t* get_next_task();
 task_state get_cur_task_state();
 
-task_t * switch_task(int32_t pid);
+task_t * switch_task(int32_t old_pid, int32_t new_pid);
 int32_t execute_task(int32_t pid);
 #endif /* _SCHED_H */
