@@ -255,6 +255,8 @@ int32_t execute_task(int32_t pid)
 	task_t * old_task; 
 	task_t * new_task;
 	
+	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	
 	old_task = get_cur_task();
 	new_task = get_task(pid);
 	new_task->state = TASK_RUNNING;
