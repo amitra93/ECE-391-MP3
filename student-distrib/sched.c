@@ -2,6 +2,7 @@
 #include "paging.h"
 #include "filesys.h"
 #include "lib.h"
+#include "terminal.h"
 
 #define DEBUG		
 #define EXECUTION_ADDR 0x8000000
@@ -166,6 +167,8 @@ int32_t end_task(int32_t pid)
 	set_task_cr3(parent_task);
 	get_cr3(pd);
 	
+	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	
 	addr = get_task_addr(pid);
 	clear_pid(pid);
 	clear_pde(addr);
@@ -198,12 +201,18 @@ task_t * get_next_task()
 	}
 	
 	//If there are no other active tasks, return current
-	return get_cur_task();
+	return get_task(schedular.ptree_tasks[schedular.cur_ptree]);
 }
 
 task_state get_cur_task_state()
 {
 	return get_cur_task()->state;
+}
+
+int32_t set_cur_ptree(int32_t ptid)
+{
+	schedular.cur_ptree = ptid;
+	return 0;
 }
 
 int32_t set_cur_task(int32_t pid)
@@ -235,6 +244,8 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 {
 	task_t * new_task = get_task(new_pid);
 	
+	get_cr3(pd);
+	
 	//Map the old process' video memory to garbage
 	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
@@ -244,7 +255,8 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	get_cr3(pd);
 	
 	//Map the new process' video memory to the real deal
-	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	if (new_task->ptid == get_current_terminal()->ptid)
+		map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
 	return new_task;
 }
@@ -286,6 +298,8 @@ halt_addr:
 int32_t tasks_init()
 {		
 	task_t * init_task;
+	task_t * terminals[3];
+	int32_t i;
 	uint8_t fname [32] = "shell";
 	uint8_t args[128] = "";
 	
@@ -293,8 +307,13 @@ int32_t tasks_init()
 	set_cur_task(0);
 	
 	init_task = get_task(0);
-	init_task->ptid = create_ptree();
-	set_ptree_task(init_task->ptid, init_task->pid);
+	
+	for (i = 0; i < 2; i ++)
+	{
+		terminals[i] = get_task(create_task(fname, args));
+		terminals[i]->ptid = create_ptree();
+		set_ptree_task(terminals[i]->ptid, terminals[i]->pid);
+	}
 	
 	init_task->tss.cs = 0x0010;
 	init_task->tss.ds = 0x0018;

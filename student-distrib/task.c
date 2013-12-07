@@ -92,10 +92,10 @@ task_t * init_task(int32_t pid)
 	task->tss.ldt_segment_selector = 0;
 	task->tss.eflags = ELAGS_IF;
 	
-	task->sys_tss = task->tss;
+	/*task->sys_tss = task->tss;
 	task->sys_tss.ss = KERNEL_DS;
 	task->sys_tss.cs = KERNEL_CS;
-	task->sys_tss.ds = KERNEL_DS;
+	task->sys_tss.ds = KERNEL_DS;*/
 	
 	task->parent_task = NULL;
 	task->child_task = NULL;
@@ -123,9 +123,92 @@ task_t * init_task(int32_t pid)
 
 //To-DO: Fill these guys out
 //Save the task's state
-int32_t save_state(task_t * task) { return 0; }
+void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
+{ 
+	task->tss.ebp = ebp;
+	task->tss.eax = eax;
+	task->tss.ebx = ebx;
+	task->tss.ecx = ecx;
+	task->tss.edx = edx;
+	task->tss.esi = esi;
+	task->tss.edi = edi;
+	
+	if (cs == USER_CS)
+		task->tss.esp = esp;
+	else
+		task->tss.esp0 = esp;
+	/*if (cs == USER_CS)
+	{
+		task->tss.esp = esp;
+		task->tss.ebp = ebp;
+		task->tss.eax = eax;
+		task->tss.ebx = ebx;
+		task->tss.ecx = ecx;
+		task->tss.edx = edx;
+		task->tss.esi = esi;
+		task->tss.edi = edi;
+	}
+	else
+	{
+		task->sys_tss.esp = esp;
+		task->sys_tss.ebp = ebp;
+		task->sys_tss.eax = eax;
+		task->sys_tss.ebx = ebx;
+		task->sys_tss.ecx = ecx;
+		task->sys_tss.edx = edx;
+		task->sys_tss.esi = esi;
+		task->sys_tss.edi = edi;
+	}*/
+}
+
 //Load the task's state
-int32_t load_state(task_t * task) { return 0; }
+uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
+{
+	ebp = task->tss.ebp;
+	eax = task->tss.eax;
+	ebx = task->tss.ebx;
+	ecx = task->tss.ecx;
+	edx = task->tss.edx;
+	esi = task->tss.esi;
+	edi = task->tss.edi;
+	
+	if (cs == USER_CS)
+	{
+		esp = task->tss.esp;
+		return 0;
+	}
+	else
+	{
+		esp = task->tss.esp0;
+		return 1;
+	}
+	/*if (cs == USER_CS)
+	{
+		esp = task->tss.esp;
+		ebp = task->tss.ebp;
+		eax = task->tss.eax;
+		ebx = task->tss.ebx;
+		ecx = task->tss.ecx;
+		edx = task->tss.edx;
+		esi = task->tss.esi;
+		edi = task->tss.edi;
+		return 0;
+	}
+	else
+	{
+		esp = task->sys_tss.esp;
+		ebp = task->sys_tss.ebp;
+		eax = task->sys_tss.eax;
+		ebx = task->sys_tss.ebx;
+		ecx = task->sys_tss.ecx;
+		edx = task->sys_tss.edx;
+		esi = task->sys_tss.esi;
+		edi = task->sys_tss.edi;
+		return 1;
+	}*/
+}
 
 //Loads task's tss into TSS
 int32_t load_tss(task_t * task)
@@ -133,22 +216,13 @@ int32_t load_tss(task_t * task)
 	if (task->state == TASK_RUNNING)
 		tss = task->tss;
 	else if (task->state == TASK_SYS_CALL)
-		tss = task->sys_tss;
+		tss = task->tss;
 	return 0;
 }
 
 task_t * get_task(int32_t pid)
 {
 	return (task_t*)((INIT_TASK_ADDR - (KERNEL_STACK_SIZE*pid) - 4) & KERNEL_STACK_MASK);
-}
-
-int32_t setup_task_switch(task_t * old_task, task_t * new_task)
-{
-	if (old_task != NULL)
-		save_state(old_task);
-	load_state(new_task);
-	load_tss(new_task);
-	return 0;
 }
 
 int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t args[128])

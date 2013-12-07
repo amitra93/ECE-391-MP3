@@ -222,23 +222,17 @@ entry (unsigned long magic, unsigned long addr)
 	printf("Enabling PIT\n");
 	pit_init();
 	
-	/* Enable interrupts */
-	/* Do not enable the following until after you have set up your
-	 * IDT correctly otherwise QEMU will triple fault and simple close
-	 * without showing you any output */
-	printf("Enabling Interrupts\n");
-
 	printf("Enabling terminal\n");
 	terminal_open(NULL);
 	
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	while(1)
+	/*while(1)
 	{
 		uint8_t pname [32] = "shell";
 		execute(pname);
-	}
+	}*/
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

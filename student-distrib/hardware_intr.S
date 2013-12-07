@@ -8,7 +8,7 @@
 	.globl idt_keyboard, idt_rtc, idt_pit
 
 	.extern do_idt_keyboard, do_idt_rtc, do_idt_pit
-
+	.extern get_cur_task, save_task, load_task
 
 _idt_keyboard:
 	.long	do_idt_keyboard
@@ -26,28 +26,124 @@ _idt_pit:
 .text
 	
 .align 4
-
 idt_keyboard:
 	pushl (_idt_keyboard)
 	jmp handle_idt
 
+.align 4
 idt_rtc:
 	pushl (_idt_rtc)
 	jmp handle_idt
 
+.align 4
 idt_pit:
-	pushl (_idt_pit)
-	jmp handle_idt
+
+	movl 	%esp, local_esp
+	cmpl  	$0x10, 4(%esp)
+	
+	jne 	from_user_space
+	subl	$8, %esp
+	pushl	%eax
+	movl	12(%esp), %eax
+	movl	%eax, 4(%esp)
+	movl	16(%esp), %eax
+	movl	%eax, 8(%esp)
+	movl	20(%esp), %eax
+	movl	%eax, 12(%esp)
+	popl	%eax
+from_user_space:
+	
+	pushl %ebp
+	movl  %esp, %ebp
+	subl  $4, %esp  # 0 if task is not in a system call 1 if task is in a system call
+	
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+	pushl %eax
+	pushl (%ebp)
+	pushl local_esp
+	pushl 8(%ebp)
+	call get_cur_task
+	pushl %eax
+	
+	call save_state
+	addl $44, %esp
+	
+	call *(_idt_pit)	# Go to ISR
+	
+	
+	subl $28, %esp
+	pushl 8(%ebp)
+	call get_cur_task
+	pushl 	%eax 			# Current task
+	
+	call load_state
+	movl %eax, -4(%ebp)		# Save return value
+	addl $8, %esp			# Pop off task and CS
+	popl local_esp
+	popl %ebp
+	popl %eax
+	popl %ebx
+	popl %ecx
+	popl %edx
+	popl %esi
+	popl %edi
+	
+	cmpl $0, (%esp)
+	je to_user_space
+	
+to_kernel_space:
+	addl $8, %esp
+	subl $12, local_esp
+	pushl	%eax
+	
+	movl	4(%esp),	%eax
+	movl	%eax,		12(%esp)
+	
+	movl	8(%esp), 	%eax
+	movl	%eax, 		16(%esp)
+	
+	movl	12(%esp), 	%eax
+	movl	%eax, 		20(%esp)
+	
+	popl	%eax
+	addl $8, %esp
+	iret
+	
+to_user_space:
+	addl $8, %esp
+	iret
+	
+local_esp:
+	.long 1
+	
 /*
 * EDI : Handler Address
 */
+.align 4
 handle_idt:
-	pusha 					# Push all registers to be saved, 8 Pushes
+	pushl %ebp
+	movl  %esp, %ebp
+	pushl %eax
+	pushl %ebx
+	pushl %ecx
+	pushl %edx
+	pushl %esi
+	pushl %edi
 	pushf
 	movl  36(%esp), %edi 	# Get the handler address	
 	call *%edi				# Go to ISR
 	popf
-	popa					# Pop off all saved registers
+	popl %eax
+	popl %ebx
+	popl %ecx
+	popl %edx
+	popl %esi
+	popl %edi
+	popl %ebp
 	addl $4, %esp 			# Pop off function address
 	iret
 	

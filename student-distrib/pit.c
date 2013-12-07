@@ -40,18 +40,18 @@
 #define get_cs(cs)\
 		do {					\
 		asm volatile("			\
-			movw 68(%%ebp), %0;	\
+			movw 36(%%ebp), %0;	\
 			":"=r"(cs));		\
 		}while(0)
-
+	
 #define setup_task_stack(task)\
 	do {												\
 		asm volatile("									\
-			movw %0, 80(%%ebp)			;				\
-			movl %1, 76(%%ebp) 			;				\
-			movl %2, 72(%%ebp)			;				\
-			movw %3, 68(%%ebp)			;				\
-			movl %4, 64(%%ebp)			;				\
+			movw %0, 48(%%ebp)			;				\
+			movl %1, 44(%%ebp) 			;				\
+			movl %2, 40(%%ebp)			;				\
+			movw %3, 36(%%ebp)			;				\
+			movl %4, 32(%%ebp)			;				\
 			movw $0x2b, %%ax 			;				\
 			movw %%ax, %%ds				;				\
 			"::"g"((task)->tss.ss), 					\
@@ -64,24 +64,24 @@
 #define setup_syscall_stack(task)\
 	do {												\
 		asm volatile("									\
-			movl %0, 72(%%ebp)			;				\
-			movw %1, 68(%%ebp)			;				\
-			movl %2, 64(%%ebp)			;				\
+			movl %0, 40(%%ebp)			;				\
+			movw %1, 36(%%ebp)			;				\
+			movl %2, 32(%%ebp)			;				\
 			movw $0x18, %%ax 			;				\
 			movw %%ax, %%ds				;				\
-			"::"g"((task)->sys_tss.eflags),					\
-			"g"((task)->sys_tss.cs),						\
-			"g"((task)->sys_tss.eip));						\
+			"::"g"((task)->tss.eflags),				\
+			"g"((task)->tss.cs),					\
+			"g"((task)->tss.eip));					\
 	}while(0)
 	
-#define save_task_state(task)			\
-		do {							\
+#define save_task_state(task)				\
+		do {								\
 			asm volatile("					\
-				movw 80(%%ebp), %0;			\
-				movl 76(%%ebp), %1;			\
-				movl 72(%%ebp), %2;			\
-				movw 68(%%ebp), %3;			\
-				movl 64(%%ebp), %4;			\
+				movw 48(%%ebp), %0;			\
+				movl 44(%%ebp), %1;			\
+				movl 40(%%ebp), %2;			\
+				movw 36(%%ebp), %3;			\
+				movl 32(%%ebp), %4;			\
 				":"=g"((task)->tss.ss), 	\
 				"=g"((task)->tss.esp), 		\
 				"=g"((task)->tss.eflags),	\
@@ -89,15 +89,15 @@
 				"=g"((task)->tss.eip));		\
 		}while(0)
 		
-#define save_syscall_state(task)			\
-		do {								\
+#define save_syscall_state(task)				\
+		do {									\
 			asm volatile("						\
-				movl 72(%%ebp), %0;				\
-				movw 68(%%ebp), %1;				\
-				movl 64(%%ebp), %2;				\
-				":"=g"((task)->sys_tss.eflags),	\
-				"=g"((task)->sys_tss.cs),		\
-				"=g"((task)->sys_tss.eip));		\
+				movl 40(%%ebp), %0;				\
+				movw 36(%%ebp), %1;				\
+				movl 32(%%ebp), %2;				\
+				":"=g"((task)->tss.eflags),	\
+				"=g"((task)->tss.cs),		\
+				"=g"((task)->tss.eip));		\
 		}while(0)
 
 
@@ -156,9 +156,9 @@ void pit_process_interrupt()
 	}
 	
 	cur_task = switch_task(cur_task->pid, get_next_task()->pid);	
-	if (get_cur_task_state() == TASK_RUNNING)
+	if (cur_task->state == TASK_RUNNING)
 		setup_task_stack(cur_task);
-	else if (get_cur_task_state() == TASK_SYS_CALL)
+	else
 		setup_syscall_stack(cur_task);
 }
 
