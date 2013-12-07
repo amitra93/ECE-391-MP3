@@ -38,6 +38,8 @@ void paging_init(){
 	//set page as 4MB, set supervisor priv., set r/w, and present
 	pd[1] |=  ( PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT);  
 	
+	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	
 	//Load the address of the page directory from pd[0] into cr3
 	asm volatile("movl %0, %%cr3" 
 						:

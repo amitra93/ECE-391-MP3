@@ -26,10 +26,10 @@ typedef struct terminal {
 	int history_index;
 	int chars_printed;
 	int starting_offset;
-	volatile int in_use;
 	terminal_line input;
 	terminal_line previous_input;
-	char video_memory[NUM_ROWS * NUM_COLS];
+	char* video_memory;
+	unsigned int ptid;
 	terminal_line input_history[MAX_SUPPORTED_HISTORY];
 } terminal;
 

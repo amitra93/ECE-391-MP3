@@ -263,7 +263,7 @@ format_char_switch:
  *       the "#" modifier to alter output.
  * */
 int32_t
-vprintf(int8_t *format, ...)
+vprintf(uint8_t *video_memory, int8_t *format, ...)
 {
 	/* Pointer to the format string */
 	int8_t* buf = format;
@@ -284,7 +284,7 @@ format_char_switch:
 					switch(*buf) {
 						/* Print a literal '%' character */
 						case '%':
-							vputc('%');
+							vputc(video_memory, '%');
 							break;
 
 						/* Use alternate formatting */
@@ -302,7 +302,7 @@ format_char_switch:
 								int8_t conv_buf[64];
 								if(alternate == 0) {
 									itoa(*((uint32_t *)esp), conv_buf, 16);
-									vputs(conv_buf);
+									vputs(video_memory,conv_buf);
 								} else {
 									int32_t starting_index;
 									int32_t i;
@@ -312,7 +312,7 @@ format_char_switch:
 										conv_buf[i] = '0';
 										i++;
 									}
-									vputs(&conv_buf[starting_index]);
+									vputs(video_memory,&conv_buf[starting_index]);
 								}
 								esp++;
 							}
@@ -323,7 +323,7 @@ format_char_switch:
 							{
 								int8_t conv_buf[36];
 								itoa(*((uint32_t *)esp), conv_buf, 10);
-								vputs(conv_buf);
+								vputs(video_memory,conv_buf);
 								esp++;
 							}
 							break;
@@ -339,20 +339,20 @@ format_char_switch:
 								} else {
 									itoa(value, conv_buf, 10);
 								}
-								vputs(conv_buf);
+								vputs(video_memory,conv_buf);
 								esp++;
 							}
 							break;
 
 						/* Print a single character */
 						case 'c':
-							vputc( (uint8_t) *((int32_t *)esp) );
+							vputc(video_memory, (uint8_t) *((int32_t *)esp) );
 							esp++;
 							break;
 
 						/* Print a NULL-terminated string */
 						case 's':
-							vputs( *((int8_t **)esp) );
+							vputs(video_memory, *((int8_t **)esp) );
 							esp++;
 							break;
 
@@ -364,7 +364,7 @@ format_char_switch:
 				break;
 
 			default:
-				vputc(*buf);
+				vputc(video_memory, *buf);
 				break;
 		}
 		buf++;
@@ -388,11 +388,11 @@ puts(int8_t* s)
 
 /* Output a string to the console */
 int32_t
-vputs(int8_t* s)
+vputs(uint8_t * video_memory, int8_t* s)
 {
 	register int32_t index = 0;
 	while(s[index] != '\0') {
-		vputc(s[index]);
+		vputc(video_memory, s[index]);
 		index++;
 	}
 
@@ -420,7 +420,7 @@ putc(uint8_t c)
 }
 
 void
-vputc(uint8_t c)
+vputc(uint8_t * video_memory, uint8_t c)
 {
     if(c == '\n' || c == '\r') {
         screen_y++;

@@ -23,9 +23,9 @@ void test_interrupts(void);
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
-int32_t vprintf(int8_t *format, ...);
-void vputc(uint8_t c);
-int32_t vputs(int8_t *s);
+int32_t vprintf(uint8_t *video_memory, int8_t *format, ...);
+void vputc(uint8_t *video_memory, uint8_t c);
+int32_t vputs(uint8_t *video_memory, int8_t *s);
 void set_cursor_pos(int32_t x, int32_t y);
 
 void get_cursor_pos(int32_t* x, int32_t* y);

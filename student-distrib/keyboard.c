@@ -7,7 +7,7 @@
 #include "i8259.h"
 #include "terminal.h"
 #include "sys_calls.h"
-
+#include "sched.h"
 
 
 /* Scancodes for lowercase characters, 'EOI' char whenever appropriate */
@@ -644,7 +644,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 	*/
 	terminal* current_terminal = get_current_terminal();
 	int old_input_pointer = current_terminal->input.input_pointer;
-	while (old_input_pointer > current_terminal->input.input_pointer - max_chars){
+	while (old_input_pointer > current_terminal->input.input_pointer - max_chars || current_terminal->ptid != schedular.cur_ptree){
 		if (is_enter_pressed() && current_terminal->input.input_pointer < BUFFER_SIZE-1){
 			enter.pressed = 0;
 			keypad_enter.pressed = 0;
