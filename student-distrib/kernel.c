@@ -220,7 +220,7 @@ entry (unsigned long magic, unsigned long addr)
 	tasks_init();
 
 	printf("Enabling PIT\n");
-	//pit_init();
+	pit_init();
 	
 	printf("Enabling terminal\n");
 	terminal_open(NULL);

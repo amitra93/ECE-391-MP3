@@ -74,10 +74,10 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	terminal* current_terminal = get_current_terminal();
 	
 	//Change this so that it will add to the history when it isn't the current terminal
-	if (current_terminal->ptid == schedular.cur_ptree)
-	{
+	//if (current_terminal->ptid == schedular.cur_ptree)
+	//{
 		set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
-		if (buf == NULL || fd != 1){
+		if (buf == NULL){
 			return -1;
 		}
 		if (nbytes <= 0){
@@ -100,7 +100,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 			current_terminal->chars_printed++;
 		}
 		get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
-	}
+	//}
 	return 0;
 }
 
@@ -166,8 +166,7 @@ void terminal_clear(){
 
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_current_terminal();
-	if (current_terminal->ptid == schedular.cur_ptree)
-	{
+	//if (current_terminal->ptid == schedular.cur_ptree){
 		if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 			return;
 		}
@@ -185,7 +184,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 			}
 			current_terminal->chars_printed = 0;
 		}
-	}
+	//}
 }
 
 terminal* get_current_terminal(){
