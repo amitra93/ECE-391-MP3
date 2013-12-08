@@ -72,7 +72,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	terminal* current_terminal = get_current_terminal();
 	
 	//Change this so that it will add to the history when it isn't the current terminal
-	if (current_terminal->ptid == schedular.cur_ptree)
+	//if (current_terminal->ptid == schedular.cur_ptree)
 	{
 		set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 		if (buf == NULL || fd != 1){
@@ -157,14 +157,12 @@ void terminal_clear(){
 	clear();
 	terminal* current_terminal = get_current_terminal();
 	current_terminal->screen_x = current_terminal->screen_y = 0;
-	set_cursor_pos(0, 0);
-	
+	set_cursor_pos(0, 0);	
 }
-
 
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_current_terminal();
-	if (current_terminal->ptid == schedular.cur_ptree)
+	//if (current_terminal->ptid == schedular.cur_ptree)
 	{
 		if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 			return;
@@ -174,7 +172,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 			terminal_copy_to_history();
 			current_terminal->input.input_pointer = 0;
 		}
-
+		//printf("hi");
 		terminal_write(1, &char_to_print, 1);
 		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
 			current_terminal->screen_y++;
@@ -217,7 +215,7 @@ void terminal_copy_to_history(){
 		i++;
 	}
 	if (!not_copy_to_history){
-		current_terminal->history_index++;
+		current_terminal->history_index = (current_terminal->history_index + 1) % MAX_SUPPORTED_HISTORY;
 	}
 }
 

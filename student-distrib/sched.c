@@ -1,4 +1,5 @@
 #include "sched.h"
+#include "x86_desc.h"
 #include "paging.h"
 #include "filesys.h"
 #include "lib.h"
@@ -244,10 +245,10 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 {
 	task_t * new_task = get_task(new_pid);
 	
-	get_cr3(pd);
+	//get_cr3(pd);
 	
 	//Map the old process' video memory to garbage
-	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	//map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
 	set_cur_task(new_pid);
 	load_tss(new_task);
@@ -255,8 +256,8 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	get_cr3(pd);
 	
 	//Map the new process' video memory to the real deal
-	if (new_task->ptid == get_current_terminal()->ptid)
-		map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	//if (new_task->ptid == get_current_terminal()->ptid)
+		//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
 	return new_task;
 }
@@ -267,7 +268,7 @@ int32_t execute_task(int32_t pid)
 	task_t * old_task; 
 	task_t * new_task;
 	
-	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	//map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
 	old_task = get_cur_task();
 	new_task = get_task(pid);
@@ -308,7 +309,7 @@ int32_t tasks_init()
 	
 	init_task = get_task(0);
 	
-	for (i = 0; i < MAX_SUPPORTED_TERMINALS; i ++)
+	for (i = 0; i < 2; i ++)
 	{
 		terminals[i] = get_task(create_task(fname, args));
 		terminals[i]->ptid = create_ptree();

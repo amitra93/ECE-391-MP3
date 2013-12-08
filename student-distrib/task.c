@@ -91,6 +91,9 @@ task_t * init_task(int32_t pid)
 	task->tss.eip = 0; 
 	task->tss.ldt_segment_selector = 0;
 	task->tss.eflags = ELAGS_IF;
+	task->ret_eip = 0xBADF00D;
+	task->ret_ebp = 0xBADF00D;
+	task->ret_esp = 0xBADF00D;
 	
 	/*task->sys_tss = task->tss;
 	task->sys_tss.ss = KERNEL_DS;
@@ -121,7 +124,6 @@ task_t * init_task(int32_t pid)
 	return task;
 }
 
-//To-DO: Fill these guys out
 //Save the task's state
 void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
@@ -134,8 +136,9 @@ void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t
 	task->tss.esi = esi;
 	task->tss.edi = edi;
 	
+	//Save the stack pointers while adding the offset generated from pushed values from processor
 	if (cs == USER_CS)
-		task->tss.esp = esp;
+		task->tss.esp = esp+12;
 	else
 		task->tss.esp0 = esp+12;
 	/*if (cs == USER_CS)
@@ -213,10 +216,11 @@ uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint
 //Loads task's tss into TSS
 int32_t load_tss(task_t * task)
 {
-	if (task->state == TASK_RUNNING)
+	tss = task->tss;
+	/*if (task->state == TASK_RUNNING)
 		tss = task->tss;
 	else if (task->state == TASK_SYS_CALL)
-		tss = task->tss;
+		tss = task->tss;*/
 	return 0;
 }
 

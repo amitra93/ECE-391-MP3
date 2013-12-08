@@ -136,9 +136,8 @@ void pit_process_interrupt()
 {
 	task_t * cur_task = get_cur_task();	
 	uint16_t cs;
-	get_cs(cs);
-	
-	
+	get_cs(cs);	
+
 	//If we interrupted a user program
 	if (cs == USER_CS)
 	{
