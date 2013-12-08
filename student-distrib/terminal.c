@@ -10,6 +10,12 @@
 
 char* video_mem;
 
+terminal * get_cur_ptree_terminal()
+{
+	return &terminal_list[schedular.cur_ptree];
+}
+
+
 int
 terminal_open(const uint8_t* filename){	
 	int i, j, k;
@@ -23,6 +29,7 @@ terminal_open(const uint8_t* filename){
 		terminal_list[i].starting_offset = 0;
 		terminal_list[i].input.input_pointer = 0;
 		terminal_list[i].ptid = (unsigned int)i;
+		terminal_list[i].state = TERMINAL_IDLE;
 		for (j = 0; j < BUFFER_SIZE; j++){
 			terminal_list[i].input.line[j] = '\0';
 		}
@@ -58,6 +65,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	if (nbytes > BUFFER_SIZE){
 		nbytes = BUFFER_SIZE;
 	}
+	get_cur_ptree_terminal()->state = TERMINAL_READ;
 	char* output = (char*) buf;
 	int i = keyboard_wait_for_new_line(nbytes);
 	int j = 0;
@@ -65,6 +73,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 		output[j] = get_last_terminal_line()->line[j];
 		j++;
 	}
+	get_cur_ptree_terminal()->state = TERMINAL_IDLE;
 	return i-1;
 	
 }
@@ -174,6 +183,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 		}
 		current_terminal->input.line[current_terminal->input.input_pointer++] = char_to_print;
 		if (char_to_print == '\n'){
+			current_terminal->state = TERMINAL_DONE_READ;
 			terminal_copy_to_history();
 			current_terminal->input.input_pointer = 0;
 		}

@@ -128,6 +128,7 @@ task_t * init_task(int32_t pid)
 void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
 { 
+	task->tss.esp = esp+12;
 	task->tss.ebp = ebp;
 	task->tss.eax = eax;
 	task->tss.ebx = ebx;
@@ -135,40 +136,14 @@ void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t
 	task->tss.edx = edx;
 	task->tss.esi = esi;
 	task->tss.edi = edi;
-	
-	//Save the stack pointers while adding the offset generated from pushed values from processor
-	if (cs == USER_CS)
-		task->tss.esp = esp+12;
-	else
-		task->tss.esp = esp+12;
-	/*if (cs == USER_CS)
-	{
-		task->tss.esp = esp;
-		task->tss.ebp = ebp;
-		task->tss.eax = eax;
-		task->tss.ebx = ebx;
-		task->tss.ecx = ecx;
-		task->tss.edx = edx;
-		task->tss.esi = esi;
-		task->tss.edi = edi;
-	}
-	else
-	{
-		task->sys_tss.esp = esp;
-		task->sys_tss.ebp = ebp;
-		task->sys_tss.eax = eax;
-		task->sys_tss.ebx = ebx;
-		task->sys_tss.ecx = ecx;
-		task->sys_tss.edx = edx;
-		task->sys_tss.esi = esi;
-		task->sys_tss.edi = edi;
-	}*/
+
 }
 
 //Load the task's state
 uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
 {
+	esp = task->tss.esp;
 	ebp = task->tss.ebp;
 	eax = task->tss.eax;
 	ebx = task->tss.ebx;
@@ -178,39 +153,9 @@ uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint
 	edi = task->tss.edi;
 	
 	if (cs == USER_CS)
-	{
-		esp = task->tss.esp;
 		return 0;
-	}
 	else
-	{
-		esp = task->tss.esp;
 		return 1;
-	}
-	/*if (cs == USER_CS)
-	{
-		esp = task->tss.esp;
-		ebp = task->tss.ebp;
-		eax = task->tss.eax;
-		ebx = task->tss.ebx;
-		ecx = task->tss.ecx;
-		edx = task->tss.edx;
-		esi = task->tss.esi;
-		edi = task->tss.edi;
-		return 0;
-	}
-	else
-	{
-		esp = task->sys_tss.esp;
-		ebp = task->sys_tss.ebp;
-		eax = task->sys_tss.eax;
-		ebx = task->sys_tss.ebx;
-		ecx = task->sys_tss.ecx;
-		edx = task->sys_tss.edx;
-		esi = task->sys_tss.esi;
-		edi = task->sys_tss.edi;
-		return 1;
-	}*/
 }
 
 //Loads task's tss into TSS

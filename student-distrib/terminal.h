@@ -15,6 +15,12 @@
 #define MAX_SUPPORTED_HISTORY			16
 #define SHELL_OFFSET					7
 
+typedef enum terminal_state {
+	TERMINAL_IDLE,
+	TERMINAL_READ,
+	TERMINAL_DONE_READ,
+	TERMINAL_WRITE
+} terminal_state;
 
 typedef struct terminal_line {
 	int input_pointer;
@@ -29,9 +35,10 @@ typedef struct terminal {
 	int starting_offset;
 	terminal_line input;
 	terminal_line previous_input;
-	char video_buffer[NUM_ROWS * NUM_COLS];
+	char video_buffer[NUM_ROWS * NUM_COLS * 2];
 	unsigned int ptid;
 	terminal_line input_history[MAX_SUPPORTED_HISTORY];
+	terminal_state state;
 } terminal;
 
 extern char* video_mem;
@@ -61,5 +68,7 @@ terminal_line* get_last_terminal_line();
 void terminal_copy_to_history();
 
 void set_current_terminal(int terminal_index);
+
+terminal * get_cur_ptree_terminal();
 
 #endif /* _TERMINAL_H */
