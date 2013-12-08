@@ -12,7 +12,7 @@ char* video_mem;
 
 terminal * get_cur_ptree_terminal()
 {
-	return &terminal_list[schedular.cur_ptree];
+	return &terminal_list[scheduler.cur_ptree];
 }
 
 
@@ -78,14 +78,13 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	
 }
 
-
 int
 terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	int i;
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_cur_ptree_terminal();
 	
 	//Change this so that it will add to the history when it isn't the current terminal
-	//if (current_terminal->ptid == schedular.cur_ptree)
+	//if (current_terminal->ptid == scheduler.cur_ptree)
 	//{
 		set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 		if (buf == NULL){
@@ -177,7 +176,7 @@ void terminal_clear(){
 
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_current_terminal();
-	//if (current_terminal->ptid == schedular.cur_ptree){
+	//if (current_terminal->ptid == scheduler.cur_ptree){
 		if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 			return;
 		}

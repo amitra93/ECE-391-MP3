@@ -411,8 +411,8 @@ putc(uint8_t c)
       		screen_y--;
     	}
     } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+        *(uint8_t *)((uint8_t*)(VIRTUAL_VID_MEM + VIDEO) + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)((uint8_t*)(VIRTUAL_VID_MEM + VIDEO) + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;

@@ -18,7 +18,7 @@ typedef struct sched_t {
 	
 } sched_t;
 
-extern sched_t schedular;
+extern sched_t scheduler;
 
 int32_t tasks_init();
 int32_t create_task(const uint8_t * fname, const uint8_t args [128]);
