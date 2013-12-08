@@ -34,7 +34,7 @@ typedef struct terminal {
 	terminal_line input_history[MAX_SUPPORTED_HISTORY];
 } terminal;
 
-static char* video_mem;
+extern char* video_mem;
 
 terminal terminal_list[MAX_SUPPORTED_TERMINALS];
 

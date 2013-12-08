@@ -140,7 +140,7 @@ void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t
 	if (cs == USER_CS)
 		task->tss.esp = esp+12;
 	else
-		task->tss.esp0 = esp+12;
+		task->tss.esp = esp+12;
 	/*if (cs == USER_CS)
 	{
 		task->tss.esp = esp;
@@ -184,7 +184,7 @@ uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint
 	}
 	else
 	{
-		esp = task->tss.esp0;
+		esp = task->tss.esp;
 		return 1;
 	}
 	/*if (cs == USER_CS)

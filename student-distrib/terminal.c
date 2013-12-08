@@ -8,6 +8,8 @@
 #include "keyboard.h"
 #include "sched.h"
 
+char* video_mem;
+
 int
 terminal_open(const uint8_t* filename){	
 	int i, j, k;
