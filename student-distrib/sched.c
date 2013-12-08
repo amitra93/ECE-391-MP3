@@ -244,7 +244,7 @@ int32_t set_cur_task_state(task_state state)
 task_t * switch_task(int32_t old_pid, int32_t new_pid)
 {
 	task_t * new_task = get_task(new_pid);
-	
+
 	//get_cr3(pd);
 	
 	//Map the old process' video memory to garbage
@@ -254,11 +254,12 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	load_tss(new_task);
 	set_task_cr3(new_task);
 	get_cr3(pd);
-	
+	//now deal with new task
 	//Map the new process' video memory to the real deal
-	//if (new_task->ptid == get_current_terminal()->ptid)
-		//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 	
+	if (new_task->ptid == get_current_terminal()->ptid)
+		map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+
 	return new_task;
 }
 
@@ -268,7 +269,8 @@ int32_t execute_task(int32_t pid)
 	task_t * old_task; 
 	task_t * new_task;
 	
-	//map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	//process on top of this process is useless information
+	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
 	old_task = get_cur_task();
 	new_task = get_task(pid);
@@ -284,6 +286,24 @@ int32_t execute_task(int32_t pid)
 	setup_task_stack(new_task);
 	set_task_cr3(new_task);
 	get_cr3(pd);
+
+	//set video memory buffer if not in current terminal....not useful until can execute things from terminals without them being open (&&)
+	/*if(new_task->ptid != current_terminal_index){
+		switch(get_cur_task()->ptid){
+			case 0:
+				map_page_directory(VID_MEM_BUF_0, VIRTUAL_VID_MEM, 1, 1);
+				break;
+			case 1:
+				map_page_directory(VID_MEM_BUF_1, VIRTUAL_VID_MEM, 1, 1);
+				break;
+			case 2:
+				map_page_directory(VID_MEM_BUF_2, VIRTUAL_VID_MEM, 1, 1);
+				break;
+			default:
+				return NULL;
+		}
+	}*/
+
 	iret();
 
 halt_addr:
@@ -308,8 +328,9 @@ int32_t tasks_init()
 	set_cur_task(0);
 	
 	init_task = get_task(0);
-	
-	for (i = 0; i < 2; i ++)
+
+	//set_ptree_task(0,0);
+	for (i = 0; i < 3; i ++)
 	{
 		terminals[i] = get_task(create_task(fname, args));
 		terminals[i]->ptid = create_ptree();

@@ -14,7 +14,7 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
-static char* virt_video_mem = (char *)(VIRTUAL_VID_MEM + VIDEO);
+//static char* virt_video_mem = (char *)(VIRTUAL_VID_MEM + VIDEO);
 /*
 *  print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
 *  Description: Prints error code onto screen
@@ -431,8 +431,8 @@ vputc(uint8_t * video_memory, uint8_t c)
       		screen_y--;
     	}
     } else {
-        *(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+        //*(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
+        //*(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;

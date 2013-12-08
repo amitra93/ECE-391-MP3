@@ -614,6 +614,24 @@ void process_shortcuts(void){
 		shortcut_received = 1;
 		return;
 	}
+	if (is_alt_pressed()  && is_pressed(&f1) ){
+		set_current_terminal(0);
+		f1.pressed = 0;
+		return;
+		
+	}
+	if( is_alt_pressed() && is_pressed(&f2) ){
+		set_current_terminal(1);
+		f2.pressed = 0;
+		return;
+	}
+	if (is_alt_pressed() && is_pressed(&f3)){
+		set_current_terminal(2);
+		f3.pressed = 0;
+		return;
+	}
+
+
 }
 
 void

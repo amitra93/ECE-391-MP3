@@ -12,6 +12,7 @@ int
 terminal_open(const uint8_t* filename){	
 	int i, j, k;
 	current_terminal_index = 0;
+	video_mem = (char *)VIDEO;
 	for (i = 0; i < MAX_SUPPORTED_TERMINALS; i++){
 		terminal_list[i].screen_x = 0;
 		terminal_list[i].screen_y = 0;
@@ -30,9 +31,10 @@ terminal_open(const uint8_t* filename){
 			}
 		}
 
-		terminal_list[i].video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
-		for (j = 0; j < NUM_ROWS * NUM_COLS; j++){
-			terminal_list[i].video_memory[j] = ' ';
+		//TODO change this....
+		//terminal_list[i].video_buffer = (char*)(VIRTUAL_VID_MEM + VIDEO00);
+		for (j = 0; j < NUM_ROWS * NUM_COLS * 2; j++){
+			terminal_list[i].video_buffer[j] = 0x0;
 		}
 	}
 	clear();
@@ -73,9 +75,9 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	
 	//Change this so that it will add to the history when it isn't the current terminal
 	//if (current_terminal->ptid == schedular.cur_ptree)
-	{
+	//{
 		set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
-		if (buf == NULL || fd != 1){
+		if (buf == NULL){
 			return -1;
 		}
 		if (nbytes <= 0){
@@ -98,7 +100,7 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 			current_terminal->chars_printed++;
 		}
 		get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
-	}
+	//}
 	return 0;
 }
 
@@ -157,13 +159,14 @@ void terminal_clear(){
 	clear();
 	terminal* current_terminal = get_current_terminal();
 	current_terminal->screen_x = current_terminal->screen_y = 0;
-	set_cursor_pos(0, 0);	
+	set_cursor_pos(0, 0);
+	
 }
+
 
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_current_terminal();
-	//if (current_terminal->ptid == schedular.cur_ptree)
-	{
+	//if (current_terminal->ptid == schedular.cur_ptree){
 		if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 			return;
 		}
@@ -172,7 +175,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 			terminal_copy_to_history();
 			current_terminal->input.input_pointer = 0;
 		}
-		//printf("hi");
+
 		terminal_write(1, &char_to_print, 1);
 		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
 			current_terminal->screen_y++;
@@ -181,7 +184,7 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 			}
 			current_terminal->chars_printed = 0;
 		}
-	}
+	//}
 }
 
 terminal* get_current_terminal(){
@@ -215,14 +218,23 @@ void terminal_copy_to_history(){
 		i++;
 	}
 	if (!not_copy_to_history){
-		current_terminal->history_index = (current_terminal->history_index + 1) % MAX_SUPPORTED_HISTORY;
+		current_terminal->history_index++;
 	}
 }
 
 void set_current_terminal(int terminal_index){
-	get_current_terminal()->video_memory = (char*)(GARBAGE_VID_MEM);
+	if (current_terminal_index == terminal_index || terminal_index < 0 || terminal_index > 2){
+		return;
+	}
+	//copy active video memory to buffer
+	memcpy(&get_current_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
+
 	current_terminal_index = terminal_index;
-	get_current_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
-	//other stuff here later
+	//do the reverse
+	memcpy(video_mem, &get_current_terminal()->video_buffer, NUM_COLS*NUM_ROWS*2);
+	//get_current_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
+
+	//TODO memcopy buff into memory
+	return;
 }
 

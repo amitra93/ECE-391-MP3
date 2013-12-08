@@ -11,6 +11,7 @@
 #define VIRTUAL_VID_MEM 0x10000000
 #define GARBAGE_VID_MEM 0x10400000
 
+
 /*
 *   This function clears the screen and draws the error description, error code, 
 *   instruction pointer, and process id.

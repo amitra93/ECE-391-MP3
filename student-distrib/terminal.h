@@ -15,6 +15,7 @@
 #define MAX_SUPPORTED_HISTORY			16
 #define SHELL_OFFSET					7
 
+
 typedef struct terminal_line {
 	int input_pointer;
 	unsigned char line[BUFFER_SIZE];
@@ -28,12 +29,12 @@ typedef struct terminal {
 	int starting_offset;
 	terminal_line input;
 	terminal_line previous_input;
-	char* video_memory;
+	char video_buffer[NUM_ROWS * NUM_COLS];
 	unsigned int ptid;
 	terminal_line input_history[MAX_SUPPORTED_HISTORY];
 } terminal;
 
-
+static char* video_mem;
 
 terminal terminal_list[MAX_SUPPORTED_TERMINALS];
 
