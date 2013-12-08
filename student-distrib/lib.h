@@ -10,9 +10,7 @@
 #define VIDEO 0xB8000
 #define VIRTUAL_VID_MEM 0x10000000
 #define GARBAGE_VID_MEM 0x10400000
-//#define VID_MEM_BUF_0 0x10800000
-//#define VID_MEM_BUF_1 0x11200000
-//#define VID_MEM_BUF_2 0x11600000
+
 
 /*
 *   This function clears the screen and draws the error description, error code, 
