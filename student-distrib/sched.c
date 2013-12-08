@@ -56,7 +56,7 @@
 	
 sched_t schedular = {
 	.task_vector = 0,
-	.max_tasks = 7,
+	.max_tasks = 10,
 	.num_tasks = 0,
 	.cur_task = -1,
 	
@@ -188,7 +188,7 @@ task_t * get_cur_task()
 task_t * get_next_task()
 {
 	uint32_t i;
-	for (i = schedular.cur_ptree; i < schedular.max_ptrees; i ++)
+	for (i = schedular.cur_ptree+1; i < schedular.max_ptrees; i ++)
 	{
 		if ( (schedular.ptree_vector & (1 << i)) > 0)
 			return get_task(schedular.ptree_tasks[i]);
@@ -308,7 +308,7 @@ int32_t tasks_init()
 	
 	init_task = get_task(0);
 	
-	for (i = 0; i < 2; i ++)
+	for (i = 0; i < MAX_SUPPORTED_TERMINALS; i ++)
 	{
 		terminals[i] = get_task(create_task(fname, args));
 		terminals[i]->ptid = create_ptree();

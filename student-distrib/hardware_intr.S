@@ -37,7 +37,6 @@ idt_rtc:
 
 .align 4
 idt_pit:
-
 	movl 	%esp, local_esp
 	cmpl  	$0x10, 4(%esp)
 	
@@ -70,12 +69,12 @@ from_user_space:
 	pushl %eax
 	
 	call save_state
-	addl $44, %esp
+	addl $40, %esp
 	
 	call *(_idt_pit)	# Go to ISR
 	
 	
-	subl $28, %esp
+	subl $32, %esp
 	pushl 8(%ebp)
 	call get_cur_task
 	pushl 	%eax 			# Current task
@@ -96,21 +95,29 @@ from_user_space:
 	je to_user_space
 	
 to_kernel_space:
-	addl $8, %esp
-	subl $12, local_esp
+	addl 	$8, 		%esp
 	pushl	%eax
+	pushl	%ebx
 	
-	movl	4(%esp),	%eax
-	movl	%eax,		12(%esp)
+	movl	local_esp,	%ebx
 	
-	movl	8(%esp), 	%eax
-	movl	%eax, 		16(%esp)
+	subl 	$4, 		%ebx
+	movl	16(%esp),	%eax
+	movl	%eax,		(%ebx)
 	
+	subl 	$4, 		%ebx
 	movl	12(%esp), 	%eax
-	movl	%eax, 		20(%esp)
+	movl	%eax, 		(%ebx)
 	
+	subl 	$4, 		%ebx
+	movl	8(%esp), 	%eax
+	movl	%eax, 		(%ebx)
+	movl 	%ebx, 		local_esp
+	
+	popl	%ebx
 	popl	%eax
-	addl $8, %esp
+	addl 	$20, 		%esp
+	movl	local_esp, 	%esp
 	iret
 	
 to_user_space:
@@ -125,25 +132,12 @@ local_esp:
 */
 .align 4
 handle_idt:
-	pushl %ebp
-	movl  %esp, %ebp
-	pushl %eax
-	pushl %ebx
-	pushl %ecx
-	pushl %edx
-	pushl %esi
-	pushl %edi
+	pusha
 	pushf
 	movl  36(%esp), %edi 	# Get the handler address	
 	call *%edi				# Go to ISR
 	popf
-	popl %eax
-	popl %ebx
-	popl %ecx
-	popl %edx
-	popl %esi
-	popl %edi
-	popl %ebp
+	popa
 	addl $4, %esp 			# Pop off function address
 	iret
 	
