@@ -12,6 +12,7 @@ int
 terminal_open(const uint8_t* filename){	
 	int i, j, k;
 	current_terminal_index = 0;
+	video_mem = (char *)VIDEO;
 	for (i = 0; i < MAX_SUPPORTED_TERMINALS; i++){
 		terminal_list[i].screen_x = 0;
 		terminal_list[i].screen_y = 0;
@@ -30,9 +31,10 @@ terminal_open(const uint8_t* filename){
 			}
 		}
 
-		terminal_list[i].video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
-		for (j = 0; j < NUM_ROWS * NUM_COLS; j++){
-			terminal_list[i].video_memory[j] = ' ';
+		//TODO change this....
+		//terminal_list[i].video_buffer = (char*)(VIRTUAL_VID_MEM + VIDEO00);
+		for (j = 0; j < NUM_ROWS * NUM_COLS * 2; j++){
+			terminal_list[i].video_buffer[j] = 0x0;
 		}
 	}
 	clear();
@@ -222,9 +224,18 @@ void terminal_copy_to_history(){
 }
 
 void set_current_terminal(int terminal_index){
-	get_current_terminal()->video_memory = (char*)(GARBAGE_VID_MEM);
+	if (current_terminal_index == terminal_index || terminal_index < 0 || terminal_index > 2){
+		return;
+	}
+	//copy active video memory to buffer
+	memcpy(&get_current_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
+
 	current_terminal_index = terminal_index;
-	get_current_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
-	//other stuff here later
+	//do the reverse
+	memcpy(video_mem, &get_current_terminal()->video_buffer, NUM_COLS*NUM_ROWS*2);
+	//get_current_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
+
+	//TODO memcopy buff into memory
+	return;
 }
 

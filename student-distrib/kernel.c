@@ -220,7 +220,7 @@ entry (unsigned long magic, unsigned long addr)
 	tasks_init();
 
 	printf("Enabling PIT\n");
-	pit_init();
+	//pit_init();
 	
 	printf("Enabling terminal\n");
 	terminal_open(NULL);
@@ -228,11 +228,11 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Execute the first program (`shell') ... */
-	/*while(1)
+	while(1)
 	{
 		uint8_t pname [32] = "shell";
 		execute(pname);
-	}*/
+	}
 	
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
