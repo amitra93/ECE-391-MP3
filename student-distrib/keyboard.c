@@ -680,10 +680,12 @@ void process_shortcuts(void){
 		return;
 	}
 	if (is_control_pressed() && is_pressed(&c)){
+		//THIS IS DISABLED CUZ IT BREAKS STUFF
+
 		//printf("\nWill halt later\n");
 		shortcut_received = 0;
 		send_eoi(1);
-		halt(1);
+		//halt(1);
 		return;
 	}
 	if (is_pressed(&backspace)){
