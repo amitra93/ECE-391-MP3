@@ -655,9 +655,6 @@ keyboard_init(void)
 	// keyboard is automatically enabled, all we do is enable IRQ1
 	
 	// set constants to use
-	//array_to_use = &lowercase[0];
-	//is_uppercase = 0;
-	//is_control_pressed = 0;
 	enable_irq(1);
 	init_keys();
 	shortcut_received = 0;
