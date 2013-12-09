@@ -45,8 +45,6 @@ terminal_open(const uint8_t* filename){
 			}
 		}
 
-		//TODO change this....
-		//terminal_list[i].video_buffer = (char*)(VIRTUAL_VID_MEM + VIDEO00);
 		for (j = 0; j < NUM_ROWS * NUM_COLS; j++){
 			terminal_list[i].video_buffer[j<<1] = ' ';
 			terminal_list[i].video_buffer[(j<<1) + 1] = ATTRIB;
@@ -75,7 +73,6 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	get_cursor_pos(&current_terminal->starting_offset, &temp);
 	if (get_executing_terminal()->input.input_pointer > 0){
 		terminal_write(1, get_executing_terminal()->input.line, get_executing_terminal()->input.input_pointer);
-		//get_executing_terminal()->input.input_pointer = 0;
 	}
 	if (nbytes <= 0){
 		return 0;
