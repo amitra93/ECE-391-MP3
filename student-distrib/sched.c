@@ -88,13 +88,6 @@ static int32_t get_new_pid()
 	return -1;
 }
 
-static int32_t clear_ptid(int32_t ptid)
-{
-	scheduler.ptree_tasks[ptid] = -1;
-	scheduler.ptree_vector &= ~(1 << ptid);
-	return 0;
-}
-
 static int32_t get_new_ptid()
 {
 	uint32_t i;
