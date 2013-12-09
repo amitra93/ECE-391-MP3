@@ -680,10 +680,12 @@ void process_shortcuts(void){
 		return;
 	}
 	if (is_control_pressed() && is_pressed(&c)){
+		//THIS IS DISABLED CUZ IT BREAKS STUFF
+
 		//printf("\nWill halt later\n");
 		shortcut_received = 0;
 		send_eoi(1);
-		halt(1);
+		//halt(1);
 		return;
 	}
 	if (is_pressed(&backspace)){
@@ -695,17 +697,20 @@ void process_shortcuts(void){
 	if (is_alt_pressed()  && is_pressed(&f1) ){
 		set_current_terminal(0);
 		f1.pressed = 0;
+		shortcut_received = 1;
 		return;
 		
 	}
 	if( is_alt_pressed() && is_pressed(&f2) ){
 		set_current_terminal(1);
 		f2.pressed = 0;
+		shortcut_received = 1;
 		return;
 	}
 	if (is_alt_pressed() && is_pressed(&f3)){
 		set_current_terminal(2);
 		f3.pressed = 0;
+		shortcut_received = 1;
 		return;
 	}
 
