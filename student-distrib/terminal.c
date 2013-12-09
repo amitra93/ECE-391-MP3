@@ -196,6 +196,7 @@ void terminal_backspace(){
 	current_terminal->chars_printed--;
 	current_terminal->input.input_pointer--;
 	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
+	set_blinking_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 	printf("%c", str);
 	/*
 	if (current_terminal->screen_x <= 0){
@@ -302,6 +303,7 @@ void set_current_terminal(int terminal_index){
 	current_terminal_index = terminal_index;
 	//do the reverse
 	memcpy(video_mem, &get_displaying_terminal()->video_buffer, NUM_COLS*NUM_ROWS*2);
+	set_blinking_cursor_pos(terminal_list[terminal_index].screen_x, terminal_list[terminal_index].screen_y);
 	//get_displaying_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
 	
 	//TODO memcopy buff into memory
