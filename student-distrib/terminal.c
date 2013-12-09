@@ -10,6 +10,7 @@
 
 #define ATTRIB 0x7
 
+//external video_mem pointer from lib.c
 char* video_mem;
 
 /*
