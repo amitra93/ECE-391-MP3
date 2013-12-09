@@ -755,7 +755,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 		if (current_terminal->state == TERMINAL_DONE_READ && current_terminal->input.input_pointer < BUFFER_SIZE-1){
 			enter.pressed = 0;
 			keypad_enter.pressed = 0;
-			return get_last_terminal_line()->input_pointer;// - old_input_pointer;
+			return get_last_terminal_line()->input_pointer;
 		}
 		current_terminal = get_executing_terminal();
 	}
