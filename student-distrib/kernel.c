@@ -158,7 +158,8 @@ entry (unsigned long magic, unsigned long addr)
 	/* Construct entries in the IDT */
 	{
 		int i;
-		
+		//dont want interrupt nesting, so we use INTR_GATE
+
 		/* Go through every entry in the IDT and set as an unknown interrupt */
 		for (i = 0; i < 256; i ++)
 		{
