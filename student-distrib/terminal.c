@@ -197,7 +197,12 @@ void terminal_backspace(){
 	current_terminal->chars_printed--;
 	current_terminal->input.input_pointer--;
 	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
-	set_blinking_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
+	if (current_terminal->screen_x == 0){
+		set_blinking_cursor_pos( current_terminal->screen_x, current_terminal->screen_y-1);
+	}
+	else {
+		set_blinking_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
+	}
 	printf("%c", str);
 
 }
