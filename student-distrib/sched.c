@@ -55,7 +55,7 @@
 			  "=r"((task)->ret_ebp));					\
 	}while(0)
 	
-sched_t schedular = {
+sched_t scheduler = {
 	.task_vector = 0,
 	.max_tasks = 10,
 	.num_tasks = 0,
@@ -70,18 +70,18 @@ sched_t schedular = {
 	
 static int32_t clear_pid(int32_t pid)
 {
-	schedular.task_vector &= ~(1 << pid);
+	scheduler.task_vector &= ~(1 << pid);
 	return 0;
 }
 
 static int32_t get_new_pid()
 {
 	uint32_t i;
-	for (i = 0; i < schedular.max_tasks; i ++)
+	for (i = 0; i < scheduler.max_tasks; i ++)
 	{
-		if ( (schedular.task_vector & (1 << i)) == 0)
+		if ( (scheduler.task_vector & (1 << i)) == 0)
 		{
-			schedular.task_vector |= 1 << i;
+			scheduler.task_vector |= 1 << i;
 			return i;
 		}
 	}
@@ -90,19 +90,19 @@ static int32_t get_new_pid()
 
 static int32_t clear_ptid(int32_t ptid)
 {
-	schedular.ptree_tasks[ptid] = -1;
-	schedular.ptree_vector &= ~(1 << ptid);
+	scheduler.ptree_tasks[ptid] = -1;
+	scheduler.ptree_vector &= ~(1 << ptid);
 	return 0;
 }
 
 static int32_t get_new_ptid()
 {
 	uint32_t i;
-	for (i = 0; i < schedular.max_ptrees; i ++)
+	for (i = 0; i < scheduler.max_ptrees; i ++)
 	{
-		if ( (schedular.ptree_vector & (1 << i)) == 0)
+		if ( (scheduler.ptree_vector & (1 << i)) == 0)
 		{
-			schedular.ptree_vector |= 1 << i;
+			scheduler.ptree_vector |= 1 << i;
 			return i;
 		}
 	}
@@ -114,8 +114,8 @@ int32_t create_ptree ()
 	int32_t ptid;
 	if ((ptid = get_new_ptid()) < 0)
 		return -1;
-	++schedular.num_ptrees;
-	schedular.ptree_tasks[ptid] = -1;
+	++scheduler.num_ptrees;
+	scheduler.ptree_tasks[ptid] = -1;
 	return ptid;
 }
 
@@ -139,9 +139,9 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	
 	//Load the file image
 	task = init_task(pid);
-	if (schedular.cur_task != -1)
+	if (scheduler.cur_task != -1)
 	{
-		task->parent_task = get_task(schedular.cur_task);
+		task->parent_task = get_task(scheduler.cur_task);
 		task->ptid = task->parent_task->ptid;
 	}
 		
@@ -152,7 +152,7 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 		return -1;
 	}
 	
-	++schedular.num_tasks;
+	++scheduler.num_tasks;
 	restore_flags(flags);
 	return pid;
 }
@@ -174,7 +174,7 @@ int32_t end_task(int32_t pid)
 	clear_pid(pid);
 	clear_pde(addr);
 	
-	--schedular.num_tasks;
+	--scheduler.num_tasks;
 	set_ptree_task(parent_task->ptid, parent_task->pid);
 	set_cur_task(parent_task->pid);
 	restore_flags(flags);
@@ -183,26 +183,26 @@ int32_t end_task(int32_t pid)
 
 task_t * get_cur_task()
 {
-	return schedular.cur_task < 0 ? NULL : get_task(schedular.cur_task );
+	return scheduler.cur_task < 0 ? NULL : get_task(scheduler.cur_task );
 }
 
 task_t * get_next_task()
 {
 	uint32_t i;
-	for (i = schedular.cur_ptree+1; i < schedular.max_ptrees; i ++)
+	for (i = scheduler.cur_ptree+1; i < scheduler.max_ptrees; i ++)
 	{
-		if ( (schedular.ptree_vector & (1 << i)) > 0)
-			return get_task(schedular.ptree_tasks[i]);
+		if ( (scheduler.ptree_vector & (1 << i)) > 0)
+			return get_task(scheduler.ptree_tasks[i]);
 	}
 	
-	for (i = 0; i < schedular.cur_ptree; i ++)
+	for (i = 0; i < scheduler.cur_ptree; i ++)
 	{
-		if ( (schedular.ptree_vector & (1 << i)) > 0)
-			return get_task(schedular.ptree_tasks[i]);
+		if ( (scheduler.ptree_vector & (1 << i)) > 0)
+			return get_task(scheduler.ptree_tasks[i]);
 	}
 	
 	//If there are no other active tasks, return current
-	return get_task(schedular.ptree_tasks[schedular.cur_ptree]);
+	return get_task(scheduler.ptree_tasks[scheduler.cur_ptree]);
 }
 
 task_state get_cur_task_state()
@@ -212,26 +212,26 @@ task_state get_cur_task_state()
 
 int32_t set_cur_ptree(int32_t ptid)
 {
-	schedular.cur_ptree = ptid;
+	scheduler.cur_ptree = ptid;
 	return 0;
 }
 
 int32_t set_cur_task(int32_t pid)
 {
-	schedular.cur_task = pid;	
-	schedular.cur_ptree = get_task(pid)->ptid;
+	scheduler.cur_task = pid;	
+	scheduler.cur_ptree = get_task(pid)->ptid;
 	return 0;
 }
 
 int32_t set_ptree_task(int32_t ptid, int32_t pid)
 {
-	schedular.ptree_tasks[ptid] = pid;
+	scheduler.ptree_tasks[ptid] = pid;
 	return 0;
 }
 
 int32_t clear_ptree_task(int32_t ptid)
 {
-	schedular.ptree_tasks[ptid] = -1;
+	scheduler.ptree_tasks[ptid] = -1;
 	return 0;
 }
 
