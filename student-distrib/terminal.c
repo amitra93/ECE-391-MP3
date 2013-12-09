@@ -8,6 +8,8 @@
 #include "keyboard.h"
 #include "sched.h"
 
+#define ATTRIB 0x7
+
 char* video_mem;
 
 terminal * get_executing_terminal()
@@ -41,8 +43,9 @@ terminal_open(const uint8_t* filename){
 
 		//TODO change this....
 		//terminal_list[i].video_buffer = (char*)(VIRTUAL_VID_MEM + VIDEO00);
-		for (j = 0; j < NUM_ROWS * NUM_COLS * 2; j++){
-			terminal_list[i].video_buffer[j] = 0x0;
+		for (j = 0; j < NUM_ROWS * NUM_COLS; j++){
+			terminal_list[i].video_buffer[j<<1] = ' ';
+			terminal_list[i].video_buffer[(j<<1) + 1] = ATTRIB;
 		}
 	}
 	clear();
@@ -153,7 +156,6 @@ terminal_write_keypress(unsigned char * buf, int32_t nbytes){
 				set_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 				printf("%c", newline);
 				get_cursor_pos(&current_disp_terminal->screen_x, &current_disp_terminal->screen_y);
-				set_blinking_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 				current_disp_terminal->chars_printed = 0;
 			}
 			else if (string[i] == '\n'){
@@ -165,9 +167,9 @@ terminal_write_keypress(unsigned char * buf, int32_t nbytes){
 			set_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 			printf("%c", string[i]);
 			get_cursor_pos(&current_disp_terminal->screen_x,&current_disp_terminal->screen_y);
-			set_blinking_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 			current_disp_terminal->chars_printed++;
 		}
+		set_blinking_cursor_pos(current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 		
 	//}
 	return 0;
@@ -206,7 +208,6 @@ void terminal_clear(){
 	terminal* current_terminal = get_displaying_terminal();
 	current_terminal->screen_x = current_terminal->screen_y = 0;
 	set_cursor_pos(0, 0);
-	
 }
 
 
@@ -270,9 +271,11 @@ void terminal_copy_to_history(){
 }
 
 void set_current_terminal(int terminal_index){
+
 	if (current_terminal_index == terminal_index || terminal_index < 0 || terminal_index > 2){
 		return;
 	}
+
 	//copy active video memory to buffer
 	memcpy(&get_displaying_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
 
