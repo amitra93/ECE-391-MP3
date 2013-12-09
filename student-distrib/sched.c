@@ -372,9 +372,8 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	load_tss(new_task);
 	set_task_cr3(new_task);
 	get_cr3(pd);
-	//now deal with new task
-	//Map the new process' video memory to the real deal
 	
+	//Map the new process' video memory to the real deal
 	if (new_task->ptid == get_displaying_terminal()->ptid)
 		map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 
