@@ -57,7 +57,6 @@ static int32_t init_task_pd(task_t * task)
 	
 	task->page_directory = (uint32_t*)(addr);
 	task->page_table = (uint32_t*)(addr) + NUM_PAGES;
-	task->video_mem = (uint8_t*)(VIRTUAL_VID_MEM) + VIDEO;
 	
 	old_pd = pd;
 	old_pt = pt;
@@ -133,9 +132,7 @@ task_t * init_task(int32_t pid)
 	task->ret_eflags = 0xBADF00D;
 	
 	task->parent_task = NULL;
-	task->child_task = NULL;
-	task->sibling_task = NULL;
-	
+
 	for (i = 0; i < 8; i ++)
 	{
 		task->files[i].fops = NULL;
@@ -165,10 +162,10 @@ task_t * init_task(int32_t pid)
  *OUTPUTS: none
  *SIDE EFFECTS: saves the task's state
  */
-void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+void save_state(task_t * task, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
 { 
-	task->tss.esp = esp+12;
+	task->tss.esp = esp+12;	// Increment by 12 to "pop" off the iret block
 	task->tss.ebp = ebp;
 	task->tss.eax = eax;
 	task->tss.ebx = ebx;
@@ -176,7 +173,6 @@ void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t
 	task->tss.edx = edx;
 	task->tss.esi = esi;
 	task->tss.edi = edi;
-
 }
 
 /*
@@ -248,15 +244,23 @@ int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname
 {
 	uint32_t i;
 	int32_t exe_addr;
+	
+	// Load the program into the task's program image
 	if ((exe_addr = load_program(fname, (uint8_t*)addr)) == -1 || task == NULL)
 		return -1;
+		
+	// Set the next executing instruction
 	task->tss.eip = exe_addr;
 	
+	// Set up the initial arguments
 	for ( i = 0; i < 128; i ++)
 		task->args[i] = args[i];
 		
+	// Set the process' process name
 	for ( i = 0; i < 32; i ++)
 		task->pName[i] = fname[i];
+	
+	// Null-terminated
 	task->pName[31] = 0;
 		
 	return 0;

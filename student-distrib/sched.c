@@ -93,13 +93,15 @@ static int32_t clear_pid(int32_t pid)
 static int32_t get_new_pid()
 {
 	uint32_t i;
+	uint32_t task_vector = scheduler.task_vector;
 	for (i = 0; i < scheduler.max_tasks; i ++)
 	{
-		if ( (scheduler.task_vector & (1 << i)) == 0)
+		if ( (task_vector & 1) == 0)
 		{
 			scheduler.task_vector |= 1 << i;
 			return i;
 		}
+		task_vector >>= 1;
 	}
 	return -1;
 }

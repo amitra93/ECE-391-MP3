@@ -248,7 +248,7 @@ format_char_switch:
 	return (buf - format);
 }
 
-/* Standard printf().
+/* Printf that writes to a terminal.
  * Only supports the following format strings:
  * %%  - print a literal '%' character
  * %x  - print a number in hexadecimal
@@ -390,7 +390,7 @@ puts(int8_t* s)
 	return index;
 }
 
-/* Output a string to the console */
+/* Output a string to the terminal */
 int32_t
 vputs(terminal * term, int8_t* s)
 {
@@ -423,6 +423,7 @@ putc(uint8_t c)
     }
 }
 
+/* Output a character to the terminal*/
 void
 vputc(terminal * term, uint8_t c)
 {

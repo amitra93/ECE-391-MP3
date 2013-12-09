@@ -370,11 +370,11 @@ void terminal_copy_to_history(){
  * SIDE EFFECTS: 
  */
 void set_current_terminal(int terminal_index){
-
 	if (current_terminal_index == terminal_index || terminal_index < 0 || terminal_index > 2){
 		return;
 	}
 
+	
 	//copy active video memory to buffer
 	memcpy(&get_displaying_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
 
