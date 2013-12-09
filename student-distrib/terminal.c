@@ -27,7 +27,7 @@ terminal_open(const uint8_t* filename){
 		terminal_list[i].screen_y = 0;
 		terminal_list[i].history_index = 0;
 		terminal_list[i].chars_printed = 0;
-		terminal_list[i].starting_offset = 0;
+		terminal_list[i].starting_offset = SHELL_OFFSET;
 		terminal_list[i].input.input_pointer = 0;
 		terminal_list[i].ptid = (unsigned int)i;
 		terminal_list[i].state = TERMINAL_IDLE;
