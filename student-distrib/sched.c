@@ -104,21 +104,6 @@ static int32_t get_new_pid()
 	return -1;
 }
 
-<<<<<<< HEAD
-/*
- *static int32_t clear_ptid(int32_t ptid)
- *DESCRIPTION: clears the ptid
- *
- *INPUTS: ptid
- *OUTPUTS: returns 0
- *SIDE EFFECTS: none
- */	
-static int32_t clear_ptid(int32_t ptid)
-{
-	scheduler.ptree_tasks[ptid] = -1;
-	scheduler.ptree_vector &= ~(1 << ptid);
-	return 0;
-}
 
 /*
  *static int32_t get_new_ptid()
@@ -128,8 +113,7 @@ static int32_t clear_ptid(int32_t ptid)
  *OUTPUTS: returns -1 on fail
  *SIDE EFFECTS: none
  */
-=======
->>>>>>> a5b628e6f60d3beb480c2383f81ce5fb40cdece7
+
 static int32_t get_new_ptid()
 {
 	uint32_t i;
