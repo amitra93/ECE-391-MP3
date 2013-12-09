@@ -196,9 +196,6 @@ entry (unsigned long magic, unsigned long addr)
 		SET_INTR_GATE(idt[40], &idt_rtc);
 	}
 		
-	
-	set_blinking_cursor_pos(0,0);
-
 
 	/* Init the PIC */
 	printf("Enabling PIC\n");
