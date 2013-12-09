@@ -148,10 +148,12 @@ int32_t create_ptree ()
 
 /*
  *int32_t create_task(const uint8_t * fname, const uint8_t * args)
- *DESCRIPTION: 
+ *DESCRIPTION: creates the task based on the args and fname by getting a new pid,
+               mapping the file image into memory, setting up user space memory, 
+			   loading the file image
  *
  *INPUTS: fname, args
- *OUTPUTS: returns -1 on fail, or ptid otherwise
+ *OUTPUTS: returns -1 on fail, or pid otherwise
  *SIDE EFFECTS: none
  */
 int32_t create_task(const uint8_t * fname, const uint8_t * args)
@@ -191,7 +193,14 @@ int32_t create_task(const uint8_t * fname, const uint8_t * args)
 	restore_flags(flags);
 	return pid;
 }
-
+/*
+ *int32_t end_task(int32_t pid)
+ *DESCRIPTION: ends the specified task
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: maps the file image into memory
+ */
 int32_t end_task(int32_t pid)
 {
 	uint32_t addr;
@@ -215,12 +224,27 @@ int32_t end_task(int32_t pid)
 	restore_flags(flags);
 	return 0;
 }
-
+/*
+ *task_t * get_cur_task()
+ *DESCRIPTION: gets the current task
+ *
+ *INPUTS: none
+ *OUTPUTS: returns the current task
+ *SIDE EFFECTS: none
+ */
 task_t * get_cur_task()
 {
 	return scheduler.cur_task < 0 ? NULL : get_task(scheduler.cur_task );
 }
 
+/*
+ *task_t * get_next_task()
+ *DESCRIPTION: gets the next active task
+ *
+ *INPUTS: none
+ *OUTPUTS: returns the next active task, if there are not any, returns the current task
+ *SIDE EFFECTS: none
+ */
 task_t * get_next_task()
 {
 	uint32_t i;
@@ -240,17 +264,41 @@ task_t * get_next_task()
 	return get_task(scheduler.ptree_tasks[scheduler.cur_ptree]);
 }
 
+/*
+ *task_state get_cur_task_state()
+ *DESCRIPTION: gets the state of the current task
+ *
+ *INPUTS: none
+ *OUTPUTS: returns the state of the current task
+ *SIDE EFFECTS: none
+ */
 task_state get_cur_task_state()
 {
 	return get_cur_task()->state;
 }
 
+/*
+ *task_state get_cur_task_state()
+ *DESCRIPTION: sets the current ptree based on the ptid
+ *
+ *INPUTS: ptid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t set_cur_ptree(int32_t ptid)
 {
 	scheduler.cur_ptree = ptid;
 	return 0;
 }
 
+/*
+ *int32_t set_cur_task(int32_t pid)
+ *DESCRIPTION: sets the current current task based on the pid
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t set_cur_task(int32_t pid)
 {
 	scheduler.cur_task = pid;	
@@ -258,24 +306,57 @@ int32_t set_cur_task(int32_t pid)
 	return 0;
 }
 
+/*
+ *int32_t set_ptree_task(int32_t ptid, int32_t pid)
+ *DESCRIPTION: sets ptree tasks up
+ *
+ *INPUTS: ptid, pid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t set_ptree_task(int32_t ptid, int32_t pid)
 {
 	scheduler.ptree_tasks[ptid] = pid;
 	return 0;
 }
 
+/*
+ *int32_t clear_ptree_task(int32_t ptid)
+ *DESCRIPTION: clears the ptree tasks
+ *
+ *INPUTS: ptid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t clear_ptree_task(int32_t ptid)
 {
 	scheduler.ptree_tasks[ptid] = -1;
 	return 0;
 }
 
+/*
+ *int32_t set_cur_task_state(task_state state)
+ *DESCRIPTION: sets the current task state
+ *
+ *INPUTS: state
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t set_cur_task_state(task_state state)
 {
 	get_cur_task()->state = state;
 	return 0;
 }
 
+/*
+ *task_t * switch_task(int32_t old_pid, int32_t new_pid)
+ *DESCRIPTION: switches tasks based on the old pid and new pid, sends old process's
+			   vm to garbage, and maps new process' vm.
+ *
+ *INPUTS: old_pid, new_pid
+ *OUTPUTS: returns the new_task
+ *SIDE EFFECTS: old process' video memory is sent to garbage
+ */
 task_t * switch_task(int32_t old_pid, int32_t new_pid)
 {
 	task_t * new_task = get_task(new_pid);
@@ -298,6 +379,14 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	return new_task;
 }
 
+/*
+ *int32_t execute_task(int32_t pid)
+ *DESCRIPTION: executes the task
+ *
+ *INPUTS: pid
+ *OUTPUTS: none
+ *SIDE EFFECTS: executes the task
+ */
 int32_t execute_task(int32_t pid)
 {
 	int32_t ret = 0;
@@ -333,6 +422,14 @@ halt_addr:
 	return ret;
 }
 
+/*
+ *int32_t tasks_init()
+ *DESCRIPTION: tasks gets initialized by setting up terminals properties properly
+ *
+ *INPUTS: none
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: executes the task
+ */
 int32_t tasks_init()
 {		
 	task_t * init_task;
