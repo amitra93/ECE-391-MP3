@@ -5,7 +5,24 @@
 #include "terminal.h"
 #include "paging.h"
 
+/*
+ *int32_t return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
+ *DESCRIPTION: This function returns to the task's return addresses to the parent task's execute to halt
+ *
+ *INPUTS: status, ebp, esp, eip
+ *OUTPUTS: none
+ *SIDE EFFECTS: halts current task
+ */
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
+
+/*
+ *void restart_shell(uint32_t eip, uint16_t cs, uint32_t eflags, uint32_t esp, uint16_t ss);
+ *DESCRIPTION: if a shell was halted, then we don't want to restart the whole task, so we only restart to the initial state
+ *
+ *INPUTS: eip, cs, eflags, esp, ss (inputs to a context switch)
+ *OUTPUTS: none
+ *SIDE EFFECTS: restarts the current shell
+ */
 extern void restart_shell(uint32_t eip, uint16_t cs, uint32_t eflags, uint32_t esp, uint16_t ss);
 
 /*
@@ -35,12 +52,15 @@ int32_t is_user_ptr(const void * ptr)
  */
 int32_t do_halt (uint8_t status) 
 { 
+	// Go to the next line in the terminal
 	int x, y;
 	get_cursor_pos(&x, &y);
 	if (x > 0){
 		char str = '\n';
 		terminal_write(1, &str, 1);
 	}
+	
+	// If the task to halt is a terminal, then restart the shell
 	task_t * cur_task = get_cur_task();
 	if (cur_task->pid == 1 || cur_task->pid == 2 || cur_task->pid == 3)
 	{
@@ -50,6 +70,8 @@ int32_t do_halt (uint8_t status)
 		load_tss(cur_task);
 		restart_shell(cur_task->ret_eip, USER_CS, cur_task->ret_eflags, cur_task->ret_esp, USER_DS);
 	}
+	
+	//Otherwise halt the current task
 	return_from_halt(status, cur_task->ret_ebp, cur_task->ret_esp, cur_task->ret_eip);
 	return 0;
 }
@@ -72,6 +94,8 @@ int32_t do_execute (const uint8_t* command)
 	uint8_t commandBufferIndex=0,argsBufferIndex=0, pgmNameIndex=0, gotProgamName=0;
 	uint8_t programName[32];
 	uint32_t i;
+	
+	//This loop parses the arguments from the console
 	while (command[commandBufferIndex]!='\0' && command[commandBufferIndex]!='\n')
 	{
 		i = commandBufferIndex;
@@ -98,9 +122,12 @@ int32_t do_execute (const uint8_t* command)
 			programName[pgmNameIndex++]=command[commandBufferIndex++]; 
 	}
 	argsBuffer[argsBufferIndex] ='\0';
-	for (i = pgmNameIndex; i < 32; i ++)
-		programName[i] = 0;
 	
+	//Fill the rest of the program name with nothing
+	for (i = pgmNameIndex; i < 32; i ++)
+		programName[i] = '\0';
+	
+	//Create and execute the task!!
 	int32_t pid = create_task(programName, argsBuffer);
 	if (pid < 0)
 		return -1;
@@ -119,8 +146,9 @@ int32_t do_execute (const uint8_t* command)
  */
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
+	//Double check that the pointer is from user space
 	if (is_user_ptr(buf))
-		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
+		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&FILE_OPEN_BIT ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
 	return -1;
 }
 
@@ -135,8 +163,9 @@ int32_t do_read (int32_t fd, void* buf, int32_t nbytes)
  */
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
 {
+	//Double check that the pointer is from user space
 	if (is_user_ptr(buf))
-		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
+		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&FILE_OPEN_BIT ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
 	return -1;
 }
 
@@ -150,15 +179,10 @@ int32_t do_write (int32_t fd, const void* buf, int32_t nbytes)
  */
 int32_t do_vidmap (uint8_t** screen_start) 
 {
-	if ((uint8_t*)screen_start < (uint8_t*)0x8000000 || (uint8_t*)screen_start >= (uint8_t*)0x8400000)
+	//Double check that the pointer is from user space
+	if (!is_user_ptr((uint8_t*)screen_start))
 		return -1;
-	
-	terminal* cur_exe_terminal = get_executing_terminal();
-	terminal* cur_disp_terminal = get_displaying_terminal();
-	if (cur_disp_terminal == cur_exe_terminal)
-		*screen_start = (uint8_t*)(VIRTUAL_VID_MEM + VIDEO);
-	else
-		*screen_start = (uint8_t*)cur_exe_terminal->video_buffer;
+	*screen_start = (uint8_t*)(VIRTUAL_VID_MEM + VIDEO);
 	return 0;
 }
 
@@ -178,6 +202,7 @@ int32_t do_open (const uint8_t* filename) {
 	uint8_t fname [32] = {'\0'};
 	uint32_t i = 0;
 	
+	//Copy over the filename into a local buffer
 	while (*filename != '\0')
 	{
 		fname[i] = *filename;
@@ -185,40 +210,50 @@ int32_t do_open (const uint8_t* filename) {
 		i ++;
 	}
 	
+	//Find the file
 	if (read_dentry_by_name (fname, &dentry)<0)
 		return -1;//failure to find file!
 
-	i=0;
+	//Try to open the file
+	i=2;
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL)
 		return -1;
-	while((curTask->files[i].flags & 0x1) && i<8){
+	//Find a file descriptor to use
+	while((curTask->files[i].flags & FILE_OPEN_BIT) && i<8){
 		if(i==7)//at maximum number of files
 			return -1;
 		i++;
 	}
+	
+	//Different file types have different fops
 	switch (dentry.file_type)
 	{
 		case 0:
-			curTask->files[i].flags = (1<<dentry.file_type) | 1;
+			curTask->files[i].flags = (1<<dentry.file_type) | FILE_OPEN_BIT;
 			curTask->files[i].fops = &rtc_fops;
 			break;	
 		case 1:
-			curTask->files[i].flags = (1<<dentry.file_type) | 1;
+			curTask->files[i].flags = (1<<dentry.file_type) | FILE_OPEN_BIT;
 			curTask->files[i].fops = &dir_fops;
 			break;
 		case 2:
-			curTask->files[i].flags = (1<<dentry.file_type) | 1;
+			curTask->files[i].flags = (1<<dentry.file_type) | FILE_OPEN_BIT;
 			curTask->files[i].fops = &file_fops;
 			break;
 		default:
+			
 			return -1;
 	}
 	curTask->files[i].dentry = dentry;
 	curTask->files[i].inode = get_inode(dentry.inode_num);
 	curTask->files[i].offset = 0;
+	
+	//If the fops open fails...
 	if(curTask->files[i].fops->open(filename) < 0)
 		return -1;
+		
+	//Success and return the FD
 	return i;
 }
 
@@ -233,9 +268,11 @@ int32_t do_open (const uint8_t* filename) {
  */
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
+	
+	//Check the bounds of the file descriptor
 	if(curTask==NULL || fd < 2 || fd>7)
 		return -1;
-	if ((curTask->files[fd].flags & 0x1) != 1)
+	if ((curTask->files[fd].flags & FILE_OPEN_BIT) != 1)
 		return -1;
 
 	curTask->files[fd].fops->close(fd);
@@ -257,6 +294,7 @@ int32_t do_close (int32_t fd) {
  */
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	
+	//Check bounds of user pointer to copy
 	if (is_user_ptr(buf))
 	{
 		task_t * curTask = get_cur_task();
@@ -272,6 +310,7 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 			return -1;
 		}
 
+		//Copy over the current task's arguments
 		for(i=0; i<=size; i++){
 			 buf[i]=curTask->args[i];
 		}
