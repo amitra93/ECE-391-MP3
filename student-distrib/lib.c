@@ -10,6 +10,9 @@
 #define NUM_COLS 80
 #define NUM_ROWS 25
 #define ATTRIB 0x7
+#define VGA_PORT 0x03D4
+#define CURSOR_HI_INDEX 0x0E
+#define CURSOR_LOW_INDEX 0x0F
 
 static int screen_x;
 static int screen_y;
@@ -454,8 +457,22 @@ set_cursor_pos(int32_t x, int32_t y)
 		screen_x = x;
 	if (y >= 0 && y < NUM_ROWS)
 		screen_y = y;
-	//outb(screen_x, 0x0E);
-	//outb(screen_y, 0x0F);
+
+}
+
+void 
+set_blinking_cursor_pos(int32_t x, int32_t y){
+	//position of cursor is based on where it is in contiguous video memory
+	//in order to write the blinking cursor to vga memrory, it must be split into
+	//2 16 bit chunks
+	int32_t fullNumber = (y * NUM_COLS) + x;
+	int16_t lowEight = fullNumber & 0xFF;
+	int16_t highEight = (fullNumber >> 8)  & 0xFF;
+	int16_t toOutput = (highEight << 8) + CURSOR_HI_INDEX;
+	outw(toOutput,VGA_PORT);
+	toOutput = (lowEight << 8) + CURSOR_LOW_INDEX;
+	outw(toOutput, VGA_PORT);
+	return;
 }
 
 

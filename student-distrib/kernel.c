@@ -196,7 +196,8 @@ entry (unsigned long magic, unsigned long addr)
 	}
 		
 	
-	
+	set_blinking_cursor_pos(0,0);
+
 
 	/* Init the PIC */
 	printf("Enabling PIC\n");
@@ -226,6 +227,7 @@ entry (unsigned long magic, unsigned long addr)
 	terminal_open(NULL);
 	
 	sti();
+
 
 	/* Execute the first program (`shell') ... */
 	while(1)

@@ -111,6 +111,8 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 			current_terminal->chars_printed++;
 		}
 		get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
+		set_blinking_cursor_pos(current_terminal->screen_x,current_terminal->screen_y);
+
 	//}
 	return 0;
 }

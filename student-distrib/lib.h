@@ -28,9 +28,8 @@ int32_t vprintf(uint8_t *video_memory, int8_t *format, ...);
 void vputc(uint8_t *video_memory, uint8_t c);
 int32_t vputs(uint8_t *video_memory, int8_t *s);
 void set_cursor_pos(int32_t x, int32_t y);
-
 void get_cursor_pos(int32_t* x, int32_t* y);
-
+void set_blinking_cursor_pos(int32_t x, int32_t y);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
