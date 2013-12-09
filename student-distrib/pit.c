@@ -101,6 +101,15 @@
 		}while(0)
 
 
+ /*
+ *int32_t pit_init()
+ *DESCRIPTION: Initializes the pit by writing the data to the specified port 0x43,
+               also sets the pit's frequency to 100 and enables it
+ *
+ *INPUTS: none
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: initializes the pit for use
+ */		
 int32_t pit_init()
 {	
 	uint8_t port, data;
@@ -114,6 +123,15 @@ int32_t pit_init()
 	return 0;
 }
 
+ /*
+ *int32_t pit_set_frequency(uint32_t frequency)
+ *DESCRIPTION: Sets the frequency by dividing the PIT_FREQUENCY by 
+               the input frequency, and writes to port 0x40
+ *
+ *INPUTS: frequency
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: sets the pits frequency to the specified
+ */
 int32_t pit_set_frequency(uint32_t frequency)
 {
 	uint8_t dh, dl;
@@ -132,6 +150,15 @@ int32_t pit_set_frequency(uint32_t frequency)
 	return 0;
 }
 
+ /*
+ *void pit_process_interrupt()
+ *DESCRIPTION: processes the interrupt depending on if it interrupt a user program of a system call
+ *
+ *INPUTS: none
+ *OUTPUTS: none
+ *SIDE EFFECTS: updates state of task to running or to system call depending on 
+ *              if a user program or system call is interrupted
+ */
 void pit_process_interrupt()
 {
 	task_t * cur_task = get_cur_task();	
@@ -160,12 +187,27 @@ void pit_process_interrupt()
 	else
 		setup_syscall_stack(cur_task);
 }
-
+ /*
+ *void pit_enable()
+ *DESCRIPTION: enables the pit
+ *
+ *INPUTS: none
+ *OUTPUTS: none
+ *SIDE EFFECTS: enables the pit
+ */
 void pit_enable()
 {
 	enable_irq(0);
 }
 
+ /*
+ *void pit_disable()
+ *DESCRIPTION: disables the pit
+ *
+ *INPUTS: none
+ *OUTPUTS: none
+ *SIDE EFFECTS: disables the pit
+ */
 void pit_disable()
 {
 	disable_irq(0);

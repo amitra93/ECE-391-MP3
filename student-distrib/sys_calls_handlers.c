@@ -8,6 +8,14 @@
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
 extern void restart_shell(uint32_t eip, uint16_t cs, uint32_t eflags, uint32_t esp, uint16_t ss);
 
+/*
+ *int32_t is_user_ptr(const void * ptr) 
+ *DESCRIPTION: this function figures out if it is a user pointer or not
+ *
+ *INPUTS: ptr
+ *OUTPUTS: returns -1 if it is not a user pointer, 0 if it is a user pointer
+ *SIDE EFFECTS: none
+ */
 int32_t is_user_ptr(const void * ptr)
 {
 	uint32_t addr = (uint32_t)ptr;
@@ -17,7 +25,14 @@ int32_t is_user_ptr(const void * ptr)
 	else
 		return 0;
 }
-
+ /*
+ *int32_t do_halt (uint8_t status) 
+ *DESCRIPTION: terminates a process, returning the specified value to its parent process
+ *
+ *INPUTS: status
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: halts and stops a process
+ */
 int32_t do_halt (uint8_t status) 
 { 
 	int x, y;
@@ -39,6 +54,15 @@ int32_t do_halt (uint8_t status)
 	return 0;
 }
 
+ /*
+ *int32_t do_execute (const uint8_t* command) 
+ *DESCRIPTION: attempts to load an execute a new program, handing off the processor
+               to the new program until it terminates.
+ *
+ *INPUTS: command
+ *OUTPUTS: returns -1 if command cannot be executed
+ *SIDE EFFECTS: processor gets handed off to the new program until termination 
+ */
 int32_t do_execute (const uint8_t* command) 
 { 
 	//argsBuffer holds the newly formatted args
@@ -82,18 +106,48 @@ int32_t do_execute (const uint8_t* command)
 		return -1;
 	return execute_task((uint32_t)pid);
 }
+
+ /*
+ *int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
+ *DESCRIPTION: reads data from the keyboard, a file, device, or directory
+ *
+ *INPUTS: fd, buf, nbytes
+ *OUTPUTS: returns returns number of bytes read, or 0 which indicates EOF has been reached
+ *SIDE EFFECTS: For keyboard: return data from one line that has been terminated
+                by pressing Enter, or as much as fits in the buffer
+                For file: data should be read to EOF or end of buffer provided
+ */
 int32_t do_read (int32_t fd, void* buf, int32_t nbytes) 
 {
 	if (is_user_ptr(buf))
 		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->read(fd, buf, nbytes) : -1;
 	return -1;
 }
+
+/*
+ *int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
+ *DESCRIPTION: writes data to terminal or to a device
+ *
+ *INPUTS: fd, buf, nbytes
+ *OUTPUTS: returns -1 for failure
+ *SIDE EFFECTS: terminal: all data should be displayed to screen immediately, 
+                for RTC, only accepts 4 byte integer specifying interrupt rate
+ */
 int32_t do_write (int32_t fd, const void* buf, int32_t nbytes) 
 {
 	if (is_user_ptr(buf))
 		return fd < 0 ? -1 : fd > 7 ? -1 : (get_cur_task()->files[fd].flags)&0x1 ? get_cur_task()->files[fd].fops->write(fd, buf, nbytes) : -1;
 	return -1;
 }
+
+ /*
+ *int32_t do_vidmap (uint8_t** screen_start)
+ *DESCRIPTION: maps text-mode video memory into user space at a pre-set virtual address.
+ *
+ *INPUTS: screen_start
+ *OUTPUTS: if invalid location, returns -1.
+ *SIDE EFFECTS: none
+ */
 int32_t do_vidmap (uint8_t** screen_start) 
 {
 	if ((uint8_t*)screen_start < (uint8_t*)0x8000000 || (uint8_t*)screen_start >= (uint8_t*)0x8400000)
@@ -107,6 +161,17 @@ int32_t do_vidmap (uint8_t** screen_start)
 		*screen_start = (uint8_t*)cur_exe_terminal->video_buffer;
 	return 0;
 }
+
+ /*
+ *int32_t do_open (const uint8_t* filename)
+ *DESCRIPTION: provides access to the file system, finds directory
+               entry corresponding to the filename.
+ *
+ *INPUTS: filename
+ *OUTPUTS: returns -1 if no file name exists or descriptors
+ *SIDE EFFECTS: allocates an unused file descriptor, and sets up
+                any data necessary to handle the given type of file
+ */
 int32_t do_open (const uint8_t* filename) { 
 	//find the directory entry corresponding to the named file
 	dentry_t dentry;
@@ -156,6 +221,16 @@ int32_t do_open (const uint8_t* filename) {
 		return -1;
 	return i;
 }
+
+ /*
+ *int32_t do_close (int32_t fd)
+ *DESCRIPTION: closes the specified file descriptor and makes it available
+               for return from later calls to open
+ *
+ *INPUTS: fd
+ *OUTPUTS: successful close returns 0, else returns a -1
+ *SIDE EFFECTS: makes fd available for return from later calls to open
+ */
 int32_t do_close (int32_t fd) { 
 	task_t * curTask = get_cur_task();
 	if(curTask==NULL || fd < 2 || fd>7)
@@ -171,6 +246,15 @@ int32_t do_close (int32_t fd) {
 
 	return 0; 
 }
+
+ /*
+ *int32_t do_getargs (uint8_t* buf, int32_t nbytes)
+ *DESCRIPTION: reads program's command line arguments into a user-level buffer.
+ *
+ *INPUTS: buf, nbytes
+ *OUTPUTS: returns -1 if args and terminal NULL do not fit in buffer.
+ *SIDE EFFECTS: args are copied into user space
+ */
 int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	
 	if (is_user_ptr(buf))
@@ -196,6 +280,23 @@ int32_t do_getargs (uint8_t* buf, int32_t nbytes) {
 	return -1;
 }
 
+ /*
+ *int32_t do_set_handler (int32_t signum, void* handler_address)
+ *DESCRIPTION: changes the default action taken when a signal is received
+ *
+ *INPUTS: signum, handler_address
+ *OUTPUTS: returns -1 for failure
+ *SIDE EFFECTS: changes the default action for a received signal
+ */
 int32_t do_set_handler (int32_t signum, void* handler_address) { return -1; }
 
+ /*
+ *int32_t do_sigreturn (void)
+ *DESCRIPTION: copies hardware context that was on user level stack back to 
+			   the processor
+ *
+ *INPUTS: none
+ *OUTPUTS: returns -1 for failure
+ *SIDE EFFECTS: none
+ */
 int32_t do_sigreturn (void) { return -1; }

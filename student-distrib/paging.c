@@ -8,11 +8,14 @@ unsigned int * pt = &page_table;
 static unsigned int * kernel_page = (unsigned int *) KERNEL_LOCATION;
 
 /* void paging_init()
- *   DESCRIPTION: Initializes paging for the CPU. The first 4MB are used with 4KB paging,
- *	 while from 4MB onwards, the pages are of size 4MB. Uses the global page_directory and page_table
+ *   DESCRIPTION: Initializes paging for the CPU. The first 4MB are used with 
+				  4KB paging,
+ *	              while from 4MB onwards, the pages are of size 4MB. Uses the 
+				  global page_directory  and page_table
  *   INPUTS: none
  *   OUTPUTS: none
- *   SIDE EFFECTS: page faults can now be generated, control registers cr0, cr3, cr4 modified
+ *   SIDE EFFECTS: page faults can now be generated, control registers cr0, cr3,
+			       cr4 modified
  */
 void paging_init(){
 	int i;
@@ -66,7 +69,15 @@ void paging_init(){
 						:
 						: "r"(temp));
 }
-
+ /*
+ *int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, 
+                             uint8_t size, uint8_t user)
+ *DESCRIPTION: This function maps the page directory
+ *
+ *INPUTS: phys_addr, virt_addr, size, user
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: page directory
+ */
 //size = 0 when 4kb size = 1 when 4mb
 int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size, uint8_t user)
 {	
@@ -85,6 +96,14 @@ int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size,
 	return 0;
 }
 
+ /*
+ *int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
+ *DESCRIPTION: This function maps the page table
+ *
+ *INPUTS: phys_addr, virt_addr, user
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: page table
+ */
 //size = 0 when 4kb size = 1 when 4mb
 int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
 {
@@ -100,6 +119,15 @@ int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
 	return 0;
 }
 
+ /*
+ *int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index,
+                                    uint32_t pt_index, uint8_t user)
+ *DESCRIPTION: This function maps the page table from the index
+ *
+ *INPUTS: phys_addr, pd_index, pt_index, user
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_t pt_index, uint8_t user)
 {
 	uint32_t * pg_table;
@@ -109,7 +137,14 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
 	
 	return 0;
 }
-
+ /*
+ *int32_t set_pde(uint32_t virt_addr)
+ *DESCRIPTION: This function sets the page directory entries
+ *
+ *INPUTS: virt_addr
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t set_pde(uint32_t virt_addr)
 {
 	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
@@ -118,6 +153,14 @@ int32_t set_pde(uint32_t virt_addr)
 	return 0;
 }
 
+ /*
+ *int32_t set_pte(uint32_t virt_addr)
+ *DESCRIPTION: This function sets the page table entries
+ *
+ *INPUTS: virt_addr
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: page table entries are set
+ */ 
 int32_t set_pte(uint32_t virt_addr)
 {
 	uint32_t pd_index;
@@ -132,6 +175,15 @@ int32_t set_pte(uint32_t virt_addr)
 	return 0;
 }
 
+ /*
+ *int32_t clear_pde(uint32_t virt_addr)
+ *DESCRIPTION: This function clears the page directory entries based on the virtual
+			   address
+ *
+ *INPUTS: virt_addr
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: clears the page directory entry
+ */ 
 int32_t clear_pde(uint32_t virt_addr)
 {
 	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
@@ -139,6 +191,15 @@ int32_t clear_pde(uint32_t virt_addr)
 	return 0;
 }
 
+/*
+ *int32_t clear_pte(uint32_t virt_addr)
+ *DESCRIPTION: This function clears the page table entry based on the given 
+			   virtual address
+ *
+ *INPUTS: virt_addr
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: clears page table entry
+ */
 int32_t clear_pte(uint32_t virt_addr)
 {
 	uint32_t pd_index;
