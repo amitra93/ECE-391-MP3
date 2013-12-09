@@ -10,11 +10,10 @@
 
 char* video_mem;
 
-terminal * get_cur_ptree_terminal()
+terminal * get_executing_terminal()
 {
 	return &terminal_list[scheduler.cur_ptree];
 }
-
 
 int
 terminal_open(const uint8_t* filename){	
@@ -57,7 +56,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 		return -1;
 	}
 	int temp;
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	get_cursor_pos(&current_terminal->starting_offset, &temp);
 	if (nbytes <= 0){
 		return 0;
@@ -65,7 +64,7 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	if (nbytes > BUFFER_SIZE){
 		nbytes = BUFFER_SIZE;
 	}
-	get_cur_ptree_terminal()->state = TERMINAL_READ;
+	get_executing_terminal()->state = TERMINAL_READ;
 	char* output = (char*) buf;
 	int i = keyboard_wait_for_new_line(nbytes);
 	int j = 0;
@@ -73,20 +72,22 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 		output[j] = get_last_terminal_line()->line[j];
 		j++;
 	}
-	get_cur_ptree_terminal()->state = TERMINAL_IDLE;
+	get_executing_terminal()->state = TERMINAL_IDLE;
 	return i-1;
 	
 }
 
+
 int
 terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	int i;
-	terminal* current_terminal = get_cur_ptree_terminal();
+	
+	terminal* current_exe_terminal = get_executing_terminal();
+	terminal* current_disp_terminal = get_displaying_terminal();
 	
 	//Change this so that it will add to the history when it isn't the current terminal
 	//if (current_terminal->ptid == scheduler.cur_ptree)
 	//{
-		set_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 		if (buf == NULL){
 			return -1;
 		}
@@ -95,21 +96,75 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 		}
 		char* string = (char*) buf;
 		for (i = 0; i < nbytes; i++){
-			if (current_terminal->chars_printed > NUM_COLS){
+			if (current_exe_terminal->chars_printed > NUM_COLS){
 				char newline = '\n';
-				printf("%c", newline);
-				current_terminal->chars_printed = 0;
+				if (current_exe_terminal == current_disp_terminal)
+				{
+					set_cursor_pos( current_exe_terminal->screen_x, current_exe_terminal->screen_y);
+					printf("%c", newline);
+					get_cursor_pos(&current_exe_terminal->screen_x, &current_exe_terminal->screen_y);
+				}
+				else
+					vprintf(current_exe_terminal, "%c", newline);
+				current_exe_terminal->chars_printed = 0;
 			}
 			else if (string[i] == '\n'){
-				current_terminal->chars_printed = 0;
+				current_exe_terminal->chars_printed = 0;
 			}
 			else if (string[i] == '\0'){
 				continue;
 			}
-			printf("%c", string[i]);
-			current_terminal->chars_printed++;
+			if (current_exe_terminal == current_disp_terminal)
+			{
+				set_cursor_pos( current_exe_terminal->screen_x, current_exe_terminal->screen_y);
+				printf("%c", string[i]);
+				get_cursor_pos(&current_exe_terminal->screen_x,&current_exe_terminal->screen_y);
+			}
+			else
+				vprintf(current_exe_terminal, "%c", string[i]);
+			current_exe_terminal->chars_printed++;
 		}
-		get_cursor_pos(&current_terminal->screen_x, &current_terminal->screen_y);
+		
+	//}
+	return 0;
+}
+
+int
+terminal_write_keypress(unsigned char * buf, int32_t nbytes){
+	int i;
+	
+	terminal* current_disp_terminal = get_displaying_terminal();
+	
+	//Change this so that it will add to the history when it isn't the current terminal
+	//if (current_terminal->ptid == scheduler.cur_ptree)
+	//{
+		if (buf == NULL){
+			return -1;
+		}
+		if (nbytes <= 0){
+			return 0;
+		}
+		char* string = (char*) buf;
+		for (i = 0; i < nbytes; i++){
+			if (current_disp_terminal->chars_printed > NUM_COLS){
+				char newline = '\n';
+				set_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
+				printf("%c", newline);
+				get_cursor_pos(&current_disp_terminal->screen_x, &current_disp_terminal->screen_y);
+				current_disp_terminal->chars_printed = 0;
+			}
+			else if (string[i] == '\n'){
+				current_disp_terminal->chars_printed = 0;
+			}
+			else if (string[i] == '\0'){
+				continue;
+			}
+			set_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
+			printf("%c", string[i]);
+			get_cursor_pos(&current_disp_terminal->screen_x,&current_disp_terminal->screen_y);
+			current_disp_terminal->chars_printed++;
+		}
+		
 	//}
 	return 0;
 }
@@ -121,7 +176,7 @@ terminal_close(int32_t fd){
 
 void terminal_backspace(){
 	char str = ' ';
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	if (current_terminal->input.input_pointer <= 0){
 		return;
 	}
@@ -167,7 +222,7 @@ void terminal_backspace(){
 
 void terminal_clear(){
 	clear();
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	current_terminal->screen_x = current_terminal->screen_y = 0;
 	set_cursor_pos(0, 0);
 	
@@ -175,7 +230,7 @@ void terminal_clear(){
 
 
 void terminal_add_to_buffer(unsigned char char_to_print){
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	//if (current_terminal->ptid == scheduler.cur_ptree){
 		if (current_terminal->input.input_pointer >= BUFFER_SIZE-1){
 			return;
@@ -187,24 +242,24 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 			current_terminal->input.input_pointer = 0;
 		}
 
-		terminal_write(1, &char_to_print, 1);
+		terminal_write_keypress(&char_to_print, 1);
 		if (current_terminal->screen_x == 0 && current_terminal->input.input_pointer >= NUM_COLS - current_terminal->starting_offset){
 			current_terminal->screen_y++;
 			if (current_terminal->screen_y >= NUM_ROWS -1){
-				scroll_up();
+				scroll_up((unsigned char *)video_mem);
 			}
 			current_terminal->chars_printed = 0;
 		}
 	//}
 }
 
-terminal* get_current_terminal(){
+terminal* get_displaying_terminal(){
 	return &terminal_list[current_terminal_index];
 }
 
 terminal_line* get_last_terminal_line(){
 	//int temp = 0;
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	//if (current_terminal->history_index > 0){
 	//	temp = current_terminal->history_index - 1;
 	//}
@@ -216,7 +271,7 @@ void terminal_copy_to_history(){
 	int8_t* shell_name = "shell";
 	int8_t* cur_task_name = (int8_t*) get_cur_task()->pName;
 	int not_copy_to_history = strncmp(cur_task_name, shell_name, 5);
-	terminal* current_terminal = get_current_terminal();
+	terminal* current_terminal = get_displaying_terminal();
 	if (!not_copy_to_history){
 		current_terminal->input_history[current_terminal->history_index].input_pointer = current_terminal->input.input_pointer;
 	}
@@ -238,13 +293,13 @@ void set_current_terminal(int terminal_index){
 		return;
 	}
 	//copy active video memory to buffer
-	memcpy(&get_current_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
+	memcpy(&get_displaying_terminal()->video_buffer, video_mem, NUM_COLS*NUM_ROWS*2);
 
 	current_terminal_index = terminal_index;
 	//do the reverse
-	memcpy(video_mem, &get_current_terminal()->video_buffer, NUM_COLS*NUM_ROWS*2);
-	//get_current_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
-
+	memcpy(video_mem, &get_displaying_terminal()->video_buffer, NUM_COLS*NUM_ROWS*2);
+	//get_displaying_terminal()->video_memory = (char*)(VIRTUAL_VID_MEM + VIDEO);
+	
 	//TODO memcopy buff into memory
 	return;
 }

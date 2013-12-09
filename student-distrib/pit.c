@@ -108,7 +108,7 @@ int32_t pit_init()
 	port = PIT_COMMAND;
 	data = ACCESS_MODE_LOHIBYTE | OPERATING_MODE_3;
 	outb (data, port);
-	pit_set_frequency(100);
+	pit_set_frequency(INIT_FREQUENCY);
 	pit_enable();
 	
 	return 0;

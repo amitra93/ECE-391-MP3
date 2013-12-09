@@ -41,8 +41,6 @@ typedef struct terminal {
 	terminal_state state;
 } terminal;
 
-extern char* video_mem;
-
 terminal terminal_list[MAX_SUPPORTED_TERMINALS];
 
 int current_terminal_index;
@@ -61,7 +59,7 @@ void terminal_clear();
 
 void terminal_add_to_buffer(unsigned char char_to_print);
 
-terminal* get_current_terminal();
+terminal* get_displaying_terminal();
 
 terminal_line* get_last_terminal_line();
 
@@ -69,6 +67,6 @@ void terminal_copy_to_history();
 
 void set_current_terminal(int terminal_index);
 
-terminal * get_cur_ptree_terminal();
+terminal * get_executing_terminal();
 
 #endif /* _TERMINAL_H */

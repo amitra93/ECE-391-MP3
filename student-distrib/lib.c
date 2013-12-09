@@ -6,6 +6,7 @@
 #include "lib.h"
 #include "task.h"
 #include "sched.h"
+#include "terminal.h"
 
 #define NUM_COLS 80
 #define NUM_ROWS 25
@@ -14,7 +15,8 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
-//static char* virt_video_mem = (char *)(VIRTUAL_VID_MEM + VIDEO);
+static char* virt_video_mem = (char *)(VIRTUAL_VID_MEM + VIDEO);
+
 /*
 *  print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
 *  Description: Prints error code onto screen
@@ -97,21 +99,21 @@ clear(void)
 }
 
 void
-clear_line(int32_t rownum){
+clear_line(unsigned char * video_memory, int32_t rownum){
 	if (rownum < 0 || rownum >= NUM_ROWS){
 		return;
 	}
 	int i;
-	char* temp = video_mem + NUM_COLS * rownum * 2;
+	unsigned char* temp = video_memory + NUM_COLS * rownum * 2;
 	for(i = 0; i < NUM_COLS; i++) {
         *(uint8_t *)(temp + (i << 1)) = ' ';
         *(uint8_t *)(temp + (i << 1) + 1) = ATTRIB;
     }
 }
 
-void scroll_up(){
-	memmove(video_mem, video_mem + NUM_COLS*2, NUM_COLS * (NUM_ROWS-1) * 2);
-	clear_line(NUM_ROWS-1);
+void scroll_up(unsigned char * video_memory){
+	memmove(video_memory, video_memory + NUM_COLS*2, NUM_COLS * (NUM_ROWS-1) * 2);
+	clear_line(video_memory, NUM_ROWS-1);
 }
 
 
@@ -263,7 +265,7 @@ format_char_switch:
  *       the "#" modifier to alter output.
  * */
 int32_t
-vprintf(uint8_t *video_memory, int8_t *format, ...)
+vprintf(terminal * term, int8_t *format, ...)
 {
 	/* Pointer to the format string */
 	int8_t* buf = format;
@@ -284,7 +286,7 @@ format_char_switch:
 					switch(*buf) {
 						/* Print a literal '%' character */
 						case '%':
-							vputc(video_memory, '%');
+							vputc(term, '%');
 							break;
 
 						/* Use alternate formatting */
@@ -302,7 +304,7 @@ format_char_switch:
 								int8_t conv_buf[64];
 								if(alternate == 0) {
 									itoa(*((uint32_t *)esp), conv_buf, 16);
-									vputs(video_memory,conv_buf);
+									vputs(term,conv_buf);
 								} else {
 									int32_t starting_index;
 									int32_t i;
@@ -312,7 +314,7 @@ format_char_switch:
 										conv_buf[i] = '0';
 										i++;
 									}
-									vputs(video_memory,&conv_buf[starting_index]);
+									vputs(term,&conv_buf[starting_index]);
 								}
 								esp++;
 							}
@@ -323,7 +325,7 @@ format_char_switch:
 							{
 								int8_t conv_buf[36];
 								itoa(*((uint32_t *)esp), conv_buf, 10);
-								vputs(video_memory,conv_buf);
+								vputs(term,conv_buf);
 								esp++;
 							}
 							break;
@@ -339,20 +341,20 @@ format_char_switch:
 								} else {
 									itoa(value, conv_buf, 10);
 								}
-								vputs(video_memory,conv_buf);
+								vputs(term,conv_buf);
 								esp++;
 							}
 							break;
 
 						/* Print a single character */
 						case 'c':
-							vputc(video_memory, (uint8_t) *((int32_t *)esp) );
+							vputc(term, (uint8_t) *((int32_t *)esp) );
 							esp++;
 							break;
 
 						/* Print a NULL-terminated string */
 						case 's':
-							vputs(video_memory, *((int8_t **)esp) );
+							vputs(term, *((int8_t **)esp) );
 							esp++;
 							break;
 
@@ -364,7 +366,7 @@ format_char_switch:
 				break;
 
 			default:
-				vputc(video_memory, *buf);
+				vputc(term, *buf);
 				break;
 		}
 		buf++;
@@ -388,11 +390,11 @@ puts(int8_t* s)
 
 /* Output a string to the console */
 int32_t
-vputs(uint8_t * video_memory, int8_t* s)
+vputs(terminal * term, int8_t* s)
 {
 	register int32_t index = 0;
 	while(s[index] != '\0') {
-		vputc(video_memory, s[index]);
+		vputc(term, s[index]);
 		index++;
 	}
 
@@ -407,12 +409,12 @@ putc(uint8_t c)
         screen_x=0;
 
         if (screen_y >= NUM_ROWS){ //we are on last line
-      		scroll_up();
+      		scroll_up(video_mem);
       		screen_y--;
     	}
     } else {
-        *(uint8_t *)((uint8_t*)(VIRTUAL_VID_MEM + VIDEO) + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)((uint8_t*)(VIRTUAL_VID_MEM + VIDEO) + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
@@ -420,22 +422,22 @@ putc(uint8_t c)
 }
 
 void
-vputc(uint8_t * video_memory, uint8_t c)
+vputc(terminal * term, uint8_t c)
 {
     if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x=0;
+        term->screen_y++;
+        term->screen_x=0;
 
-        if (screen_y >= NUM_ROWS){ //we are on last line
-      		scroll_up();
-      		screen_y--;
+        if (term->screen_y >= NUM_ROWS){ //we are on last line
+      		scroll_up(term->video_buffer);
+      		term->screen_y--;
     	}
     } else {
-        //*(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        //*(uint8_t *)(virt_video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
-        screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        *(uint8_t *)(term->video_buffer + ((NUM_COLS*term->screen_y + term->screen_x) << 1)) = c;
+        *(uint8_t *)(term->video_buffer + ((NUM_COLS*term->screen_y + term->screen_x) << 1) + 1) = ATTRIB;
+        term->screen_x++;
+        term->screen_x %= NUM_COLS;
+        term->screen_y = (term->screen_y + (term->screen_x / NUM_COLS)) % NUM_ROWS;
     }
 }
 

@@ -660,7 +660,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 		
 	}
 	*/
-	terminal* current_terminal = get_cur_ptree_terminal();
+	terminal* current_terminal = get_executing_terminal();
 	int old_input_pointer = current_terminal->input.input_pointer;
 	while (old_input_pointer > current_terminal->input.input_pointer - max_chars){
 		if (current_terminal->state == TERMINAL_DONE_READ && current_terminal->input.input_pointer < BUFFER_SIZE-1){
@@ -668,7 +668,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 			keypad_enter.pressed = 0;
 			return get_last_terminal_line()->input_pointer - old_input_pointer;
 		}
-		current_terminal = get_cur_ptree_terminal();
+		current_terminal = get_executing_terminal();
 	}
 	
 	return max_chars;
