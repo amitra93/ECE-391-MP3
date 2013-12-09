@@ -5,7 +5,7 @@
 
 ____________________________________________________________________
 Description...The GDT is initialized incorrectly
-Symptom.......The OS consistently reboots with no imput from the user
+Symptom.......The OS consistently reboots with no input from the user
 Fix...........gdt variables not aligned
 Time to Find..1 hour
 Time to Fix...5 mins
@@ -33,11 +33,12 @@ Time to Fix...10 minutes
 ____________________________________________________________________
 
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Typing while a program is executing allows you to delete the
+			  number of characters typed even if no characters are shown
+Symptom.......could delete characters if no characters are shown
+Fix...........Print the buffer in terminal read	
+Time to Find..few weeks
+Time to Fix...30 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...text will still appear after any exception is called
@@ -57,7 +58,7 @@ ____________________________________________________________________
 ____________________________________________________________________
 Description...init filesys crashes the system 
 Symptom.......when we call our test init filesys, everything dies
-Fix...........woops we didnt sanitize out inputs (check if in bounds)
+Fix...........woops we didn't sanitize out inputs (check if in bounds)
 Time to Find..10 minutes
 Time to Fix...5 minutes
 ____________________________________________________________________
@@ -99,37 +100,37 @@ ____________________________________________________________________
 ____________________________________________________________________
 Description...Cat can overflow the system
 Symptom.......typing 'cat fish' breaks many things until cntl+l
-Fix...........implement scolling inside the buffer itself
+Fix...........implement scrolling inside the buffer itself
 Time to Find..10 mins
 Time to Fix...40 mins
 ____________________________________________________________________
 ____________________________________________________________________
 Description...Terminal does not handle overflow
-Symptom.......Typing too much inside terminal has unexpected behhavior
+Symptom.......Typing too much inside terminal has unexpected behavior
 Fix...........track where cursor is and do not let surpass max value
 Time to Find..5 minutes
 Time to Fix...25 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Pingpong not running as expected
+Symptom.......Instead of a smooth slope of characters, there was a "bump"
+Fix...........fixed how the video memory and scheduler worked together
+Time to Find..2 minutes
+Time to Fix...20 minutes	
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Fish stops working and generates a general protection fault error
+Symptom.......general protection fault error
+Fix...........was not saving all of the states correctly
+Time to Find..1 minute	
+Time to Fix...15 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...run counter in terminal 0, then press ls in terminal 1, then spam alt f1 alt f2
+Symptom.......creates new line in terminal 1 and overwrites buffer
+Fix...........switch terminal function is now wrapped in a cli and sti
+Time to Find..2 minutes
+Time to Fix...15 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...
@@ -272,16 +273,18 @@ Time to Find..
 Time to Fix...
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...backspace is not working as anticipated: in a terminal other than terminal 0,
+              when the backspace is pressed, it skips some characters and starts backspacing 
+			  at the new location
+Symptom.......backspace was not deleting proper characters
+Fix...........fixed the backspace
+Time to Find..5 minutes
+Time to Fix...20 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...video memory not flushed between terminal switches
-Symptom.......switching terminals shows prrevious terminal's contents
-Fix...........didnt need to flush, just FULLY copy new memory into video memory, even if not yet used
+Symptom.......switching terminals shows previous terminal's contents
+Fix...........didn't need to flush, just FULLY copy new memory into video memory, even if not yet used
 Time to Find..5 minutes
 Time to Fix...10 minutes
 ____________________________________________________________________
@@ -295,9 +298,9 @@ ____________________________________________________________________
 ____________________________________________________________________
 Description...Terminal memory not properly initialized
 Symptom.......Cursor not working in multiple terminals 
-Fix...........iterate thorugh memory and set BOTH bytes of position
+Fix...........iterate through memory and set BOTH bytes of position
 Time to Find..3 hours
-Time to Fix...10 miutes
+Time to Fix...10 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...
