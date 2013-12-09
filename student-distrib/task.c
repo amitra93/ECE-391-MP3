@@ -94,6 +94,7 @@ task_t * init_task(int32_t pid)
 	task->ret_eip = 0xBADF00D;
 	task->ret_ebp = 0xBADF00D;
 	task->ret_esp = 0xBADF00D;
+	task->ret_eflags = 0xBADF00D;
 	
 	/*task->sys_tss = task->tss;
 	task->sys_tss.ss = KERNEL_DS;

@@ -289,7 +289,7 @@ void terminal_copy_to_history(){
 		i++;
 	}
 	if (!not_copy_to_history){
-		current_terminal->history_index++;
+		current_terminal->history_index = (current_terminal->history_index+1)%MAX_SUPPORTED_HISTORY;
 	}
 }
 
