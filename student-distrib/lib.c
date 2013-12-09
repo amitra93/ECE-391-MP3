@@ -458,7 +458,6 @@ set_cursor_pos(int32_t x, int32_t y)
 		screen_x = x;
 	if (y >= 0 && y < NUM_ROWS)
 		screen_y = y;
-
 }
 
 void 
@@ -466,6 +465,9 @@ set_blinking_cursor_pos(int32_t x, int32_t y){
 	//position of cursor is based on where it is in contiguous video memory
 	//in order to write the blinking cursor to vga memrory, it must be split into
 	//2 16 bit chunks
+	if (x == 0){
+		y++;
+	}
 	int32_t fullNumber = (y * NUM_COLS) + x;
 	int16_t lowEight = fullNumber & 0xFF;
 	int16_t highEight = (fullNumber >> 8)  & 0xFF;

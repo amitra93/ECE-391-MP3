@@ -343,8 +343,15 @@ key_orientation pause_released 			= { &pause 			, 0 };
 
 key_orientation* keymap[0xFF];
 
-
-void init_keys(){
+/*
+ *void init_keys()
+ *DESCRIPTION: initializes the keyboard by setting the corresponding keymap to the corresponding key
+ *
+ *INPUTS: none
+ *OUTPUTS: none
+ *SIDE EFFECTS: none
+ */
+ void init_keys(){
 	int i;
 	for (i = 0; i < 0xFF; i++){
 		keymap[i] = &dummy_pressed;
@@ -526,31 +533,86 @@ void init_keys(){
 }
 
 
-
+ /*
+ *unsigned char is_shift_pressed()
+ *DESCRIPTION: this function checks if the shift is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns if the shift is pressed or not
+ *SIDE EFFECTS: none
+ */
 unsigned char is_shift_pressed(){
 	return (is_pressed(&right_shift) || is_pressed(&left_shift));
 }
 
+ /*
+ *unsigned char is_enter_pressed()
+ *DESCRIPTION: this function checks if the enter is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns if the enter is pressed or not
+ *SIDE EFFECTS: none
+ */
 unsigned char is_enter_pressed(){
 	return (is_pressed(&enter) || is_pressed(&keypad_enter));
 }
 
+ /*
+ *unsigned char is_caps_lock_pressed()
+ *DESCRIPTION: this function checks if the caps lock is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns if the caps lock is pressed or not
+ *SIDE EFFECTS: none
+ */
 unsigned char is_caps_lock_pressed(){
 	return is_pressed(&caps_lock);
 }
 
+ /*
+ *unsigned char is_control_pressed()
+ *DESCRIPTION: this function checks if the control key is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns if the control key is pressed or not
+ *SIDE EFFECTS: none
+ */
 unsigned char is_control_pressed(){
 	return (is_pressed(&right_control) || is_pressed(&left_control));
 }
 
+ /*
+ *unsigned char is_alt_pressed()
+ *DESCRIPTION: this function checks if the alt key is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns if the alt key is pressed or not
+ *SIDE EFFECTS: none
+ */
 unsigned char is_alt_pressed(){
 	return (is_pressed(&right_alt) || is_pressed(&left_alt));
 }
 
+ /*
+ *unsigned char is_pressed(key* keyboard_key)
+ *DESCRIPTION: returns which key is pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns the key pressed
+ *SIDE EFFECTS: none
+ */
 unsigned char is_pressed(key* keyboard_key){
 	return keyboard_key->pressed;
 }
 
+ /*
+ *unsigned char print_key(key* keyboard_key)
+ *DESCRIPTION: prints the current key being pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: returns -1 on fail
+ *SIDE EFFECTS: none
+ */
 unsigned char print_key(key* keyboard_key){
 	if (keyboard_key == NULL || !(keyboard_key->pressed) || !(keyboard_key->to_display) || shortcut_received){
 		return -1;
@@ -579,6 +641,14 @@ unsigned char print_key(key* keyboard_key){
 
 
 /* Initialize the keyboard */
+/*
+ * void keyboard_init(void)
+ * DESCRIPTION: This function initializes relevant global variables that we use when keyboard interrupts are generated
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: initializes global variables
+ */
 void
 keyboard_init(void)
 {
@@ -594,6 +664,14 @@ keyboard_init(void)
 	//keyboard_last_printable_key = '\0';
 }
 
+ /*
+ *void process_shortcuts(void)
+ *DESCRIPTION: This function processes short cuts such as control + l, control + c, and the backspace when they are pressed
+ *
+ *INPUTS: none
+ *OUTPUTS: none
+ *SIDE EFFECTS: clears and resets the terminal when control + l is pressed, control + c halts, backspace deletes characters
+ */
 void process_shortcuts(void){
 	if (is_control_pressed() && is_pressed(&l)){
 		terminal_clear();
@@ -617,23 +695,36 @@ void process_shortcuts(void){
 	if (is_alt_pressed()  && is_pressed(&f1) ){
 		set_current_terminal(0);
 		f1.pressed = 0;
+		shortcut_received = 1;
 		return;
 		
 	}
 	if( is_alt_pressed() && is_pressed(&f2) ){
 		set_current_terminal(1);
 		f2.pressed = 0;
+		shortcut_received = 1;
 		return;
 	}
 	if (is_alt_pressed() && is_pressed(&f3)){
 		set_current_terminal(2);
 		f3.pressed = 0;
+		shortcut_received = 1;
 		return;
 	}
 
 
 }
 
+ /* Function that gets called whenever a keyboard interrupt is generated */
+
+/*
+ * void process_keypress(void)
+ * DESCRIPTION: This is an internal helper function that gets called whenever we get a keyboard interrupt
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: sends relevant keypresses to the console
+ */
 void
 process_keypress(void)
 {
@@ -646,20 +737,16 @@ process_keypress(void)
 	
 }
 
+ /*
+ *unsigned char keyboard_wait_for_new_line(int max_chars)
+ *DESCRIPTION: Waits until max_chars characters have been pressed or a new line has been pressed
+ *
+ *INPUTS: max_chars: 
+ *OUTPUTS: unsigned char 
+ *SIDE EFFECTS: this is a blocking function 
+ */
 unsigned char keyboard_wait_for_new_line(int max_chars){
-	/*
-	int i = 0;
-	while (i < max_chars){
-		while (!keyboard_interrupt_received);
-		i++;
-		keyboard_interrupt_received = 0;
-		if (keyboard_last_printable_key == '\n'){
-			return i;
-		}
-		
-		
-	}
-	*/
+	
 	terminal* current_terminal = get_executing_terminal();
 	int old_input_pointer = current_terminal->input.input_pointer;
 	while (old_input_pointer > current_terminal->input.input_pointer - max_chars){
