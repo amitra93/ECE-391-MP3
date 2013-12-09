@@ -248,7 +248,7 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	get_cr3(pd);
 	
 	//Map the old process' video memory to garbage
-	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	//map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
 	set_cur_task(new_pid);
 	load_tss(new_task);
@@ -257,8 +257,8 @@ task_t * switch_task(int32_t old_pid, int32_t new_pid)
 	//now deal with new task
 	//Map the new process' video memory to the real deal
 	
-	if (new_task->ptid == get_displaying_terminal()->ptid)
-		map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
+	//if (new_task->ptid == get_displaying_terminal()->ptid)
+		//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
 
 	return new_task;
 }
@@ -270,7 +270,7 @@ int32_t execute_task(int32_t pid)
 	task_t * new_task;
 	
 	//process on top of this process is useless information
-	map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
+	//map_page_directory(GARBAGE_VID_MEM, VIRTUAL_VID_MEM, 1, 1);
 	
 	old_task = get_cur_task();
 	new_task = get_task(pid);
@@ -318,6 +318,7 @@ int32_t tasks_init()
 		terminals[i]->ret_eip = terminals[i]->tss.eip;
 		terminals[i]->ret_esp = terminals[i]->tss.esp;
 		terminals[i]->ret_ebp = terminals[i]->tss.ebp;
+		terminals[i]->ret_eflags = 0x200;
 		set_ptree_task(terminals[i]->ptid, terminals[i]->pid);
 	}
 	

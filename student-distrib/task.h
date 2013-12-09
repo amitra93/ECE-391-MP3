@@ -33,6 +33,7 @@ typedef struct task_t{
 	uint32_t ret_ebp;
 	uint32_t ret_esp;
 	uint32_t ret_eip;
+	uint32_t ret_eflags;
 	
 	uint32_t * page_directory;
 	uint32_t * page_table;

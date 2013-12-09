@@ -2,6 +2,7 @@
 
 .data
 	.globl return_from_halt
+	.globl restart_shell
 
 .text
 .align 4
@@ -19,3 +20,7 @@ return_from_halt:
 	movl %ecx, %esp
 	
 	jmp *%edx
+
+restart_shell:
+	addl	$4, %esp
+	iret

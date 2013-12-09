@@ -217,14 +217,14 @@ entry (unsigned long magic, unsigned long addr)
 	printf("Enabling keyboard\n");
 	keyboard_init();
 	
-	printf("Initializing tasks\n");
+	printf("Enabling Terminal\n");
+	terminal_open(NULL);
+	
+	//printf("Initializing tasks\n");
 	tasks_init();
 
-	printf("Enabling PIT\n");
+	//printf("Enabling PIT\n");
 	pit_init();
-	
-	printf("Enabling terminal\n");
-	terminal_open(NULL);
 	
 	sti();
 

@@ -6,7 +6,7 @@
 #include "paging.h"
 
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
-extern void restart_shell(uint32_t eip, uint32_t eflags, uint16_t cs, uint32_t esp, uint16_t ss);
+extern void restart_shell(uint32_t eip, uint16_t cs, uint32_t eflags, uint32_t esp, uint16_t ss);
 
 int32_t is_user_ptr(const void * ptr)
 {
@@ -27,6 +27,14 @@ int32_t do_halt (uint8_t status)
 		terminal_write(1, &str, 1);
 	}
 	task_t * cur_task = get_cur_task();
+	if (cur_task->pid == 1 || cur_task->pid == 2 || cur_task->pid == 3)
+	{
+		cur_task->tss.eip = cur_task->ret_eip;
+		cur_task->tss.eflags = cur_task->ret_eflags;
+		cur_task->tss.esp = cur_task->ret_esp;
+		load_tss(cur_task);
+		restart_shell(cur_task->ret_eip, USER_CS, cur_task->ret_eflags, cur_task->ret_esp, USER_DS);
+	}
 	return_from_halt(status, cur_task->ret_ebp, cur_task->ret_esp, cur_task->ret_eip);
 	return 0;
 }
@@ -90,7 +98,7 @@ int32_t do_vidmap (uint8_t** screen_start)
 {
 	if ((uint8_t*)screen_start < (uint8_t*)0x8000000 || (uint8_t*)screen_start >= (uint8_t*)0x8400000)
 		return -1;
-	*screen_start = get_cur_task()->video_mem;
+	*screen_start = (uint8_t*)(VIRTUAL_VID_MEM + VIDEO);
 	return 0;
 }
 int32_t do_open (const uint8_t* filename) { 
