@@ -86,38 +86,13 @@ int32_t write_data(uint32_t offset, const uint8_t* buf, uint32_t length)
 }
 
 int32_t directory_open(const uint8_t* filename) { 
-	#if 0
-	int i=0;
-	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
-		return -1;
-	while((curTask->files[i].flags & 0x1) && i<8){
-		if(i==7)//at maximum number of files
-			return -1;
-		i++;
-	}
-	curTask->files[i].flags = (uint32_t) (1 | (1<<1));
-	curTask->files[i].inode = NULL;//ignore bc of directory
-	curTask->files[i].offset =1;
-	#endif
 	return 0; 
 }
 
 int32_t directory_close(int32_t fd) { 
-#if 0
-	if(fd<2 || fd>6)
-		return -1;
-	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
-		return -1;
-	//if(!(curTask->files[fd].flags & 0x1) )//not open!!
-	//	return -1;
-	curTask->files[fd].flags=0;
-	curTask->files[fd].inode=0;
-	curTask->files[fd].offset=0;
-#endif
 	return 0; 
 }
+
 int32_t directory_read(int32_t fd, void* buf, int32_t nbytes) { 
 	if(fd<0 || fd>7)
 		return -1;
@@ -142,43 +117,13 @@ int32_t directory_write(int32_t fd, const void* buf, int32_t nbytes) {
 
 
 int32_t file_open(const uint8_t* filename) { 
-
-#if 0
-	int i=0;
-	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
-		return -1;
-	while((curTask->files[i].flags & 0x1) && i<8){
-		if(i==7)//at maximum number of files
-			return -1;
-		i++;
-	}
-	dentry_t dentry;
-	if (read_dentry_by_name (filename, &dentry)<0)
-		return -1;//failure to find file!
-	curTask->files[i].flags = (uint32_t) (1 | (dentry.file_type<<1));//sets to in use
-	curTask->files[i].inode = get_inode(dentry.inode_num);
-	curTask->files[i].offset =0;//init should have set this to 0, but just to be sure
-#endif
 	return 0; 
 }
 int32_t file_close(int32_t fd) 
 { 
-#if 0
-	if(fd<2 || fd>6)
-		return -1;
-	task_t * curTask = get_cur_task();
-	if(curTask==NULL)
-		return -1;
-	//if(!(curTask->files[fd].flags & 0x1) )//not open!!
-	//	return -1;
-	curTask->files[fd].flags=0;
-	curTask->files[fd].inode=0;
-	curTask->files[fd].offset=0;
-#endif
 	return 0; 
-
 }
+
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) { 
 	if(fd<0 || fd>7)//TODO look to see if should be bw 2 and 7
 		return -1;
