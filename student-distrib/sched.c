@@ -276,35 +276,16 @@ int32_t execute_task(int32_t pid)
 	new_task = get_task(pid);
 	new_task->state = TASK_RUNNING;
 
-	old_task->ret_eip = (uint32_t)(&&halt_addr);
+	new_task->ret_eip = (uint32_t)(&&halt_addr);
 	
 	set_cur_task(pid);
 	set_ptree_task(new_task->ptid, pid);
 	
-	save_task_state(old_task);
+	save_task_state(new_task);
 	load_tss(new_task);
 	setup_task_stack(new_task);
 	set_task_cr3(new_task);
 	get_cr3(pd);
-
-	//map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
-	//set video memory buffer if not in current terminal....not useful until can execute things from terminals without them being open (&&)
-	/*if(new_task->ptid != current_terminal_index){
-		switch(get_cur_task()->ptid){
-			case 0:
-				map_page_directory(VID_MEM_BUF_0, VIRTUAL_VID_MEM, 1, 1);
-				break;
-			case 1:
-				map_page_directory(VID_MEM_BUF_1, VIRTUAL_VID_MEM, 1, 1);
-				break;
-			case 2:
-				map_page_directory(VID_MEM_BUF_2, VIRTUAL_VID_MEM, 1, 1);
-				break;
-			default:
-				return NULL;
-		}
-	}*/
-
 	iret();
 
 halt_addr:
@@ -334,6 +315,9 @@ int32_t tasks_init()
 	{
 		terminals[i] = get_task(create_task(fname, args));
 		terminals[i]->ptid = create_ptree();
+		terminals[i]->ret_eip = terminals[i]->tss.eip;
+		terminals[i]->ret_esp = terminals[i]->tss.esp;
+		terminals[i]->ret_ebp = terminals[i]->tss.ebp;
 		set_ptree_task(terminals[i]->ptid, terminals[i]->pid);
 	}
 	

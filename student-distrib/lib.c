@@ -18,7 +18,6 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
-static char* virt_video_mem = (char *)(VIRTUAL_VID_MEM + VIDEO);
 
 /*
 *  print_error(char * description, uint32_t error_code, uint32_t instr_ptr, uint32_t pid)
@@ -412,7 +411,7 @@ putc(uint8_t c)
         screen_x=0;
 
         if (screen_y >= NUM_ROWS){ //we are on last line
-      		scroll_up(video_mem);
+      		scroll_up((unsigned char *)video_mem);
       		screen_y--;
     	}
     } else {
@@ -432,7 +431,7 @@ vputc(terminal * term, uint8_t c)
         term->screen_x=0;
 
         if (term->screen_y >= NUM_ROWS){ //we are on last line
-      		scroll_up(term->video_buffer);
+      		scroll_up((unsigned char *)term->video_buffer);
       		term->screen_y--;
     	}
     } else {

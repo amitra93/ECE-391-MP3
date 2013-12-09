@@ -6,6 +6,7 @@
 #include "paging.h"
 
 extern void return_from_halt(uint8_t status, uint32_t ebp, uint32_t esp, uint32_t eip);
+extern void restart_shell(uint32_t eip, uint32_t eflags, uint16_t cs, uint32_t esp, uint16_t ss);
 
 int32_t is_user_ptr(const void * ptr)
 {
@@ -25,8 +26,8 @@ int32_t do_halt (uint8_t status)
 		char str = '\n';
 		terminal_write(1, &str, 1);
 	}
-	task_t * parent_task = get_cur_task()->parent_task;
-	return_from_halt(status, parent_task->ret_ebp, parent_task->ret_esp, parent_task->ret_eip);
+	task_t * cur_task = get_cur_task();
+	return_from_halt(status, cur_task->ret_ebp, cur_task->ret_esp, cur_task->ret_eip);
 	return 0;
 }
 

@@ -57,7 +57,6 @@ void do_common_intr(void){
 	sti();
 	terminal_read(0, &key, 1);
 	set_cur_task_state(TASK_EXCEPTION);
-	while(1);
 	halt(0);
 }
 
