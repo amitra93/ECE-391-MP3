@@ -32,7 +32,7 @@ rtc_open(const uint8_t* filename)
  *
  * INPUTS: fd, buf, nbytes
  * OUTPUTS: returns 0 on success, 1 on failure
- * SIDE EFFECTS: none
+ * SIDE EFFECTS: waits for interrupt received to change to 1 (can take up time)
  */
 int
 rtc_read(int32_t fd, void* buf, int32_t nbytes)
@@ -83,7 +83,7 @@ rtc_close(int32_t fd)
  *
  * INPUTS: none
  * OUTPUTS: none
- * SIDE EFFECTS: none
+ * SIDE EFFECTS: changes interrupt received to 1
  */
 void
 rtc_process_interrupt(void)
