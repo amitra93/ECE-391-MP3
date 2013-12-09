@@ -10,7 +10,16 @@
 uint8_t master_mask; /* IRQs 0-7 */
 uint8_t slave_mask; /* IRQs 8-15 */
 
-/* Initialize the 8259 PIC */
+
+/*
+ * void i8259_init(void)
+ * DESCRIPTION: Initializes the 8259 PIC by setting slave PIC at IRQ 2 
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS:
+ */
+
 void
 i8259_init(void)
 {

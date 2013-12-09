@@ -67,13 +67,29 @@ sched_t scheduler = {
 	.num_ptrees = 0,
 	.cur_ptree = -1,
 };
-	
+
+/*
+ *static int32_t clear_pid(int32_t pid)
+ *DESCRIPTION: this function clears the pid
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */		
 static int32_t clear_pid(int32_t pid)
 {
 	scheduler.task_vector &= ~(1 << pid);
 	return 0;
 }
 
+/*
+ *static int32_t get_new_pid()
+ *DESCRIPTION: this function gets the new pid 
+ *
+ *INPUTS: none
+ *OUTPUTS: returns -1 on fail
+ *SIDE EFFECTS: none
+ */	
 static int32_t get_new_pid()
 {
 	uint32_t i;
@@ -88,6 +104,14 @@ static int32_t get_new_pid()
 	return -1;
 }
 
+/*
+ *static int32_t clear_ptid(int32_t ptid)
+ *DESCRIPTION: clears the ptid
+ *
+ *INPUTS: ptid
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */	
 static int32_t clear_ptid(int32_t ptid)
 {
 	scheduler.ptree_tasks[ptid] = -1;
@@ -95,6 +119,14 @@ static int32_t clear_ptid(int32_t ptid)
 	return 0;
 }
 
+/*
+ *static int32_t get_new_ptid()
+ *DESCRIPTION: gets the new ptid
+ *
+ *INPUTS: none
+ *OUTPUTS: returns -1 on fail
+ *SIDE EFFECTS: none
+ */
 static int32_t get_new_ptid()
 {
 	uint32_t i;
@@ -109,6 +141,14 @@ static int32_t get_new_ptid()
 	return -1;
 }
 
+/*
+ *int32_t create_ptree ()
+ *DESCRIPTION: creates the ptree for use
+ *
+ *INPUTS: none
+ *OUTPUTS: returns -1 on fail, or ptid otherwise
+ *SIDE EFFECTS: none
+ */
 int32_t create_ptree ()
 {
 	int32_t ptid;
@@ -119,6 +159,14 @@ int32_t create_ptree ()
 	return ptid;
 }
 
+/*
+ *int32_t create_task(const uint8_t * fname, const uint8_t * args)
+ *DESCRIPTION: 
+ *
+ *INPUTS: fname, args
+ *OUTPUTS: returns -1 on fail, or ptid otherwise
+ *SIDE EFFECTS: none
+ */
 int32_t create_task(const uint8_t * fname, const uint8_t * args)
 {
 	task_t * task;

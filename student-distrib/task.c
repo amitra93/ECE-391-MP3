@@ -11,16 +11,44 @@
 #define EXECUTION_ADDR  0x8000000
 #define ELAGS_IF 0x200
 
+
+ /*
+ *uint32_t get_task_addr(uint32_t pid)
+ *DESCRIPTION: 
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns the task address based on the initial task address of 
+		   0x800000 + pid * the size of a 4mb page.
+ *SIDE EFFECTS: none
+ */
 uint32_t get_task_addr(uint32_t pid)
 {
 	return INIT_TASK_ADDR + (pid * SIZE_4MB_PAGE);
 }
 
+ /*
+ *uint32_t get_task_stack_addr(uint32_t pid)
+ *DESCRIPTION: returns the stack address based on the initial task address 
+               of 0x800000 and the kernel's stack size
+ *
+ *INPUTS: pid
+ *OUTPUTS: none
+ *SIDE EFFECTS: none
+ */
 uint32_t get_task_stack_addr(uint32_t pid)
 {
 	return INIT_TASK_ADDR - (KERNEL_STACK_SIZE * pid) - 4;
 }
 
+/*
+ *static int32_t init_task_pd(task_t * task)
+ *DESCRIPTION: sets up user-space memory, 4mb page for kernel,
+			   sets up mapped task memory, video memory
+ *
+ *INPUTS: task_t * task
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 static int32_t init_task_pd(task_t * task)
 {
 	uint32_t i;
@@ -68,6 +96,14 @@ static int32_t init_task_pd(task_t * task)
 	return 0;
 }
 
+/*
+ *task_t * init_task(int32_t pid)
+ *DESCRIPTION: initializes the task
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns task
+ *SIDE EFFECTS: none
+ */
 task_t * init_task(int32_t pid)
 {
 	task_t * task;
@@ -96,11 +132,6 @@ task_t * init_task(int32_t pid)
 	task->ret_esp = 0xBADF00D;
 	task->ret_eflags = 0xBADF00D;
 	
-	/*task->sys_tss = task->tss;
-	task->sys_tss.ss = KERNEL_DS;
-	task->sys_tss.cs = KERNEL_CS;
-	task->sys_tss.ds = KERNEL_DS;*/
-	
 	task->parent_task = NULL;
 	task->child_task = NULL;
 	task->sibling_task = NULL;
@@ -124,8 +155,16 @@ task_t * init_task(int32_t pid)
 	
 	return task;
 }
-
-//Save the task's state
+ /*
+ *uint32_t save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
+ *DESCRIPTION: saves the task's state
+ *
+ *INPUTS: task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi
+ *OUTPUTS: none
+ *SIDE EFFECTS: saves the task's state
+ */
 void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
 { 
@@ -140,7 +179,16 @@ void save_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t
 
 }
 
-//Load the task's state
+/*
+ *uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
+ *DESCRIPTION: loads the task's state
+ *
+ *INPUTS: task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
+					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi
+ *OUTPUTS: returns 0 if the code segment is user, return 0, else return 1
+ *SIDE EFFECTS: loads the state
+ */
 uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint32_t eax, uint32_t ebx, 
 					uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi) 
 {
@@ -159,22 +207,43 @@ uint32_t load_state(task_t * task, uint16_t cs, uint32_t esp, uint32_t ebp, uint
 		return 1;
 }
 
-//Loads task's tss into TSS
+/*
+ *uint32_t load_tss(task_t * task)
+ *DESCRIPTION: loads the task's tss into TSS
+ *
+ *INPUTS: task_t * task
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t load_tss(task_t * task)
 {
 	tss = task->tss;
-	/*if (task->state == TASK_RUNNING)
-		tss = task->tss;
-	else if (task->state == TASK_SYS_CALL)
-		tss = task->tss;*/
+	
 	return 0;
 }
 
+/*
+ *task_t * get_task(int32_t pid)
+ *DESCRIPTION: gets the task
+ *
+ *INPUTS: pid
+ *OUTPUTS: returns a task_t*
+ *SIDE EFFECTS: none
+ */
 task_t * get_task(int32_t pid)
 {
 	return (task_t*)((INIT_TASK_ADDR - (KERNEL_STACK_SIZE*pid) - 4) & KERNEL_STACK_MASK);
 }
 
+/*
+ *int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname,
+							   const uint8_t args[128])
+ *DESCRIPTION: loads a program into physical memory
+ *
+ *INPUTS: task, addr, fname, args[128]
+ *OUTPUTS: returns 0
+ *SIDE EFFECTS: none
+ */
 int32_t load_program_to_task(task_t * task, uint32_t addr, const uint8_t * fname, const uint8_t args[128])
 {
 	uint32_t i;

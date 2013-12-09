@@ -7,6 +7,14 @@
 #include "i8259.h"
 #include "sched.h"
 
+/*
+ * int rtc_open(const uint8_t* filename);
+ * DESCRIPTION: This function opens the RTC
+ *
+ * INPUTS: filename
+ * OUTPUTS: returns 0 on success, 1 on failure
+ * SIDE EFFECTS: none
+ */
 int
 rtc_open(const uint8_t* filename)
 {
@@ -18,7 +26,14 @@ rtc_open(const uint8_t* filename)
 	return 0;
 }
 
-
+/*
+ * rtc_read(int32_t fd, void* buf, int32_t nbytes);
+ * DESCRIPTION: This function reads from RTC Register C and processes the data.
+ *
+ * INPUTS: fd, buf, nbytes
+ * OUTPUTS: returns 0 on success, 1 on failure
+ * SIDE EFFECTS: none
+ */
 int
 rtc_read(int32_t fd, void* buf, int32_t nbytes)
 {
@@ -31,7 +46,14 @@ rtc_read(int32_t fd, void* buf, int32_t nbytes)
 	return 0;
 }
 
-
+/*
+ * int rtc_write(int32_t fd, const void* buf, int32_t nbytes);
+ * DESCRIPTION: This function writes a new frequency
+ *
+ * INPUTS: fd, buf, nbytes
+ * OUTPUTS: returns 0 on success, 1 on failure
+ * SIDE EFFECTS: none
+ */
 int
 rtc_write(int32_t fd, const void* buf, int32_t nbytes)
 {
@@ -39,7 +61,14 @@ rtc_write(int32_t fd, const void* buf, int32_t nbytes)
 	return rtc_set_frequency(freq);
 }
 
-
+/*
+ * int rtc_close(int32_t fd);
+ * DESCRIPTION: This function reads from RTC Register C and processes the data.
+ *
+ * INPUTS: fd
+ * OUTPUTS: returns 0 on success, 1 on failure
+ * SIDE EFFECTS: none
+ */
 int
 rtc_close(int32_t fd)
 {
@@ -48,7 +77,14 @@ rtc_close(int32_t fd)
 }
 
 
-
+/*
+ * void rtc_process_interrupt(void)
+ * DESCRIPTION: This function reads from RTC Register C and processes the data.
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: none
+ */
 void
 rtc_process_interrupt(void)
 {
@@ -62,7 +98,14 @@ rtc_process_interrupt(void)
 	restore_flags(flags);
 }
 
-
+/*
+ * void rtc_init(void)
+ * DESCRIPTION: This function initializes the RTC
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: initializes the RTC
+ */
 void
 rtc_init(void)
 {
@@ -78,6 +121,14 @@ rtc_init(void)
 	interrupt_received = 0;
 }
 
+/*
+ * int32_t rtc_set_frequency(int32_t frequency)
+ * DESCRIPTION: This function sets the frequency
+ *
+ * INPUTS: frequency
+ * OUTPUTS: returns 0 on success, -1 on failure
+ * SIDE EFFECTS: initializes the RTC
+ */
 int32_t
 rtc_set_frequency(int32_t frequency){
 	unsigned long flags;
@@ -101,6 +152,14 @@ rtc_set_frequency(int32_t frequency){
 	return 0;
 }
 
+/*
+ * int32_t rtc_get_power_of_2(int32_t number)
+ * DESCRIPTION: This function returns the log base 2 of a number
+ *
+ * INPUTS: frequency in a power of 2
+ * OUTPUTS: the power of 2
+ * SIDE EFFECTS: initializes the RTC
+ */
 int32_t
 rtc_get_power_of_2(int32_t number){
 	if (number == 1){
