@@ -167,10 +167,9 @@ terminal_write_keypress(unsigned char * buf, int32_t nbytes){
 			set_cursor_pos( current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 			printf("%c", string[i]);
 			get_cursor_pos(&current_disp_terminal->screen_x,&current_disp_terminal->screen_y);
+			set_blinking_cursor_pos(current_disp_terminal->screen_x, current_disp_terminal->screen_y);
 			current_disp_terminal->chars_printed++;
 		}
-		set_blinking_cursor_pos(current_disp_terminal->screen_x, current_disp_terminal->screen_y);
-		
 	//}
 	return 0;
 }
