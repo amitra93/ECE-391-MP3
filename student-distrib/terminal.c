@@ -16,7 +16,14 @@ terminal * get_executing_terminal()
 {
 	return &terminal_list[scheduler.cur_ptree];
 }
-
+/*
+ * int terminal_open(const uint8_t* filename)
+ * DESCRIPTION: 
+ *
+ * INPUTS: filename
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 int
 terminal_open(const uint8_t* filename){	
 	int i, j, k;
@@ -53,6 +60,14 @@ terminal_open(const uint8_t* filename){
 	return 0;
 }
 
+/*
+ * int terminal_read(int32_t fd, void* buf, int32_t nbytes)
+ * DESCRIPTION: 
+ *
+ * INPUTS: buf, nbytes
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 int
 terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	if (buf == NULL){
@@ -80,7 +95,14 @@ terminal_read(int32_t fd, void* buf, int32_t nbytes){
 	
 }
 
-
+/*
+ * int terminal_write(int32_t fd, const void* buf, int32_t nbytes)
+ * DESCRIPTION: 
+ *
+ * INPUTS: fd, buf, nbytes
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 int
 terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	int i;
@@ -132,6 +154,15 @@ terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 	return 0;
 }
 
+
+/*
+ * int terminal_write_keypress(unsigned char * buf, int32_t nbytes)
+ * DESCRIPTION: 
+ *
+ * INPUTS: buf, nbytes
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 int
 terminal_write_keypress(unsigned char * buf, int32_t nbytes){
 	int i;
@@ -174,11 +205,27 @@ terminal_write_keypress(unsigned char * buf, int32_t nbytes){
 	return 0;
 }
 
+/*
+ * int terminal_close(int32_t fd)
+ * DESCRIPTION: 
+ *
+ * INPUTS: fd
+ * OUTPUTS: returns 0
+ * SIDE EFFECTS: 
+ */
 int
 terminal_close(int32_t fd){
 	return 0;
 }
 
+/*
+ * void terminal_backspace()
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 void terminal_backspace(){
 	char str = ' ';
 	terminal* current_terminal = get_displaying_terminal();
@@ -207,6 +254,14 @@ void terminal_backspace(){
 
 }
 
+/*
+ * void terminal_clear()
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 void terminal_clear(){
 	clear();
 	terminal* current_terminal = get_displaying_terminal();
@@ -215,7 +270,14 @@ void terminal_clear(){
 	set_blinking_cursor_pos(0, 0);
 }
 
-
+/*
+ * void terminal_add_to_buffer(unsigned char char_to_print)
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 void terminal_add_to_buffer(unsigned char char_to_print){
 	terminal* current_terminal = get_displaying_terminal();
 	//if (current_terminal->ptid == scheduler.cur_ptree){
@@ -240,10 +302,26 @@ void terminal_add_to_buffer(unsigned char char_to_print){
 	//}
 }
 
+/*
+ * terminal* get_displaying_terminal()
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 terminal* get_displaying_terminal(){
 	return &terminal_list[current_terminal_index];
 }
 
+/*
+ * terminal_line* get_last_terminal_line()
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 terminal_line* get_last_terminal_line(){
 	//int temp = 0;
 	terminal* current_terminal = get_displaying_terminal();
@@ -253,6 +331,14 @@ terminal_line* get_last_terminal_line(){
 	return &current_terminal->previous_input;
 }
 
+/*
+ * void terminal_copy_to_history()
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 void terminal_copy_to_history(){
 	int i = 0;
 	int8_t* shell_name = "shell";
@@ -275,6 +361,14 @@ void terminal_copy_to_history(){
 	}
 }
 
+/*
+ * void set_current_terminal(int terminal_index)
+ * DESCRIPTION: 
+ *
+ * INPUTS: none
+ * OUTPUTS: 
+ * SIDE EFFECTS: 
+ */
 void set_current_terminal(int terminal_index){
 
 	if (current_terminal_index == terminal_index || terminal_index < 0 || terminal_index > 2){
