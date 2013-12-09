@@ -208,6 +208,7 @@ void terminal_clear(){
 	terminal* current_terminal = get_displaying_terminal();
 	current_terminal->screen_x = current_terminal->screen_y = 0;
 	set_cursor_pos(0, 0);
+	set_blinking_cursor_pos(0, 0);
 }
 
 
