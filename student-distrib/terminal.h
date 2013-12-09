@@ -51,6 +51,8 @@ int terminal_read(int32_t fd, void* buf, int32_t nbytes);
 
 int terminal_write(int32_t fd, const void* buf, int32_t nbytes);
 
+int terminal_write_keypress(unsigned char* buf, int32_t nbytes);
+
 int terminal_close(int32_t fd);
 
 void terminal_backspace();

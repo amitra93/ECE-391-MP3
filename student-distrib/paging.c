@@ -2,6 +2,10 @@
 #include "lib.h"
 #include "filesys.h"
 
+#define PDE_BASE_ADDRESS_OFF 22
+#define PTE_BASE_ADDRESS_OFF 12
+#define PTE_MASK		     0x3FF000
+
 unsigned int * pd = &page_directory;
 unsigned int * pt = &page_table;
 
@@ -41,8 +45,6 @@ void paging_init(){
 	//set page as 4MB, set supervisor priv., set r/w, and present
 	pd[1] |=  ( PAGE_SIZE_BIT | SUPERVISOR_RW_PRESENT);  
 	
-	map_page_directory(VIDEO, VIRTUAL_VID_MEM, 1, 1);
-	
 	//Load the address of the page directory from pd[0] into cr3
 	asm volatile("movl %0, %%cr3" 
 						:
@@ -78,18 +80,19 @@ void paging_init(){
  *OUTPUTS: returns 0
  *SIDE EFFECTS: page directory
  */
-//size = 0 when 4kb size = 1 when 4mb
 int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size, uint8_t user)
 {	
 	//4KB Page
 	if (size == 0)
 	{
-		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
 		pd[pd_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
 	}
+	
+	//4MB Page
 	else if (size == 1)
 	{
-		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+		uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
 		pd[pd_index] = (phys_addr & FIRST_10_BITS) | PAGE_SIZE_BIT | (user << 2) |  RW_PRESENT;
 	}
 	
@@ -104,39 +107,20 @@ int32_t map_page_directory(uint32_t phys_addr, uint32_t virt_addr, uint8_t size,
  *OUTPUTS: returns 0
  *SIDE EFFECTS: page table
  */
-//size = 0 when 4kb size = 1 when 4mb
 int32_t map_page_table(uint32_t phys_addr, uint32_t virt_addr, uint8_t user)
 {
 	uint32_t pd_index;
 	uint32_t pt_index;
 	uint32_t * pg_table;
 		
-	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-	pt_index = (virt_addr & 0x3FF000) >> 12;
+	pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
+	pt_index = (virt_addr & PTE_MASK) >> PTE_BASE_ADDRESS_OFF;
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
 	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
 	return 0;
 }
 
- /*
- *int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index,
-                                    uint32_t pt_index, uint8_t user)
- *DESCRIPTION: This function maps the page table from the index
- *
- *INPUTS: phys_addr, pd_index, pt_index, user
- *OUTPUTS: returns 0
- *SIDE EFFECTS: none
- */
-int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_t pt_index, uint8_t user)
-{
-	uint32_t * pg_table;
-	
-	pg_table = (uint32_t *)(pd[pd_index] & FIRST_10_BITS);
-	pg_table[pt_index] = (phys_addr & FIRST_20_BITS) | (user << 2) |  RW_PRESENT;
-	
-	return 0;
-}
  /*
  *int32_t set_pde(uint32_t virt_addr)
  *DESCRIPTION: This function sets the page directory entries
@@ -147,7 +131,7 @@ int32_t map_page_table_from_index(uint32_t phys_addr, uint32_t pd_index, uint32_
  */
 int32_t set_pde(uint32_t virt_addr)
 {
-	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
 	pd[pd_index] |=  1;
 	
 	return 0;
@@ -167,8 +151,8 @@ int32_t set_pte(uint32_t virt_addr)
 	uint32_t pt_index;
 	uint32_t * pg_table;
 		
-	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-	pt_index = (virt_addr & 0x3FF000) >> 12;
+	pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
+	pt_index = (virt_addr & PTE_MASK) >> PTE_BASE_ADDRESS_OFF;
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
 	pg_table[pt_index] |= 1;
@@ -186,7 +170,7 @@ int32_t set_pte(uint32_t virt_addr)
  */ 
 int32_t clear_pde(uint32_t virt_addr)
 {
-	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> 22;
+	uint32_t pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
 	pd[pd_index] = 0;
 	return 0;
 }
@@ -206,8 +190,8 @@ int32_t clear_pte(uint32_t virt_addr)
 	uint32_t pt_index;
 	uint32_t * pg_table;
 		
-	pd_index = (virt_addr & FIRST_10_BITS) >> 22;
-	pt_index = (virt_addr & 0x3FF000) >> 12;
+	pd_index = (virt_addr & FIRST_10_BITS) >> PDE_BASE_ADDRESS_OFF;
+	pt_index = (virt_addr & PTE_MASK) >> PTE_BASE_ADDRESS_OFF;
 	
 	pg_table = (uint32_t *)(pd[pd_index] & FIRST_20_BITS);
 	pg_table[pt_index] = 0;

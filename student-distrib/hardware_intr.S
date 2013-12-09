@@ -37,90 +37,110 @@ idt_rtc:
 
 .align 4
 idt_pit:
-	movl 	%esp, local_esp
-	cmpl  	$0x10, 4(%esp)
+	movl 	%esp, 		local_esp 	# Save the esp in a local label
+	cmpl  	$0x10, 		4(%esp)		
 	
-	jne 	from_user_space
-	subl	$8, %esp
-	pushl	%eax
-	movl	12(%esp), %eax
-	movl	%eax, 4(%esp)
-	movl	16(%esp), %eax
-	movl	%eax, 8(%esp)
-	movl	20(%esp), %eax
-	movl	%eax, 12(%esp)
+	/*
+	*  The point of this check is to create a standard iret stack regardless of if we are from user or 
+	*  kernel space. This allows us to ignore the check in c code of if we are kernel or user
+	*/
+	
+	jne 	from_user_space			# If we are from kernel space...
+	subl	$8, 		%esp		# Create two new spaces in the stack
+	pushl	%eax					# Save EAX
+	movl	12(%esp), 	%eax		# Move the EIP
+	movl	%eax, 		4(%esp)
+	movl	16(%esp), 	%eax		# Move the CS
+	movl	%eax, 		8(%esp)
+	movl	20(%esp), 	%eax		# Move the EFLAGS
+	movl	%eax, 		12(%esp)
 	popl	%eax
-from_user_space:
+from_user_space:					# If we are from user space, the stack is correct
 	
-	pushl %ebp
-	movl  %esp, %ebp
-	subl  $4, %esp  # 0 if task is not in a system call 1 if task is in a system call
+	pushl 	%ebp					# Create a frame pointer
+	movl  	%esp, 		%ebp		
+	subl  	$4, 		%esp  		# 0 if task is not in a system call 1 if task is in a system call
 	
-	pushl %edi
-	pushl %esi
-	pushl %edx
-	pushl %ecx
-	pushl %ebx
-	pushl %eax
-	pushl (%ebp)
-	pushl local_esp
-	pushl 8(%ebp)
-	call get_cur_task
-	pushl %eax
+	/*
+	*  This next function call takes the current registers and saves it to the task's TSS
+	*/
+	pushl 	%edi
+	pushl 	%esi
+	pushl 	%edx
+	pushl 	%ecx
+	pushl 	%ebx
+	pushl 	%eax
+	pushl 	(%ebp)
+	pushl 	local_esp
+	call  	get_cur_task
+	pushl 	%eax
 	
-	call save_state
-	addl $40, %esp
+	call 	save_state
+	addl 	$36, %esp
 	
-	call *(_idt_pit)	# Go to ISR
+	call 	*(_idt_pit)				# Go to ISR
 	
 	
-	subl $32, %esp
-	pushl 8(%ebp)
-	call get_cur_task
-	pushl 	%eax 			# Current task
+	/*
+	*  This next function call puts the task's tss registers onto the stack
+	*/
+	subl 	$32, 		%esp		
+	pushl 	8(%ebp)
+	call 	get_cur_task
+	pushl 	%eax 					# Current task
 	
-	call load_state
-	movl %eax, -4(%ebp)		# Save return value
-	addl $8, %esp			# Pop off task and CS
-	popl local_esp
-	popl %ebp
-	popl %eax
-	popl %ebx
-	popl %ecx
-	popl %edx
-	popl %esi
-	popl %edi
+	call 	load_state
+	movl 	%eax, -4(%ebp)			# Save return value
+	addl 	$8, %esp				# Pop off task and CS
+	popl 	local_esp				# Get the next ESP
 	
-	cmpl $0, (%esp)
+	/*
+	*  This next part pops off all values from stack into the registers
+	*/
+	popl 	%ebp
+	popl 	%eax
+	popl 	%ebx
+	popl 	%ecx
+	popl 	%edx
+	popl 	%esi
+	popl 	%edi
+	
+	cmpl 	$0, 	(%esp)			# If the return value from the load_state...
 	je to_user_space
 	
-to_kernel_space:
-	addl 	$8, 		%esp
-	pushl	%eax
-	pushl	%ebx
+	/*
+	*  If we are going to kernel space, then we are potentially going to another ESP.
+	*  But, since an iret without privelage change does not have an ESP to pop off,
+	*  we need to set up the return stack in the next task's stack.
+	*/
 	
-	movl	local_esp,	%ebx
+to_kernel_space:					
+	addl 	$8, 		%esp		# Pop off EBP and local variable
+	pushl	%eax					# Save EAX
+	pushl	%ebx					# Save EBX
 	
-	subl 	$4, 		%ebx
+	movl	local_esp,	%ebx		# Move the next task's stack into EBX
+	
+	subl 	$4, 		%ebx		# Push EFLAGS
 	movl	16(%esp),	%eax
 	movl	%eax,		(%ebx)
 	
-	subl 	$4, 		%ebx
+	subl 	$4, 		%ebx		# Push CS
 	movl	12(%esp), 	%eax
 	movl	%eax, 		(%ebx)
 	
-	subl 	$4, 		%ebx
-	movl	8(%esp), 	%eax
+	subl 	$4, 		%ebx		# Push EIP
+	movl	8(%esp), 	%eax		
 	movl	%eax, 		(%ebx)
-	movl 	%ebx, 		local_esp
+	movl 	%ebx, 		local_esp	# Move the new stack pointer into local_esp (we still need our stack)
 	
 	popl	%ebx
 	popl	%eax
-	addl 	$20, 		%esp
-	movl	local_esp, 	%esp
-	iret
-	
-to_user_space:
+	addl 	$20, 		%esp		# Break down the iret block in our stack
+	movl	local_esp, 	%esp		# Move to the next process stack
+	iret							# Context Switch
+
+to_user_space: 		# If we are going to user space then the stack is set up for a context switch
 	addl $8, %esp
 	iret
 	

@@ -15,6 +15,7 @@
 #define DENTRY_RNUM		24
 #define FILESYS_RNUM	52
 
+#define FILE_OPEN_BIT	0x1
 
 typedef struct dblock_t {
 	uint8_t data[DATABLOCK_SIZE];
@@ -56,8 +57,6 @@ typedef struct file_t {
 	//Pointer to dentry
 	dentry_t dentry;
 	inode_t * inode;
-	
-	//State if open or closed
 	uint32_t offset;
 	
 	//Flags
