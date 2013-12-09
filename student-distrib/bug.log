@@ -63,44 +63,44 @@ Time to Find..10 minutes
 Time to Fix...5 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...RTC read doesn't wait for the RTC to interrupt
+Symptom.......cat rtc returns immediately
+Fix...........make interrupt_received flag volatile
+Time to Find..10 minutes
+Time to Fix...5 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...No newline after program end
+Symptom.......Running hello results in no newline printed after program halts
+Fix...........Check if last character printed is a newline (before terminal_read) and if not print a newline
+Time to Find..2 minutes
+Time to Fix...20 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Can't parse arguments from programs
+Symptom......."cat frame0.txt" returns file not found
+Fix...........implement correct parsing of arguments in do_getargs()
+Time to Find..4 minutes
+Time to Fix...2 hours
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...ls doesn't work properly
+Symptom.......ls doesn't print itself (.)
+Fix...........Change dentry index from 1 to 0
+Time to Find..5 minutes
+Time to Fix...10 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...RTC/Keyboard read fails
+Symptom.......shell fails to read from keyboard
+Fix...........Implement correct fops table pointers for file/RTC/keyboard
+Time to Find..2 minutes
+Time to Fix...30 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...Cat can overflow the system
 Symptom.......typing 'cat fish' breaks many things until cntl+l
-Fix...........implement scrolling inside the buffer itself
+Fix...........Allow unlimited printing from terminal_write (while not in terminal_read)
 Time to Find..10 mins
 Time to Fix...40 mins
 ____________________________________________________________________
@@ -133,18 +133,18 @@ Time to Find..2 minutes
 Time to Fix...15 minutes
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Not saving previous keyboard input history
+Symptom.......Hello not getting correct name (due to how we have terminal buffer set up)
+Fix...........Implement keyboard input history (input_history)
+Time to Find..2 hours
+Time to Fix...1 hour
 ____________________________________________________________________
 ____________________________________________________________________
-Description...
-Symptom.......
-Fix...........
-Time to Find..
-Time to Fix...
+Description...Cursor doesn't move back to top of screen after Ctrl + L
+Symptom.......Cursor remains in previous position after Ctrl + L
+Fix...........Add a call to set_blinking_cursor_pos in Ctrl + L handler
+Time to Find..10 minutes
+Time to Fix...5 minutes
 ____________________________________________________________________
 ____________________________________________________________________
 Description...
