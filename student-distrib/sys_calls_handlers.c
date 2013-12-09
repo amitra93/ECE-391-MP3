@@ -98,7 +98,13 @@ int32_t do_vidmap (uint8_t** screen_start)
 {
 	if ((uint8_t*)screen_start < (uint8_t*)0x8000000 || (uint8_t*)screen_start >= (uint8_t*)0x8400000)
 		return -1;
-	*screen_start = (uint8_t*)(VIRTUAL_VID_MEM + VIDEO);
+	
+	terminal* cur_exe_terminal = get_executing_terminal();
+	terminal* cur_disp_terminal = get_displaying_terminal();
+	if (cur_disp_terminal == cur_exe_terminal)
+		*screen_start = (uint8_t*)(VIRTUAL_VID_MEM + VIDEO);
+	else
+		*screen_start = (uint8_t*)cur_exe_terminal->video_buffer;
 	return 0;
 }
 int32_t do_open (const uint8_t* filename) { 

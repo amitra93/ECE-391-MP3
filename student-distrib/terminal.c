@@ -198,31 +198,7 @@ void terminal_backspace(){
 	set_cursor_pos(current_terminal->screen_x, current_terminal->screen_y);
 	set_blinking_cursor_pos( current_terminal->screen_x, current_terminal->screen_y);
 	printf("%c", str);
-	/*
-	if (current_terminal->screen_x <= 0){
-		current_terminal->screen_x = NUM_COLS - 1;
-		current_terminal->screen_y--;
-	}
-	*/
-	/*
-	if (current_terminal->input.input_pointer <= NUM_COLS - current_terminal->starting_offset){
-		if (current_terminal->screen_x == 0){
-			current_terminal->screen_x = NUM_COLS;
-		}
-		current_terminal->screen_x -= current_terminal->input.input_pointer;
-		terminal_write(1,&current_terminal->input.line, current_terminal->input.input_pointer-1);
-		char str = ' ';
-		printf("%c",str);
-		current_terminal->input.input_pointer--;
-	}
-	else {
-		current_terminal->screen_x -= (current_terminal->input.input_pointer + NUM_COLS - current_terminal->starting_offset);
-		terminal_write(1,&current_terminal->input.line + NUM_COLS - current_terminal->starting_offset, current_terminal->input.input_pointer - 1 - NUM_COLS + current_terminal->starting_offset);
-		char str = ' ';
-		printf("%c",str);
-		current_terminal->input.input_pointer--;
-	}
-	*/
+
 }
 
 void terminal_clear(){
