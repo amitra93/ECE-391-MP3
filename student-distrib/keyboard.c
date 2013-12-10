@@ -20,6 +20,7 @@
 
 //__________________KEYBOARD CHARACTER STUFF___________________
 
+//flags for every key from scancode set 1
 
  key dummy 			= { '\0', '\0', '\0', 0, 0 }; //this should never be pressed
  key escape 		= { '\0', '\0', '\0', 0, 0 };
@@ -354,8 +355,11 @@ key_orientation* keymap[0xFF];
  void init_keys(){
 	int i;
 	for (i = 0; i < 0xFF; i++){
+		//set unused keys to dummy
 		keymap[i] = &dummy_pressed;
 	}
+
+	//set up the keymap array that we will be using later
 
 	keymap[0x01] = &escape_pressed;
 	keymap[0x02] = &number_1_pressed;
@@ -614,10 +618,13 @@ unsigned char is_pressed(key* keyboard_key){
  *SIDE EFFECTS: none
  */
 unsigned char print_key(key* keyboard_key){
+	//if invalid params or unpressable key then return
 	if (keyboard_key == NULL || !(keyboard_key->pressed) || !(keyboard_key->to_display) || shortcut_received){
 		return -1;
 	}
 	unsigned char char_to_print = '\0';
+
+	//get correct value to print based on uppercase/shift keys
 	if (is_shift_pressed()){
 		char_to_print = keyboard_key->shift_char;
 	}
@@ -627,7 +634,10 @@ unsigned char print_key(key* keyboard_key){
 	else {
 		char_to_print = keyboard_key->lowercase_char;
 	}
+
+	//add it to buffer to be printed later
 	terminal_add_to_buffer(char_to_print);
+
 	return 0;
 }
 
@@ -653,12 +663,13 @@ void
 keyboard_init(void)
 {
 	// keyboard is automatically enabled, all we do is enable IRQ1
-	
-	// set constants to use
 	enable_irq(1);
+
+	//init keymap
 	init_keys();
+
 	shortcut_received = 0;
-	//keyboard_last_printable_key = '\0';
+
 }
 
  /*
@@ -670,6 +681,7 @@ keyboard_init(void)
  *SIDE EFFECTS: clears and resets the terminal when control + l is pressed, control + c halts, backspace deletes characters
  */
 void process_shortcuts(void){
+	//if shortcuts are caught then we do not want to print the key
 	if (is_control_pressed() && is_pressed(&l)){
 		terminal_clear();
 		set_cursor_pos(0, 0);
@@ -678,8 +690,6 @@ void process_shortcuts(void){
 	}
 	if (is_control_pressed() && is_pressed(&c)){
 		//THIS IS DISABLED CUZ IT BREAKS STUFF
-
-		//printf("\nWill halt later\n");
 		shortcut_received = 0;
 		send_eoi(1);
 		//halt(1);
@@ -729,9 +739,17 @@ process_keypress(void)
 {
 	// read scancode from data port
 	unsigned char scan_code = inb(DATA_PORT);
+
+	//change state of relevant key
 	keymap[scan_code]->keyboard_key->pressed = keymap[scan_code]->orientation;
+	
+	//check for any available shortcuts depending on what key is pressed
 	process_shortcuts();
+
+	//put key on buffer to be printed later
 	print_key(keymap[scan_code]->keyboard_key);
+
+	//reset shortcut flag
 	shortcut_received = 0;
 	
 }
@@ -745,11 +763,15 @@ process_keypress(void)
  *SIDE EFFECTS: this is a blocking function 
  */
 unsigned char keyboard_wait_for_new_line(int max_chars){
-	
 	terminal* current_terminal = get_executing_terminal();
+
+	//check start of buffer before going in loop
 	int old_input_pointer = current_terminal->input.input_pointer;
+
+	//wait while newline has been pressed or max_chars characters have been pressed
 	while (old_input_pointer > current_terminal->input.input_pointer - max_chars){
 		if (current_terminal->state == TERMINAL_DONE_READ && current_terminal->input.input_pointer < BUFFER_SIZE-1){
+			//set relevant keys to 0 otherwise the next terminal_read will be stuck in this loop
 			enter.pressed = 0;
 			keypad_enter.pressed = 0;
 			return get_last_terminal_line()->input_pointer;
@@ -757,6 +779,7 @@ unsigned char keyboard_wait_for_new_line(int max_chars){
 		current_terminal = get_executing_terminal();
 	}
 	
+	//no newline encountered, so max_chars must have been pressed
 	return max_chars;
 }
 
